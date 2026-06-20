@@ -76,7 +76,7 @@ templates.text_input = function(name, text_length, on_text_changed_fnc)
                     size = v2(text_length,20),
                 },
                 events = {
-                    -- textChanged = async:callback(on_text_changed_fnc)
+                    textChanged = async:callback(on_text_changed_fnc)
                 }
             },
         }

@@ -13,6 +13,8 @@ local enchanting_ui = {}
 -- header
 local header = {}
 
+local name_input = templates.text_input("Name", 200, function(text) enchanter.name = text end)
+
 local function inputs()
     print("inputs")
     return {
@@ -25,7 +27,7 @@ local function inputs()
             size = v2(300,50)
         },
         content = UI.content {
-            templates.text_input("Name", 200, nil),
+            name_input,
             templates.padding(10, 0),
             {
                 name = "item_soul_flex",
@@ -142,7 +144,7 @@ footer.element = {
             templates.button("Create", (function()
                 print("Clicked Create")
                 ambient.playSound('menu click')
-                --enchanter.enchant_item(menu.root.content.content.header.element.content.conent.inputs.) TODO: THISSSSSS
+                enchanting_ui.enchant_item()
                 return true
             end)),
             templates.padding(10, 0),
@@ -213,19 +215,24 @@ end
 
 enchanting_ui.set_item_to_enchant = function()
     print("set_item_to_enchant")
+
+    print(enchanter.name)
+    -- enchanter.item_id = 
 end
 
 enchanting_ui.set_soul_value = function()
     print("set_soul_value")
+    -- enchanter.soul_value = 
 end
 
 enchanting_ui.set_enchantment = function()
     print("set_enchantment")
-    --enchanter.
+    --enchanter.enchantment = 
 end
 
 enchanting_ui.calculate_chance  = function()
     print("calculate_chance")
+    -- enchanter.calculate_success_rate()
 end
 
 enchanting_ui.enchant_item = function()

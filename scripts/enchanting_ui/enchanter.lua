@@ -7,16 +7,30 @@ local enchanter = {}
 
 -- Testing values
 -- TODO: add item instead of item_id
+enchanter.name = ""
 enchanter.item_id = "orcish warhammer"
 enchanter.soul_value = types.Creature.records["golden saint"].soulValue
 enchanter.enchantment = core.magic.enchantments.records[1] -- Just an initial value
+enchanter.chance = 0
 
 enchanter.check_requirements = function()
     print("check_requirements")
+
+    -- Check item is valid
+
+    -- Check enchantment and soul value are valid
+
+    -- check cast cost, charge etc, price
 end
 
 enchanter.get_enchant_success = function()
     print("get_enchant_success")
+
+    -- if enchanter.chance < some random dice roll
+        -- return true
+    -- else
+        -- return false
+
     return true
 end
 
@@ -26,14 +40,12 @@ enchanter.create_item = function()
 
     -- core.sendGlobalEvent('create_enchantment', {id=enchanter.enchantment.id})
     -- TODO: update this to be not Weapon specific
-    -- core.sendGlobalEvent('create_item', {name=enchanter.name, item_id=enchanter.item_id, enchantment_id=enchanter.enchantment.id})
+    core.sendGlobalEvent('create_item', {name=enchanter.name, item_id=enchanter.item_id, enchantment_id=enchanter.enchantment.id})
 end
 
 -- TODO: make this return if item was created and message
 enchanter.enchant_item = function(name)
     print("enchant_item")
-
-    enchanter.name = name
     
     enchanter.check_requirements()
 

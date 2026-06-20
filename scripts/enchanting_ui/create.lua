@@ -20,14 +20,17 @@ end
 local function create_item(data)
 
     print("create_item")
-    
-    local name = data.name
-    print("The item shall be called: ", name)
 
     -- Get Item record
     local item_id = data.item_id
     print("Item ID: ", item_id)
     local item_record = types.Weapon.records[item_id]
+
+    local name = data.name
+    if name == "" then
+        name = item_record.name
+    end
+    print("The item shall be called: ", name)
 
     -- Get Enchantment record
     local enchantment_id = data.enchantment_id
