@@ -69,7 +69,7 @@ templates.text_input = function(name, text_length, on_text_changed_fnc)
             {
                 name =  name .. "input",
                 type = UI.TYPE.TextEdit,
-                template = I.MWUI.templates.textEditBox,
+                template = I.MWUI.templates.textEditLine,
                 props = {
                     text = "",
                     textSize = 20,
@@ -157,32 +157,78 @@ templates.text_image = function(name, image_size, padding_length, on_image_mouse
     }
 end
 
-templates.list = function(name, list_size)
+templates.list = function(name, list_size, generate_items)
+
+    local items = generate_items() or {}
+    -- items = {
+    --     {
+    --         name = 1,
+    --         type = UI.TYPE.Text,
+    --         template = I.MWUI.templates.textNormal,
+    --         props = {
+    --             text = "Test1",
+    --             textSize = 20,
+    --         }
+    --     },
+    --     {
+    --         name = 2,
+    --         type = UI.TYPE.Text,
+    --         template = I.MWUI.templates.textNormal,
+    --         props = {
+    --             text = "Test2",
+    --             textSize = 20,
+    --         }
+    --     }
+    -- }
+
     return {
         name = name .. "_list",
         template = I.MWUI.templates.padding,
-        content = UI.content { {
-            name = "flex",
-            type = UI.TYPE.Flex,
-            props = {
-                horizontal = false,
-                arrange = UI.ALIGNMENT.Start,
-                align = UI.ALIGNMENT.Start,
-            },
-            content = UI.content {
-                {
-                name = "name",
-                type = UI.TYPE.Text,
-                template = I.MWUI.templates.textNormal,
+        content = UI.content { 
+            {
+                name = "flex",
+                type = UI.TYPE.Flex,
                 props = {
-                    text = name,
-                    textSize = 20,
-                }},
-                templates.make_border(list_size),
-                -- TODO: add list items here
-                -- Events = onUpdate and items onClick
+                    horizontal = false,
+                    arrange = UI.ALIGNMENT.Start,
+                    align = UI.ALIGNMENT.Start,
+                    gap = 10,
+                    size = v2(0, 20) + list_size
+                },
+                content = UI.content {
+                    {
+                        name = "name",
+                        type = UI.TYPE.Text,
+                        template = I.MWUI.templates.textNormal,
+                        props = {
+                            text = name,
+                            textSize = 20,
+                        }
+                    },
+                    {
+                        name = "border",
+                        template = I.MWUI.templates.boxSolid,
+                        props = {
+                            size = list_size,
+                        }, 
+                        content = UI.content {
+                            {
+                                name = "items",
+                                type = UI.TYPE.Flex,
+                                props = {
+                                    horizontal = false,
+                                    arrange = UI.ALIGNMENT.Start,
+                                    align = UI.ALIGNMENT.Start,
+                                    gap = 10,
+                                    size = list_size
+                                },
+                                content = UI.content(items)
+                            }
+                        }
+                    }
+                } 
             }
-        } }
+        }
     }
 end
 

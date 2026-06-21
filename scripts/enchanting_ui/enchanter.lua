@@ -13,6 +13,23 @@ enchanter.soul_value = types.Creature.records["golden saint"].soulValue
 enchanter.enchantment = core.magic.enchantments.records[1] -- Just an initial value
 enchanter.chance = 0
 
+enchanter.get_known_magic_effects = function()
+
+    local known_magic_effects = {}
+    local seen = {}
+    local spells = types.Player.spells(self)
+
+    for _, spell in ipairs(spells) do
+        if (spell.type ~= core.magic.SPELL_TYPE.Power) then
+            for _, effect in ipairs(spell.effects) do
+                known_magic_effects[effect.effect.id] = effect.effect.name
+            end
+        end
+    end
+
+    return known_magic_effects
+end
+
 enchanter.check_requirements = function()
     print("check_requirements")
 

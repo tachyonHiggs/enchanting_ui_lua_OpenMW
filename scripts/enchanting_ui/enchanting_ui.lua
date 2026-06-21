@@ -4,9 +4,13 @@ local Util = require('openmw.util')
 local auxUi = require("openmw_aux.ui")
 local v2 = Util.vector2
 local ambient = require('openmw.ambient')
+local self = require('openmw.self')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
+
+
+-- TODO: tooltips hovering
 
 local enchanting_ui = {}
 
@@ -24,7 +28,8 @@ local function inputs()
             horizontal = false,
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
-            size = v2(300,50)
+            size = v2(300,50),
+            gap = 10,
         },
         content = UI.content {
             name_input,
@@ -56,16 +61,17 @@ local function stats()
             horizontal = false,
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
+            gap = 10,
         },
         content = UI.content {
             templates.text_output("Enchantment:", 200, 10, "0", UI.ALIGNMENT.End),
-            templates.padding(10, 0),
+            -- templates.padding(10, 0),
             templates.text_output("Cast Cost:", 200, 10, "0", UI.ALIGNMENT.End),
-            templates.padding(10, 0),
+            -- templates.padding(10, 0),
             templates.text_output("Charge:", 200, 10, "0", UI.ALIGNMENT.End),
-            templates.padding(10, 0),
+            -- templates.padding(10, 0),
             templates.text_output("Chance:", 200, 10, "0", UI.ALIGNMENT.End),
-            templates.padding(10, 0),
+            -- templates.padding(10, 0),
         }
     }
 end
@@ -80,13 +86,13 @@ header.element = {
             horizontal = true,
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
+            gap = 20,
         },
         content = UI.content {
             templates.padding(20, 0),
             inputs(),
-            templates.padding(20, 0),
             stats(),
-            templates.padding(10, 0),
+            templates.padding(20, 0),
         }
     } }
 }
@@ -94,6 +100,41 @@ header.element = {
 
 -- main_content
 local main_content = {}
+
+local function create_magic_effect_item(id, name, onMouseClick)
+    return 
+    {
+        name = id,
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = name,
+            textSize = 20,
+        },
+        events = {
+            mouseClick = onMouseClick
+        }
+    }
+end
+
+local function make_magic_effects_list()
+    local known_magic_effects = enchanter.get_known_magic_effects()
+    if known_magic_effects == nil then
+        print("!! ERROR magic_effects_list is NIL")
+        return
+    end
+    local items = {}
+
+    print("make_magic_effects_list")
+    for id, name in pairs(known_magic_effects) do
+        table.insert(items, create_magic_effect_item(id, name, function() end)) -- TODO: on click fnc
+    end
+
+    return items or {} -- return the list or just an empty one
+end
+
+local magic_effects = templates.list("Magic Effects", v2(200,300), make_magic_effects_list)
+-- local effects = templates.list("Effects", v2(350,300), function() end)
 
 main_content.element = {
     name = "content",
@@ -105,12 +146,13 @@ main_content.element = {
             horizontal = true,
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
+            gap = 20,
         },
         content = UI.content {
             templates.padding(10, 0),
-            templates.list("Magic Effects", v2(200,300)),
+            magic_effects,
             templates.padding(10, 0),
-            templates.list("Effects", v2(350,300)),
+            effects,
             templates.padding(10, 0),
         }
     } }
@@ -194,6 +236,8 @@ enchanting_ui.create_ui = function()
             } }
         } }
     }
+
+    make_magic_effects_list()
     
     print("Created UI")
 end
