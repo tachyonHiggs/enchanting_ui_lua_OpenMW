@@ -1,26 +1,105 @@
 local UI = require('openmw.ui')
 local I = require('openmw.interfaces')
 local Util = require('openmw.util')
-local auxUi = require("openmw_aux.ui")
 local v2 = Util.vector2
+local auxUi = require("openmw_aux.ui")
 local ambient = require('openmw.ambient')
 local self = require('openmw.self')
+local async = require('openmw.async')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 
+local ui_helpers = require("scripts.enchanting_ui.ui_helpers")
 
 -- TODO: tooltips hovering
 
+--
 local enchanting_ui = {}
 
 -- header
 local header = {}
 
-local name_input = templates.text_input("Name", 200, function(text) enchanter.name = text end)
+local function on_item_clicked(id, icon)
+
+    enchanter.item.id = id
+    enchanter.item.icon = icon
+    print("click on item: ", id)
+    enchanting_ui.item_input.content[3].props.resource = UI.texture({
+        path = icon
+    })
+    enchanting_ui.root:update()
+
+    auxUi.deepDestroy(enchanting_ui.item_list)
+
+end
+
+local function show_item_list()
+
+    ui_helpers.set_on_item_clicked(on_item_clicked)
+
+    enchanting_ui.item_list = UI.create{
+        name = "item_list",
+        layer = "Windows",
+        template = I.MWUI.templates.boxSolid,
+        props = {
+            size = v2(300, 500),
+            relativePosition = v2(0.5, 0.5),
+            anchor = v2(0.5, 0.5),
+        },
+        content = UI.content {
+            templates.list("Items", v2(300, 500), ui_helpers.make_enchantable_items_list)
+        }
+    }
+end
+
+local function on_soul_clicked(id, value, icon)
+
+    enchanter.soul.id = id
+    enchanter.soul.value = value
+    enchanter.soul.icon = icon
+    print(icon)
+
+    print("click on item: ", id)
+    enchanting_ui.soul_input.content[3].props.resource = UI.texture({
+        path = icon
+    })
+    enchanting_ui.root:update()
+
+    auxUi.deepDestroy(enchanting_ui.soul_list)
+
+end
+
+local function show_soul_list()
+
+    ui_helpers.set_on_soul_clicked(on_soul_clicked)
+
+    enchanting_ui.soul_list = UI.create{
+        name = "souls_list",
+        layer = "Windows",
+        template = I.MWUI.templates.boxSolid,
+        props = {
+            size = v2(300, 500),
+            relativePosition = v2(0.5, 0.5),
+            anchor = v2(0.5, 0.5),
+        },
+        content = UI.content {
+            templates.list("Souls", v2(300, 500), ui_helpers.make_souls_list)
+        }
+    }
+end
+
+enchanting_ui.name_input = templates.text_input("Name", 200, function(text) enchanter.name = text end)
+enchanting_ui.item_input = templates.text_image("Item", v2(75,75), 10, show_item_list, nil, nil)
+enchanting_ui.soul_input = templates.text_image("Soul", v2(75,75), 10, show_soul_list, nil, nil)
+
+enchanting_ui.magic_effects = templates.list("Magic Effects", v2(200,300), ui_helpers.make_magic_effects_list)
+-- local effects = templates.list("Effects", v2(350,300), function() end)
 
 local function inputs()
     print("inputs")
+
+                    
     return {
         name = "inputs_flex",
         type = UI.TYPE.Flex,
@@ -29,10 +108,10 @@ local function inputs()
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
             size = v2(300,50),
-            gap = 10,
+            -- gap = 10,
         },
         content = UI.content {
-            name_input,
+            enchanting_ui.name_input,
             templates.padding(10, 0),
             {
                 name = "item_soul_flex",
@@ -43,9 +122,9 @@ local function inputs()
                     align = UI.ALIGNMENT.Start,
                 },
                 content = UI.content {
-                    templates.text_image("Item", v2(50,50), 10, nil, nil, nil),
+                    enchanting_ui.item_input,
                     templates.padding(10, 0),
-                    templates.text_image("Soul", v2(50,50), 10, nil, nil, nil),
+                    enchanting_ui.soul_input,
                 },
                 templates.padding(10, 0),
             }
@@ -61,7 +140,7 @@ local function stats()
             horizontal = false,
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
-            gap = 10,
+            -- gap = 10,
         },
         content = UI.content {
             templates.text_output("Enchantment:", 200, 10, "0", UI.ALIGNMENT.End),
@@ -86,7 +165,7 @@ header.element = {
             horizontal = true,
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
-            gap = 20,
+            -- gap = 20,
         },
         content = UI.content {
             templates.padding(20, 0),
@@ -101,41 +180,6 @@ header.element = {
 -- main_content
 local main_content = {}
 
-local function create_magic_effect_item(id, name, onMouseClick)
-    return 
-    {
-        name = id,
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = name,
-            textSize = 20,
-        },
-        events = {
-            mouseClick = onMouseClick
-        }
-    }
-end
-
-local function make_magic_effects_list()
-    local known_magic_effects = enchanter.get_known_magic_effects()
-    if known_magic_effects == nil then
-        print("!! ERROR magic_effects_list is NIL")
-        return
-    end
-    local items = {}
-
-    print("make_magic_effects_list")
-    for id, name in pairs(known_magic_effects) do
-        table.insert(items, create_magic_effect_item(id, name, function() end)) -- TODO: on click fnc
-    end
-
-    return items or {} -- return the list or just an empty one
-end
-
-local magic_effects = templates.list("Magic Effects", v2(200,300), make_magic_effects_list)
--- local effects = templates.list("Effects", v2(350,300), function() end)
-
 main_content.element = {
     name = "content",
     template = I.MWUI.templates.padding,
@@ -146,13 +190,13 @@ main_content.element = {
             horizontal = true,
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
-            gap = 20,
+            -- gap = 20,
         },
         content = UI.content {
             templates.padding(10, 0),
-            magic_effects,
+            enchanting_ui.magic_effects,
             templates.padding(10, 0),
-            effects,
+            enchanting_ui.effects,
             templates.padding(10, 0),
         }
     } }
@@ -236,8 +280,6 @@ enchanting_ui.create_ui = function()
             } }
         } }
     }
-
-    make_magic_effects_list()
     
     print("Created UI")
 end

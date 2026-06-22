@@ -139,16 +139,16 @@ templates.text_image = function(name, image_size, padding_length, on_image_mouse
             {
                 name = "image",
                 type = UI.TYPE.Image,
-                template = I.MWUI.templates.bordersThick,
+                template = I.MWUI.templates.borders,
                 props = {
                     resource = UI.texture({
-                    path = "black"
+                        path = "black"
                     }),
-                    alpha = 0.5,
+                    alpha = 1,
                     size = image_size,
                 },
                 events = {
-                    -- mouseClick = async:callback(on_image_mouse_click),
+                    mouseClick = async:callback(on_image_mouse_click),
                     -- focusGain = async:callback(on_image_focus_gained),
                     -- focusLoss = async:callback(on_image_focus_loss),
                 }
@@ -160,26 +160,6 @@ end
 templates.list = function(name, list_size, generate_items)
 
     local items = generate_items() or {}
-    -- items = {
-    --     {
-    --         name = 1,
-    --         type = UI.TYPE.Text,
-    --         template = I.MWUI.templates.textNormal,
-    --         props = {
-    --             text = "Test1",
-    --             textSize = 20,
-    --         }
-    --     },
-    --     {
-    --         name = 2,
-    --         type = UI.TYPE.Text,
-    --         template = I.MWUI.templates.textNormal,
-    --         props = {
-    --             text = "Test2",
-    --             textSize = 20,
-    --         }
-    --     }
-    -- }
 
     return {
         name = name .. "_list",
@@ -192,7 +172,7 @@ templates.list = function(name, list_size, generate_items)
                     horizontal = false,
                     arrange = UI.ALIGNMENT.Start,
                     align = UI.ALIGNMENT.Start,
-                    gap = 10,
+                    -- gap = 10,
                     size = v2(0, 20) + list_size
                 },
                 content = UI.content {
@@ -219,7 +199,7 @@ templates.list = function(name, list_size, generate_items)
                                     horizontal = false,
                                     arrange = UI.ALIGNMENT.Start,
                                     align = UI.ALIGNMENT.Start,
-                                    gap = 10,
+                                    -- gap = 20,
                                     size = list_size
                                 },
                                 content = UI.content(items)

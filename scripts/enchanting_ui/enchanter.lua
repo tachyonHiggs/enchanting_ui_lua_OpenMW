@@ -8,7 +8,15 @@ local enchanter = {}
 -- Testing values
 -- TODO: add item instead of item_id
 enchanter.name = ""
-enchanter.item_id = "orcish warhammer"
+enchanter.item = {
+    id = "",
+    icon = nil
+}
+enchanter.soul = {
+    id = "",
+    value = 0,
+    icon = nil
+}
 enchanter.soul_value = types.Creature.records["golden saint"].soulValue
 enchanter.enchantment = core.magic.enchantments.records[1] -- Just an initial value
 enchanter.chance = 0
@@ -28,6 +36,59 @@ enchanter.get_known_magic_effects = function()
     end
 
     return known_magic_effects
+end
+
+enchanter.get_enchantable_inventory_items = function()
+
+    local enchantable_inventory_items = {}
+    local weapons = types.Actor.inventory(self.object):getAll(types.Weapon)
+    local armors = types.Actor.inventory(self.object):getAll(types.Armor)
+    local clothing = types.Actor.inventory(self.object):getAll(types.Clothing)
+
+    for _, item in ipairs(weapons) do
+        -- check not enchanted
+        if item.enchant == nil then
+            local icon = types.Weapon.records[item.recordId].icon
+            table.insert(enchantable_inventory_items, {item.recordId, icon})
+            -- print(item.recordId)
+        end
+    end
+    for _, item in ipairs(armors) do
+        -- check not enchanted
+        if item.enchant == nil then
+            local icon = types.Armor.records[item.recordId].icon
+            table.insert(enchantable_inventory_items, {item.recordId, icon})
+            -- print(item.recordId)
+        end
+    end
+    for _, item in ipairs(clothing) do
+        -- check not enchanted
+        if item.enchant == nil then
+            local icon = types.Clothing.records[item.recordId].icon
+            table.insert(enchantable_inventory_items, {item.recordId, icon})
+            -- print(item.recordId)
+        end
+    end
+
+    return enchantable_inventory_items
+end
+
+enchanter.get_inventory_souls = function ()
+
+    local souls = {}
+    local items = types.Actor.inventory(self.object):getAll(types.Miscellaneous)
+
+    for _, item in ipairs(items) do
+        -- check for soul
+        local soul = types.Item.itemData(item).soul
+        if soul ~= nil then
+            local soul_value = types.Creature.records[soul].soulValue
+            local icon = types.Miscellaneous.records[item.recordId].icon
+            table.insert(souls, {item.recordId, soul_value, icon})
+        end
+    end
+
+    return souls
 end
 
 enchanter.check_requirements = function()
@@ -57,7 +118,7 @@ enchanter.create_item = function()
 
     -- core.sendGlobalEvent('create_enchantment', {id=enchanter.enchantment.id})
     -- TODO: update this to be not Weapon specific
-    core.sendGlobalEvent('create_item', {name=enchanter.name, item_id=enchanter.item_id, enchantment_id=enchanter.enchantment.id})
+    core.sendGlobalEvent('create_item', {name=enchanter.name, item_id=enchanter.item.id, enchantment_id=enchanter.enchantment.id})
 end
 
 -- TODO: make this return if item was created and message
