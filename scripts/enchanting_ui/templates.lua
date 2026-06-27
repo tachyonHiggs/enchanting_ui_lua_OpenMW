@@ -30,19 +30,28 @@ templates.padding = function(x, y)
 end
 
 -- Templates
-templates.button = function(name, on_click_fnc)
+templates.button = function(name, on_click_fnc, size)
     return {
-        name = name  .. "_btn",
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
+        name = name .. "_btn_border",
+        type = UI.TYPE.Container,
+        template = I.MWUI.templates.bordersThick,
         props = {
-            text = name,
-            textSize = 20,
+            size = size
         },
-        events = {
-            mouseClick = async:callback(on_click_fnc)
+        content = UI.content {
+            {
+                name = name  .. "_btn",
+                type = UI.TYPE.Text,
+                template = I.MWUI.templates.textNormal,
+                props = {
+                    text = name,
+                    textSize = 20,
+                },
+                events = {
+                    mouseClick = async:callback(on_click_fnc)
+                }
+            }
         }
-        -- Border?
     }
 end
 
@@ -208,6 +217,154 @@ templates.list = function(name, list_size, generate_items)
                     }
                 } 
             }
+        }
+    }
+end
+
+templates.slider = {}
+
+templates.slider.bar = {
+    name = "bar",
+    template = I.MWUI.templates.borders,
+    type = UI.TYPE.Image,
+    props = {
+        resource = UI.texture({
+            path = "Textures/menu_bar_yellow.dds" -- TODO: this withthe actual bar image
+        }),
+        alpha = 1,
+        size = v2(20, 20),
+    },
+    events = {
+        
+    }
+}
+
+
+templates.slider.value = 0
+templates.slider.value_text = "0"
+templates.slider.value_element = {
+    name = "value",
+    type = UI.TYPE.Text,
+    template = I.MWUI.templates.textNormal,
+    props = {
+        text = templates.slider.value_text,
+        textSize = 20,
+        size = v2(100, 20) -- tbd size
+    }
+}
+
+templates.slider.move_left = function(interval, max, min) 
+    print("Moving slider left")
+    local relativeInterval = interval/(max-min)
+    templates.slider.bar.props.relativePosition = templates.slider.bar.props.relativePosition - v2(relativeInterval, 0)
+    templates.slider.value = templates.slider.value - interval
+
+    print("moving left interval: ", interval)
+
+    if templates.slider.value < min or templates.slider.bar.props.relativePosition < v2(0,0) then
+        print("LESS THAN ", templates.slider.bar.props.relativePosition)
+        print("Slider value: ", templates.slider.value)
+        templates.slider.value = min
+        templates.slider.bar.props.relativePosition = v2(0,0)
+    end
+    print("Current value: ", templates.slider.value)
+    templates.slider.value_text = tostring(templates.slider.value)
+    templates.slider.value_element.props.text = templates.slider.value_text
+    templates.slider.update_target()
+end
+
+templates.slider.move_right = function(interval, max, min) 
+    print("Moving slider right")
+    local relativeInterval = interval/(max-min)
+    templates.slider.bar.props.relativePosition = templates.slider.bar.props.relativePosition + v2(relativeInterval, 0)
+    templates.slider.value = interval + templates.slider.value
+
+    if templates.slider.value > max or templates.slider.bar.props.relativePosition > v2(1,0) then
+        templates.slider.value = max
+        templates.slider.bar.props.relativePosition = v2(1,0)
+    end
+    print("Current value: ", templates.slider.value_text)
+    templates.slider.value_text = tostring(templates.slider.value)
+    templates.slider.value_element.props.text = templates.slider.value_text
+    templates.slider.update_target()
+end
+
+templates.slider.create = function(name, max, min, text_size, padding_size, bar_size, bar_start_pos, interval, update_target)
+
+    templates.slider.bar.props.relativePosition = v2(bar_start_pos, 0)
+    templates.slider.update_target = update_target
+
+    templates.slider.value = min
+    templates.slider.value_text = tostring(templates.slider.value)
+    templates.slider.value_element.props.text = templates.slider.value_text
+
+    return {
+        name = name .. "_slider",
+        type = UI.TYPE.Flex,
+        props = {
+            horizontal = true,
+            arrange = UI.ALIGNMENT.Start,
+            align = UI.ALIGNMENT.Start,
+        },
+        content = UI.content {
+            {
+                name = name  .. "_name",
+                type = UI.TYPE.Text,
+                template = I.MWUI.templates.textNormal,
+                props = {
+                    text = name .. ":   ",
+                    textSize = 20,
+                    size = v2(text_size, 20)
+                },
+                content = UI.content {}
+            }, 
+            templates.slider.value_element,
+            templates.padding(padding_size, 20),
+            {
+                name = "left",
+                template = I.MWUI.templates.borders,
+                type = UI.TYPE.Image,
+                props = {
+                    resource = UI.texture({
+                        path = "Textures/menu_scroll_left.dds"
+                    }),
+                    alpha = 1,
+                    size = v2(20, 20),
+                },
+                events = {
+                    mouseClick = async:callback(function() templates.slider.move_left(interval, max, min) end)
+                }
+            },
+            {
+                name = name  .. "_background_bar",
+                template = I.MWUI.templates.borders,
+                type = UI.TYPE.Image,
+                props = {
+                    resource = UI.texture({
+                        path = "black"
+                    }),
+                    alpha = 1,
+                    size = v2(bar_size, 20),
+                },
+                content = UI.content {
+                    templates.slider.bar
+                }
+            },
+            {
+                name = "right",
+                template = I.MWUI.templates.borders,
+                type = UI.TYPE.Image,
+                props = {
+                    resource = UI.texture({
+                        path = "Textures/menu_scroll_right.dds"
+                    }),
+                    alpha = 1,
+                    size = v2(20, 20),
+                },
+                events = {
+                    mouseClick = async:callback(function() templates.slider.move_right(interval, max, min) end)
+                }
+            },
         }
     }
 end

@@ -12,12 +12,17 @@ local helper = {}
 
 local on_item_clicked = nil
 local on_soul_clicked = nil
+local on_magic_effect_clicked = nil
 function helper.set_on_item_clicked(callback)
     on_item_clicked = callback
 end
 function helper.set_on_soul_clicked(callback)
     on_soul_clicked = callback
 end
+function helper.set_on_magic_effect_clicked(callback)
+    on_magic_effect_clicked = callback
+end
+
 
 -- ITEMS
 
@@ -98,7 +103,7 @@ end
 
 -- MAGIC EFFECTS
 
-local function create_magic_effect_item(id, name, onMouseClick)
+local function create_magic_effect_item(id, name)
     return 
     {
         name = id,
@@ -109,7 +114,11 @@ local function create_magic_effect_item(id, name, onMouseClick)
             textSize = 20,
         },
         events = {
-            mouseClick = async:callback(onMouseClick)
+            mouseClick = async:callback(function()
+                if on_magic_effect_clicked then
+                    on_magic_effect_clicked(id)
+                end
+            end)
         }
     }
 end
@@ -123,7 +132,7 @@ function helper.make_magic_effects_list()
     local items = {}
 
     for id, name in pairs(known_magic_effects) do
-        table.insert(items, create_magic_effect_item(id, name, function() end)) -- TODO: on click fnc
+        table.insert(items, create_magic_effect_item(id, name)) -- TODO: on click fnc
     end
 
     return items or {} -- return the list or just an empty one

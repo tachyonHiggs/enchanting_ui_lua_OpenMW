@@ -20,17 +20,21 @@ local enchanting_ui = {}
 -- header
 local header = {}
 
+-- header input list fncs
+
 local function on_item_clicked(id, icon)
 
     enchanter.item.id = id
     enchanter.item.icon = icon
     print("click on item: ", id)
+    print("Icon: ", icon)
     enchanting_ui.item_input.content[3].props.resource = UI.texture({
         path = icon
     })
     enchanting_ui.root:update()
 
     auxUi.deepDestroy(enchanting_ui.item_list)
+    enchanting_ui.item_list:update()
 
 end
 
@@ -56,17 +60,18 @@ end
 local function on_soul_clicked(id, value, icon)
 
     enchanter.soul.id = id
-    enchanter.soul.value = value
     enchanter.soul.icon = icon
-    print(icon)
-
-    print("click on item: ", id)
+    enchanter.enchantment.charge = value
+    enchanting_ui.stats_charge.content[3].props.text = tostring(value)
+    
+    print("click on soul: ", id)
     enchanting_ui.soul_input.content[3].props.resource = UI.texture({
         path = icon
     })
     enchanting_ui.root:update()
 
     auxUi.deepDestroy(enchanting_ui.soul_list)
+    enchanting_ui.soul_list:update()
 
 end
 
@@ -92,9 +97,6 @@ end
 enchanting_ui.name_input = templates.text_input("Name", 200, function(text) enchanter.name = text end)
 enchanting_ui.item_input = templates.text_image("Item", v2(75,75), 10, show_item_list, nil, nil)
 enchanting_ui.soul_input = templates.text_image("Soul", v2(75,75), 10, show_soul_list, nil, nil)
-
-enchanting_ui.magic_effects = templates.list("Magic Effects", v2(200,300), ui_helpers.make_magic_effects_list)
--- local effects = templates.list("Effects", v2(350,300), function() end)
 
 local function inputs()
     print("inputs")
@@ -132,6 +134,11 @@ local function inputs()
     }
 end
 
+enchanting_ui.stats_enchantment = templates.text_output("Enchantment:", 200, 10, "0", UI.ALIGNMENT.End)
+enchanting_ui.stats_cast_cost = templates.text_output("Cast Cost:", 200, 10, "0", UI.ALIGNMENT.End)
+enchanting_ui.stats_charge = templates.text_output("Charge:", 200, 10, "0", UI.ALIGNMENT.End)
+enchanting_ui.stats_chance = templates.text_output("Chance:", 200, 10, "0", UI.ALIGNMENT.End)
+
 local function stats()
     return{
         name = "stats_flex",
@@ -143,14 +150,10 @@ local function stats()
             -- gap = 10,
         },
         content = UI.content {
-            templates.text_output("Enchantment:", 200, 10, "0", UI.ALIGNMENT.End),
-            -- templates.padding(10, 0),
-            templates.text_output("Cast Cost:", 200, 10, "0", UI.ALIGNMENT.End),
-            -- templates.padding(10, 0),
-            templates.text_output("Charge:", 200, 10, "0", UI.ALIGNMENT.End),
-            -- templates.padding(10, 0),
-            templates.text_output("Chance:", 200, 10, "0", UI.ALIGNMENT.End),
-            -- templates.padding(10, 0),
+            enchanting_ui.stats_enchantment,
+            enchanting_ui.stats_cast_cost,
+            enchanting_ui.stats_charge,
+            enchanting_ui.stats_chance
         }
     }
 end
@@ -180,6 +183,60 @@ header.element = {
 -- main_content
 local main_content = {}
 
+
+local function update_magic_effect_add()
+    enchanting_ui.magic_effect_add:update()
+end
+local function toggle_range_type()
+    print("toggle_range_type")
+    enchanting_ui.range.content[1].props.text = enchanter.toggle_range_type()
+    update_magic_effect_add()
+end
+enchanting_ui.range = templates.button("Self", toggle_range_type, v2(100, 100))
+enchanting_ui.magnitude = templates.slider.create("Magnitude", 999, 1, 100, 75, 200, 0, 1, update_magic_effect_add)
+
+local function on_magic_effect_clicked(id)
+
+    print("On magic effect clicked: ", id)
+
+    enchanting_ui.magic_effect_add = UI.create{
+        name = "magic_effect_add",
+        layer = "Windows",
+        template = I.MWUI.templates.boxSolid,
+        props = {
+            size = v2(400, 300),
+            relativePosition = v2(0.5, 0.5),
+            anchor = v2(0.5, 0.5),
+        },
+        content = UI.content {
+            templates.make_border(v2(400, 300)),
+            {
+                name = "magic_effect_add_flex",
+                type = UI.TYPE.Flex,
+                props = {
+                    horizontal = false,
+                    arrange = UI.ALIGNMENT.Center,
+                    align = UI.ALIGNMENT.Center,
+                },
+                content = UI.content {
+                    enchanting_ui.range,
+                    enchanting_ui.magnitude,
+                }
+            }
+        }
+    }
+    -- enchanting_ui.root.layout.template = I.MWUI.templates.disabled
+
+    enchanting_ui.root:update()
+    enchanting_ui.magic_effect_add:update()
+
+end
+
+ui_helpers.set_on_magic_effect_clicked(on_magic_effect_clicked)
+
+enchanting_ui.magic_effects = templates.list("Magic Effects", v2(200,300), ui_helpers.make_magic_effects_list)
+-- local effects = templates.list("Effects", v2(350,300), function() end)
+
 main_content.element = {
     name = "content",
     template = I.MWUI.templates.padding,
@@ -206,6 +263,14 @@ main_content.element = {
 -- footer
 local footer = {}
 
+local function toggle_cast_type()
+    print("toggle_cast_type")
+    enchanting_ui.cast_type_btn.content[1].props.text = enchanter.toggle_cast_type()
+    enchanting_ui.root:update()
+end
+
+enchanting_ui.cast_type_btn = templates.button("Cast Once", toggle_cast_type, v2(100, 100))
+
 footer.element = {
     name = "footer",
     template = I.MWUI.templates.padding,
@@ -219,11 +284,7 @@ footer.element = {
         },
         content = UI.content {
             templates.padding(10, 0),
-            templates.button("Cast Once", (function()
-                print("Clicked Type")
-                ambient.playSound('menu click')
-                return true
-            end)),
+            enchanting_ui.cast_type_btn,
             templates.padding(10, 0),
             templates.text_output("Price", 200, 10, "0", UI.ALIGNMENT.End),
             templates.padding(200, 0),
@@ -232,13 +293,13 @@ footer.element = {
                 ambient.playSound('menu click')
                 enchanting_ui.enchant_item()
                 return true
-            end)),
+            end), v2(30, 20)),
             templates.padding(10, 0),
             templates.button("Cancel", (function()
                 print("Clicked Cancel")
                 ambient.playSound('menu click')
                 return true
-            end)),
+            end), v2(30, 20)),
             templates.padding(10, 0),
         }
     } }
@@ -249,10 +310,13 @@ enchanting_ui.create_ui = function()
 
     print("create_ui")
 
+    enchanter.reset()
+
     enchanting_ui.root = UI.create{
         name = "root",
         layer = "Windows",
-        type = UI.TYPE.Widget,
+        -- type = UI.TYPE.Widget,
+        template = nil,
         props = {
             size = v2(600, 500),
             relativePosition = v2(0.5, 0.5),
@@ -260,7 +324,6 @@ enchanting_ui.create_ui = function()
         },
         content = UI.content { 
             templates.make_border(v2(600, 500)),
-
             {
             name = "root_padding",
             template = I.MWUI.templates.padding,

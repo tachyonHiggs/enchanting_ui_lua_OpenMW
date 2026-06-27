@@ -5,8 +5,6 @@ local self = require('openmw.self')
 -- Main object
 local enchanter = {}
 
--- Testing values
--- TODO: add item instead of item_id
 enchanter.name = ""
 enchanter.item = {
     id = "",
@@ -14,12 +12,23 @@ enchanter.item = {
 }
 enchanter.soul = {
     id = "",
-    value = 0,
     icon = nil
 }
-enchanter.soul_value = types.Creature.records["golden saint"].soulValue
-enchanter.enchantment = core.magic.enchantments.records[1] -- Just an initial value
-enchanter.chance = 0
+
+enchanter.reset = function()
+    enchanter.enchantment = {}
+    enchanter.enchantment.charge = 0
+    enchanter.enchantment.cost = 0
+    enchanter.enchantment.effects = {}
+    enchanter.enchantment.effects.range = 0
+    enchanter.enchantment.id = nil -- should be generated
+    enchanter.enchantment.isAutocalc = 0
+    enchanter.enchantment.type = 0
+
+    enchanter.chance = 0
+end
+
+enchanter.reset()
 
 enchanter.get_known_magic_effects = function()
 
@@ -155,6 +164,52 @@ enchanter.calculate_success_rate = function(isEffectConstant, enchantmentPoints)
     local rate = (0.75 + fatigue_percent/2) * (1 - enchantment_const_chance_mult*isEffectConstant) * (enchant_skill + intelligence/5 + luck/10 - enchantment_chance_mult*enchantmentPoints)
 
     return rate
+end
+
+enchanter.toggle_cast_type = function()
+    local text = ""
+
+    enchanter.enchantment.type = ((enchanter.enchantment.type+1) % 4) -- 0-3)
+    if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnce then
+        text = "Cast Once"
+        print(text)
+    elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnStrike then
+        text = "Cast on Strike"
+        print(text)
+    elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnUse then
+        text = "Cast on Use"
+        print(text)
+    elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        text = "Constant Effect"
+        enchanter.enchantment.isAutocalc = false
+        print(text)
+    else
+        print("Unknown option")
+    end
+    print("New type: ", enchanter.enchantment.type)
+
+    return text
+end
+
+enchanter.toggle_range_type = function()
+    local text = ""
+
+    enchanter.enchantment.effects.range = ((enchanter.enchantment.effects.range+1) % 3) -- 0-2)
+    if enchanter.enchantment.effects.range == core.magic.RANGE.Self then
+        text = "Self"
+        print(text)
+    elseif enchanter.enchantment.effects.range == core.magic.RANGE.Touch then
+        text = "Target"
+        print(text)
+    elseif enchanter.enchantment.effects.range == core.magic.RANGE.Target then
+        text = "Touch"
+        print(text)
+    else
+        print("Unknown option")
+    end
+    print("New range: ", enchanter.enchantment.effects.range)
+
+    return text
 end
 
 return enchanter
