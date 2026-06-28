@@ -30,15 +30,16 @@ templates.padding = function(x, y)
 end
 
 -- Templates
-templates.button = function(name, on_click_fnc, size)
+templates.button = function(name, on_click_fnc, size_x, size_y)
     return {
         name = name .. "_btn_border",
         type = UI.TYPE.Container,
         template = I.MWUI.templates.bordersThick,
         props = {
-            size = size
+            size = v2(size_x, size_y)
         },
         content = UI.content {
+            templates.padding(size_x, size_y),
             {
                 name = name  .. "_btn",
                 type = UI.TYPE.Text,
@@ -166,207 +167,261 @@ templates.text_image = function(name, image_size, padding_length, on_image_mouse
     }
 end
 
-templates.list = function(name, list_size, generate_items)
+templates.list = {}
+templates.list.new = function(name, list_size, generate_items)
 
-    local items = generate_items() or {}
+    local list = {}
 
-    return {
-        name = name .. "_list",
-        template = I.MWUI.templates.padding,
-        content = UI.content { 
-            {
-                name = "flex",
-                type = UI.TYPE.Flex,
-                props = {
-                    horizontal = false,
-                    arrange = UI.ALIGNMENT.Start,
-                    align = UI.ALIGNMENT.Start,
-                    -- gap = 10,
-                    size = v2(0, 20) + list_size
-                },
-                content = UI.content {
-                    {
-                        name = "name",
-                        type = UI.TYPE.Text,
-                        template = I.MWUI.templates.textNormal,
-                        props = {
-                            text = name,
-                            textSize = 20,
-                        }
+    list.name = name
+    list.size = list_size
+    list.items = generate_items() or {}
+
+    list.items_container = {
+        name = "items",
+        type = UI.TYPE.Flex,
+        props = {
+            horizontal = false,
+            arrange = UI.ALIGNMENT.Start,
+            align = UI.ALIGNMENT.Start,
+            size = list_size,
+        },
+        content = UI.content(list.items)
+    }
+
+    function list:add_item(item)
+        print("adding item: ", item.name)
+        table.insert(self.items, item)
+
+        -- rebuild the UI content
+        self.items_container.content = UI.content(self.items)
+    end
+
+    function list:clear()
+        self.items = {}
+        self.items_container.content = UI.content({})
+    end
+
+    function list:create()
+        self.ui = {
+            name = self.name .. "_list",
+            template = I.MWUI.templates.padding,
+            content = UI.content {
+                {
+                    name = "flex",
+                    type = UI.TYPE.Flex,
+                    props = {
+                        horizontal = false,
+                        arrange = UI.ALIGNMENT.Start,
+                        align = UI.ALIGNMENT.Start,
+                        size = v2(0,20) + self.size,
                     },
-                    {
-                        name = "border",
-                        template = I.MWUI.templates.boxSolid,
-                        props = {
-                            size = list_size,
-                        }, 
-                        content = UI.content {
-                            {
-                                name = "items",
-                                type = UI.TYPE.Flex,
-                                props = {
-                                    horizontal = false,
-                                    arrange = UI.ALIGNMENT.Start,
-                                    align = UI.ALIGNMENT.Start,
-                                    -- gap = 20,
-                                    size = list_size
-                                },
-                                content = UI.content(items)
+                    content = UI.content {
+                        {
+                            name = "name",
+                            type = UI.TYPE.Text,
+                            template = I.MWUI.templates.textNormal,
+                            props = {
+                                text = self.name,
+                                textSize = 20,
+                            }
+                        },
+                        {
+                            name = "border",
+                            template = I.MWUI.templates.boxSolid,
+                            props = {
+                                size = self.size,
+                            },
+                            content = UI.content {
+                                self.items_container
                             }
                         }
                     }
-                } 
+                }
             }
-        }
-    }
+        }        
+        return self.ui
+    end
+    
+    return list
 end
 
 templates.slider = {}
+templates.slider.new = function(text, max, min, start, interval, update_target)
+    local slider = {}
 
-templates.slider.bar = {
-    name = "bar",
-    template = I.MWUI.templates.borders,
-    type = UI.TYPE.Image,
-    props = {
-        resource = UI.texture({
-            path = "Textures/menu_bar_yellow.dds" -- TODO: this withthe actual bar image
-        }),
-        alpha = 1,
-        size = v2(20, 20),
-    },
-    events = {
-        
-    }
-}
+    slider.ui = {}
+    slider.text = text -- sets the slider name and starting text value
+    slider.value = min
+    slider.value_text = tostring(slider.value)
+    
+    slider.min = min
+    slider.max = max
+    slider.interval = interval
 
+    slider.update_target = update_target
 
-templates.slider.value = 0
-templates.slider.value_text = "0"
-templates.slider.value_element = {
-    name = "value",
-    type = UI.TYPE.Text,
-    template = I.MWUI.templates.textNormal,
-    props = {
-        text = templates.slider.value_text,
-        textSize = 20,
-        size = v2(100, 20) -- tbd size
-    }
-}
-
-templates.slider.move_left = function(interval, max, min) 
-    print("Moving slider left")
-    local relativeInterval = interval/(max-min)
-    templates.slider.bar.props.relativePosition = templates.slider.bar.props.relativePosition - v2(relativeInterval, 0)
-    templates.slider.value = templates.slider.value - interval
-
-    print("moving left interval: ", interval)
-
-    if templates.slider.value < min or templates.slider.bar.props.relativePosition < v2(0,0) then
-        print("LESS THAN ", templates.slider.bar.props.relativePosition)
-        print("Slider value: ", templates.slider.value)
-        templates.slider.value = min
-        templates.slider.bar.props.relativePosition = v2(0,0)
-    end
-    print("Current value: ", templates.slider.value)
-    templates.slider.value_text = tostring(templates.slider.value)
-    templates.slider.value_element.props.text = templates.slider.value_text
-    templates.slider.update_target()
-end
-
-templates.slider.move_right = function(interval, max, min) 
-    print("Moving slider right")
-    local relativeInterval = interval/(max-min)
-    templates.slider.bar.props.relativePosition = templates.slider.bar.props.relativePosition + v2(relativeInterval, 0)
-    templates.slider.value = interval + templates.slider.value
-
-    if templates.slider.value > max or templates.slider.bar.props.relativePosition > v2(1,0) then
-        templates.slider.value = max
-        templates.slider.bar.props.relativePosition = v2(1,0)
-    end
-    print("Current value: ", templates.slider.value_text)
-    templates.slider.value_text = tostring(templates.slider.value)
-    templates.slider.value_element.props.text = templates.slider.value_text
-    templates.slider.update_target()
-end
-
-templates.slider.create = function(name, max, min, text_size, padding_size, bar_size, bar_start_pos, interval, update_target)
-
-    templates.slider.bar.props.relativePosition = v2(bar_start_pos, 0)
-    templates.slider.update_target = update_target
-
-    templates.slider.value = min
-    templates.slider.value_text = tostring(templates.slider.value)
-    templates.slider.value_element.props.text = templates.slider.value_text
-
-    return {
-        name = name .. "_slider",
-        type = UI.TYPE.Flex,
+    slider.bar = {
+        name = "bar",
+        template = I.MWUI.templates.borders,
+        type = UI.TYPE.Image,
         props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-        },
-        content = UI.content {
-            {
-                name = name  .. "_name",
-                type = UI.TYPE.Text,
-                template = I.MWUI.templates.textNormal,
-                props = {
-                    text = name .. ":   ",
-                    textSize = 20,
-                    size = v2(text_size, 20)
-                },
-                content = UI.content {}
-            }, 
-            templates.slider.value_element,
-            templates.padding(padding_size, 20),
-            {
-                name = "left",
-                template = I.MWUI.templates.borders,
-                type = UI.TYPE.Image,
-                props = {
-                    resource = UI.texture({
-                        path = "Textures/menu_scroll_left.dds"
-                    }),
-                    alpha = 1,
-                    size = v2(20, 20),
-                },
-                events = {
-                    mouseClick = async:callback(function() templates.slider.move_left(interval, max, min) end)
-                }
-            },
-            {
-                name = name  .. "_background_bar",
-                template = I.MWUI.templates.borders,
-                type = UI.TYPE.Image,
-                props = {
-                    resource = UI.texture({
-                        path = "black"
-                    }),
-                    alpha = 1,
-                    size = v2(bar_size, 20),
-                },
-                content = UI.content {
-                    templates.slider.bar
-                }
-            },
-            {
-                name = "right",
-                template = I.MWUI.templates.borders,
-                type = UI.TYPE.Image,
-                props = {
-                    resource = UI.texture({
-                        path = "Textures/menu_scroll_right.dds"
-                    }),
-                    alpha = 1,
-                    size = v2(20, 20),
-                },
-                events = {
-                    mouseClick = async:callback(function() templates.slider.move_right(interval, max, min) end)
-                }
-            },
+            resource = UI.texture({
+                path = "Textures/menu_bar_yellow.dds"
+            }),
+            alpha = 1,
+            size = v2(20,20),
+            relativePosition = v2((start+min)/(max-min), 0)
         }
     }
+
+    slider.value_element = {
+        name = "value",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = slider.value_text,
+            textSize = 20,
+            size = v2(100,20)
+        }
+    }
+
+    function slider:move_left()
+        print("Moving slider left")
+
+        local relativeInterval = self.interval / (self.max - self.min)
+
+        self.bar.props.relativePosition =
+            self.bar.props.relativePosition - v2(relativeInterval, 0)
+
+        self.value = self.value - self.interval
+
+        if self.value < self.min or self.bar.props.relativePosition < v2(0,0) then
+            self.value = self.min
+            self.bar.props.relativePosition = v2(0,0)
+        end
+
+        self.value_text = tostring(self.value)
+        self.value_element.props.text = self.value_text
+
+        if self.update_target then
+            self.update_target(self.value)
+        end
+    end
+
+    function slider:move_right()
+        print("Moving slider right")
+
+        local relativeInterval = self.interval / (self.max - self.min)
+
+        self.bar.props.relativePosition =
+            self.bar.props.relativePosition + v2(relativeInterval, 0)
+
+        self.value = self.value + self.interval
+        print("Value", self.value)
+
+        if self.value > self.max or self.bar.props.relativePosition > v2(1,0) then
+            self.value = self.max
+            self.bar.props.relativePosition = v2(1,0)
+        end
+        print("Value", self.value)
+
+        self.value_text = tostring(self.value)
+        self.value_element.props.text = self.value_text
+
+        if self.update_target then
+            self.update_target(self.value)
+        end
+    end
+
+    function slider:create()
+        self.ui = {
+            name = self.text .. "_slider",
+            type = UI.TYPE.Flex,
+            props = {
+                horizontal = true,
+                arrange = UI.ALIGNMENT.Start,
+                align = UI.ALIGNMENT.Start,
+            },
+            content = UI.content {
+                {
+                    name = self.text  .. "_name",
+                    type = UI.TYPE.Text,
+                    template = I.MWUI.templates.textNormal,
+                    props = {
+                        text = self.text .. ":   ",
+                        textSize = 20,
+                        size = v2(100, 20),
+                        visible = true
+                    },
+                    content = UI.content {}
+                }, 
+                self.value_element,
+                templates.padding(20, 20),
+                {
+                    name = "left",
+                    template = I.MWUI.templates.borders,
+                    type = UI.TYPE.Image,
+                    props = {
+                        resource = UI.texture({
+                            path = "Textures/menu_scroll_left.dds"
+                        }),
+                        alpha = 1,
+                        size = v2(20, 20),
+                    },
+                    events = {
+                        mouseClick = async:callback(function() self:move_left() end)
+                    }
+                },
+                {
+                    name = self.text  .. "_background_bar",
+                    template = I.MWUI.templates.borders,
+                    type = UI.TYPE.Image,
+                    props = {
+                        resource = UI.texture({
+                            path = "black"
+                        }),
+                        alpha = 1,
+                        size = v2(200, 20),
+                    },
+                    content = UI.content {
+                        self.bar
+                    }
+                },
+                {
+                    name = "right",
+                    template = I.MWUI.templates.borders,
+                    type = UI.TYPE.Image,
+                    props = {
+                        resource = UI.texture({
+                            path = "Textures/menu_scroll_right.dds"
+                        }),
+                        alpha = 1,
+                        size = v2(20, 20),
+                    },
+                    events = {
+                        mouseClick = async:callback(function() self:move_right() end)
+                    }
+                },
+            }
+        }
+        return self.ui
+    end
+
+    function slider:hide() 
+        print("hiding: ", self.text)
+        self.ui.props.visible = false
+    end
+
+    function slider:show() 
+        print("hiding: ", self.text)
+        if self.update_target then
+            print(self.value)
+            self.update_target(self.value)
+        end
+        self.ui.props.visible = true
+    end
+
+    return slider
 end
 
 return templates

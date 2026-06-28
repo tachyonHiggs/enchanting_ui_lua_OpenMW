@@ -6,6 +6,8 @@ local auxUi = require("openmw_aux.ui")
 local ambient = require('openmw.ambient')
 local self = require('openmw.self')
 local async = require('openmw.async')
+local core = require('openmw.core')
+local types = require('openmw.types')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
@@ -21,6 +23,8 @@ local enchanting_ui = {}
 local header = {}
 
 -- header input list fncs
+enchanting_ui.soul_list = templates.list.new("Souls", v2(300, 500), ui_helpers.make_souls_list)
+enchanting_ui.items_list = templates.list.new("Items", v2(300, 500), ui_helpers.make_enchantable_items_list)
 
 local function on_item_clicked(id, icon)
 
@@ -52,7 +56,7 @@ local function show_item_list()
             anchor = v2(0.5, 0.5),
         },
         content = UI.content {
-            templates.list("Items", v2(300, 500), ui_helpers.make_enchantable_items_list)
+            enchanting_ui.items_list:create()
         }
     }
 end
@@ -89,7 +93,7 @@ local function show_soul_list()
             anchor = v2(0.5, 0.5),
         },
         content = UI.content {
-            templates.list("Souls", v2(300, 500), ui_helpers.make_souls_list)
+            enchanting_ui.soul_list:create()
         }
     }
 end
@@ -183,21 +187,122 @@ header.element = {
 -- main_content
 local main_content = {}
 
+-- enchanting_ui attribute
+-- enchanting_ui skill
+enchanting_ui.magnitude = templates.slider.new("Magnitude", 100, 1, 1, 1, function(value) enchanter.enchantment.effect_to_add.magnitudeMin = value enchanting_ui.magic_effect_add:update() end)
+enchanting_ui.magnitude_max = templates.slider.new("         ", 100, 1, 1, 1, function(value) enchanter.enchantment.effect_to_add.magnitudeMax = value enchanting_ui.magic_effect_add:update() end)
+enchanting_ui.duration = templates.slider.new("Duration", 1440, 1, 1, 1, function(value) enchanter.enchantment.effect_to_add.duration = value enchanting_ui.magic_effect_add:update() end)
+enchanting_ui.area = templates.slider.new("Area", 50, 0, 0, 1, function(value) enchanter.enchantment.effect_to_add.area = value enchanting_ui.magic_effect_add:update() end)
 
-local function update_magic_effect_add()
-    enchanting_ui.magic_effect_add:update()
-end
 local function toggle_range_type()
     print("toggle_range_type")
-    enchanting_ui.range.content[1].props.text = enchanter.toggle_range_type()
-    update_magic_effect_add()
+    local text = ""
+
+    -- Find next valid range for magic id
+    local range = enchanter.enchantment.effect_to_add.range
+    while true do
+        range = ((range+1) % 3) -- 0-2)
+        
+        if enchanter.enchantment.effect_to_add.effect.onSelf and range == core.magic.RANGE.Self then
+            text = "Self"
+            break
+        end
+        if enchanter.enchantment.effect_to_add.effect.onTarget and range == core.magic.RANGE.Target then
+            text = "Target"
+            break
+        end
+        if enchanter.enchantment.effect_to_add.effect.onTouch and range == core.magic.RANGE.Touch then
+            text = "Touch"
+            break
+        end
+    end
+
+    -- however, if constant effect only self is allowed
+    if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        print("Constant Effect")
+
+        range = core.magic.RANGE.Self -- range has to be self
+        text = "Self"
+        enchanter.enchantment.isAutocalc = false -- disable autocalc
+    end
+
+    enchanter.enchantment.effect_to_add.range = range
+    enchanting_ui.range.content[2].props.text = text
+    print("New range: ", text)
+
+    -- Now get all possible parameters to customize
+    if enchanter.enchantment.effect_to_add.effect.hasAttribute then
+        print("Effect has attribute")
+
+    else
+        
+    end
+    if enchanter.enchantment.effect_to_add.effect.hasSkill then
+        print("Effect has skill")
+        
+    else
+        
+    end
+
+    if enchanter.enchantment.effect_to_add.effect.hasDuration then
+        print("Effect has duration")
+        enchanting_ui.duration:show()
+    else
+        enchanting_ui.duration:hide()
+        enchanter.enchantment.effect_to_add.duration = 0
+    end
+
+    if enchanter.enchantment.effect_to_add.effect.hasMagnitude then
+        print("Effect has magnitude")
+        enchanting_ui.magnitude:show()
+        enchanting_ui.magnitude_max:show()
+    else
+        enchanting_ui.magnitude:hide()
+        enchanting_ui.magnitude_max:hide()
+
+        enchanter.enchantment.effect_to_add.magnitudeMax = 0
+        enchanter.enchantment.effect_to_add.magnitudeMin = 0
+    end
+
+    if enchanter.enchantment.effect_to_add.range ~= core.magic.RANGE.Self then
+        print("Effect has area")
+        enchanting_ui.area:show()
+    else
+        enchanting_ui.area:hide()
+        enchanter.enchantment.effect_to_add.area = 0
+    end
+
+    enchanting_ui.magic_effect_add:update()
 end
-enchanting_ui.range = templates.button("Self", toggle_range_type, v2(100, 100))
-enchanting_ui.magnitude = templates.slider.create("Magnitude", 999, 1, 100, 75, 200, 0, 1, update_magic_effect_add)
+
+enchanting_ui.range = templates.button("Self", toggle_range_type, 100, 30)
+
+local function ok_magic_effect()
+    print(ok_magic_effect)
+
+    table.insert(enchanter.enchantment.effects_with_params, enchanter.enchantment.effect_to_add)
+
+    local effect_to_add_ui = ui_helpers.create_effect_item(enchanter.enchantment.effect_to_add, function(id) print(id) end)
+    enchanting_ui.effects:add_item(effect_to_add_ui)
+
+    auxUi.deepDestroy(enchanting_ui.magic_effect_add)
+    enchanting_ui.magic_effect_add:update()
+    enchanting_ui.root:update()
+end
+local function cancel_magic_effect()
+    print(cancel_magic_effect)
+
+    auxUi.deepDestroy(enchanting_ui.magic_effect_add)
+    enchanting_ui.magic_effect_add:update()
+end
+enchanting_ui.ok_magic_effect_clicked = templates.button("OK", ok_magic_effect, 100, 30)
+enchanting_ui.cancel_magic_effect_clicked = templates.button("Cancel", cancel_magic_effect, 100, 30)
 
 local function on_magic_effect_clicked(id)
 
     print("On magic effect clicked: ", id)
+    enchanter.enchantment.effect_to_add.id = id
+    enchanter.enchantment.effect_to_add.effect = core.magic.effects.records[enchanter.enchantment.effect_to_add.id]
 
     enchanting_ui.magic_effect_add = UI.create{
         name = "magic_effect_add",
@@ -215,17 +320,79 @@ local function on_magic_effect_clicked(id)
                 type = UI.TYPE.Flex,
                 props = {
                     horizontal = false,
-                    arrange = UI.ALIGNMENT.Center,
+                    arrange = UI.ALIGNMENT.Start,
                     align = UI.ALIGNMENT.Center,
                 },
                 content = UI.content {
-                    enchanting_ui.range,
-                    enchanting_ui.magnitude,
+                    {
+                        name = "effect_icon",
+                        type = UI.TYPE.Flex,
+                        props = {
+                            horizontal = true,
+                            arrange = UI.ALIGNMENT.Start,
+                            align = UI.ALIGNMENT.Start,
+                        },
+                        content = UI.content {
+                            {
+                                name = "icon",
+                                type = UI.TYPE.Image,
+                                template = I.MWUI.templates.borders,
+                                props = {
+                                    resource = UI.texture({
+                                        path = core.magic.effects.records[id].icon
+                                    }),
+                                    alpha = 1,
+                                    size = v2(20,20),
+                                },
+                            },
+                            templates.padding(10, 0),
+                            {
+                                name = "name",
+                                type = UI.TYPE.Text,
+                                template = I.MWUI.templates.textNormal,
+                                props = {
+                                    text = core.magic.effects.records[id].name,
+                                    textSize = 20,
+                                }
+                            },
+                            
+                        }
+                    },
+                    {
+                        name = "effect_icon",
+                        type = UI.TYPE.Flex,
+                        props = {
+                            horizontal = true,
+                            arrange = UI.ALIGNMENT.Start,
+                            align = UI.ALIGNMENT.Start,
+                        },
+                        content = UI.content {
+                            {
+                                name = "range",
+                                type = UI.TYPE.Text,
+                                template = I.MWUI.templates.textNormal,
+                                props = {
+                                    text = "Range",
+                                    textSize = 20,
+                                }
+                            },
+                            templates.padding(100, 0),
+                            enchanting_ui.range,
+                        }
+                    },
+                    enchanting_ui.magnitude:create(),
+                    enchanting_ui.magnitude_max:create(),
+                    enchanting_ui.duration:create(),
+                    enchanting_ui.area:create(),
+                    enchanting_ui.ok_magic_effect_clicked,
+                    enchanting_ui.cancel_magic_effect_clicked,
                 }
             }
         }
     }
     -- enchanting_ui.root.layout.template = I.MWUI.templates.disabled
+
+    toggle_range_type()
 
     enchanting_ui.root:update()
     enchanting_ui.magic_effect_add:update()
@@ -234,8 +401,8 @@ end
 
 ui_helpers.set_on_magic_effect_clicked(on_magic_effect_clicked)
 
-enchanting_ui.magic_effects = templates.list("Magic Effects", v2(200,300), ui_helpers.make_magic_effects_list)
--- local effects = templates.list("Effects", v2(350,300), function() end)
+enchanting_ui.magic_effects = templates.list.new("Magic Effects", v2(200,300), ui_helpers.make_magic_effects_list)
+enchanting_ui.effects = templates.list.new("Effects", v2(350,300), function() end)
 
 main_content.element = {
     name = "content",
@@ -251,9 +418,9 @@ main_content.element = {
         },
         content = UI.content {
             templates.padding(10, 0),
-            enchanting_ui.magic_effects,
+            enchanting_ui.magic_effects:create(),
             templates.padding(10, 0),
-            enchanting_ui.effects,
+            enchanting_ui.effects:create(),
             templates.padding(10, 0),
         }
     } }
@@ -265,11 +432,11 @@ local footer = {}
 
 local function toggle_cast_type()
     print("toggle_cast_type")
-    enchanting_ui.cast_type_btn.content[1].props.text = enchanter.toggle_cast_type()
+    enchanting_ui.cast_type_btn.content[2].props.text = enchanter.toggle_cast_type()
     enchanting_ui.root:update()
 end
 
-enchanting_ui.cast_type_btn = templates.button("Cast Once", toggle_cast_type, v2(100, 100))
+enchanting_ui.cast_type_btn = templates.button("Cast Once", toggle_cast_type, 100, 30)
 
 footer.element = {
     name = "footer",
@@ -293,13 +460,13 @@ footer.element = {
                 ambient.playSound('menu click')
                 enchanting_ui.enchant_item()
                 return true
-            end), v2(30, 20)),
+            end), 50, 30),
             templates.padding(10, 0),
             templates.button("Cancel", (function()
                 print("Clicked Cancel")
                 ambient.playSound('menu click')
-                return true
-            end), v2(30, 20)),
+                enchanting_ui.hide()
+            end), 50, 30),
             templates.padding(10, 0),
         }
     } }
@@ -347,9 +514,6 @@ enchanting_ui.create_ui = function()
     print("Created UI")
 end
 
-enchanting_ui.configure_effect_popup = function()
-end
-
 enchanting_ui.show = function()
     print("Menu Show")
     enchanting_ui.create_ui()
@@ -360,6 +524,8 @@ end
 enchanting_ui.hide = function()
     print("Menu Hide")
     auxUi.deepDestroy(enchanting_ui.root)
+    enchanting_ui.root:update()
+    I.UI.removeMode('EnchantingDialog')
 end
 
 enchanting_ui.set_item_to_enchant = function()

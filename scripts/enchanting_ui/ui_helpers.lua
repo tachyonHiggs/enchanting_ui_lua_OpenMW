@@ -4,6 +4,7 @@ local async = require('openmw.async')
 local Util = require('openmw.util')
 local v2 = Util.vector2
 local I = require('openmw.interfaces')
+local core = require('openmw.core')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
@@ -13,6 +14,8 @@ local helper = {}
 local on_item_clicked = nil
 local on_soul_clicked = nil
 local on_magic_effect_clicked = nil
+local on_effect_clicked = nil
+
 function helper.set_on_item_clicked(callback)
     on_item_clicked = callback
 end
@@ -21,6 +24,9 @@ function helper.set_on_soul_clicked(callback)
 end
 function helper.set_on_magic_effect_clicked(callback)
     on_magic_effect_clicked = callback
+end
+function helper.set_on_effect_clicked(callback)
+    on_effect_clicked = callback
 end
 
 
@@ -136,6 +142,82 @@ function helper.make_magic_effects_list()
     end
 
     return items or {} -- return the list or just an empty one
+end
+
+-- EFFECTS
+
+function helper.create_effect_item(effect, on_effect_clicked)
+    print("create_effect_item")
+
+    local icon_element = {
+        name = "icon",
+        type = UI.TYPE.Image,
+        template = I.MWUI.templates.borders,
+        props = {
+            resource = UI.texture({
+                path = core.magic.effects.records[effect.id].icon
+            }),
+            alpha = 1,
+            size = v2(20,20),
+        },
+    }
+
+    local parts = { effect.effect.name }
+
+    if effect.magnitudeMax > 0 then
+        table.insert(parts, ("%d to %d"):format(effect.magnitudeMin, effect.magnitudeMax))
+    end
+
+    if effect.duration > 0 then
+        table.insert(parts, ("for %d sec"):format(effect.duration))
+    end
+
+    if effect.area > 0 then
+        table.insert(parts, ("in %d ft"):format(effect.area))
+    end
+
+    if effect.range == core.magic.RANGE.Self then
+        table.insert(parts, "on Self")
+    elseif effect.range == core.magic.RANGE.Target then
+        table.insert(parts, "on Target")
+    else 
+        table.insert(parts, "on Touch")
+    end
+
+    local text = table.concat(parts, " ")
+    print(effect.range)
+    
+    local text_element = {
+        name = effect.id,
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = text,
+            textSize = 20,
+        },
+    }
+
+    return 
+    {
+        name = effect.effect.name.."_effect_item",
+        type = UI.TYPE.Flex,
+        props = {
+            horizontal = true,
+            arrange = UI.ALIGNMENT.Start,
+            align = UI.ALIGNMENT.Start,
+        },
+        content = UI.content {
+            icon_element,
+            text_element,
+        },
+        events = {
+            mouseClick = async:callback(function()
+                if on_effect_clicked then
+                    on_effect_clicked(effect.id)
+                end
+            end)
+        }
+    }
 end
 
 return helper

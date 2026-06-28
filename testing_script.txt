@@ -15,5 +15,4 @@ Player->addsoulgem"vivec_god""Misc_SoulGem_Azura"
 
 Player->additem "daedric_towershield" 1
 
-
-
+player->setenchant 100

@@ -19,8 +19,19 @@ enchanter.reset = function()
     enchanter.enchantment = {}
     enchanter.enchantment.charge = 0
     enchanter.enchantment.cost = 0
-    enchanter.enchantment.effects = {}
-    enchanter.enchantment.effects.range = 0
+    enchanter.enchantment.effects_with_params = {}
+    enchanter.enchantment.effect_to_add = {
+        affectedAttribute = nil,
+        affectedSkill = nil,
+        area = 0,
+        duration = 0,
+        effect = {},
+        id = 0,
+        index = 0,
+        magnitudeMax = 0,
+        magnitudeMin = 0,
+        range = 0
+    }
     enchanter.enchantment.id = nil -- should be generated
     enchanter.enchantment.isAutocalc = 0
     enchanter.enchantment.type = 0
@@ -187,27 +198,6 @@ enchanter.toggle_cast_type = function()
         print("Unknown option")
     end
     print("New type: ", enchanter.enchantment.type)
-
-    return text
-end
-
-enchanter.toggle_range_type = function()
-    local text = ""
-
-    enchanter.enchantment.effects.range = ((enchanter.enchantment.effects.range+1) % 3) -- 0-2)
-    if enchanter.enchantment.effects.range == core.magic.RANGE.Self then
-        text = "Self"
-        print(text)
-    elseif enchanter.enchantment.effects.range == core.magic.RANGE.Touch then
-        text = "Target"
-        print(text)
-    elseif enchanter.enchantment.effects.range == core.magic.RANGE.Target then
-        text = "Touch"
-        print(text)
-    else
-        print("Unknown option")
-    end
-    print("New range: ", enchanter.enchantment.effects.range)
 
     return text
 end
