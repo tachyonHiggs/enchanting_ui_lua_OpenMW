@@ -2,6 +2,7 @@ local core = require('openmw.core')
 local types = require('openmw.types')
 local self = require('openmw.self')
 local UI = require('openmw.ui')
+local storage = require('openmw.storage')
 
 -- Main object
 local enchanter = {}
@@ -9,7 +10,8 @@ local enchanter = {}
 enchanter.name = ""
 enchanter.item = {
     id = "",
-    icon = nil
+    icon = nil,
+    enchantment_capacity = 0
 }
 enchanter.soul = {
     id = "",
@@ -149,12 +151,28 @@ enchanter.check_requirements = function()
         return false
     end
 
-    -- check cast cost, charge etc, price
+    -- Check enchantment capacity limit
+    if storage.globalSection("cheats_enchanting_ui"):get("remove_enchant_cap_limit") == false then
+        
+    end
+
+    -- Check charge
+
+    -- Check cost
+
+    -- Check price
+
     return true
 end
 
 enchanter.get_enchant_success = function()
     print("get_enchant_success")
+
+    success_percent = 100
+    
+    if storage.globalSection("cheats_enchanting_ui"):get("always_success") == false then
+        -- success_percent = enchanter.calculate_success_rate 
+    end
 
     -- if enchanter.chance < some random dice roll
         -- return true

@@ -2,6 +2,14 @@ local I = require('openmw.interfaces')
 
 local enchanting_ui = require("scripts.enchanting_ui.enchanting_ui")
 
+-- For the menu settings tab
+I.Settings.registerPage ({
+    key = 'enchanting_ui_page',
+    l10n = 'enchanting_ui',
+    name = 'Enchanting Remastered',
+    description = 'Enchanting Remastered Description and Settings.',
+})
+
 
 local function show()
     enchanting_ui.show()

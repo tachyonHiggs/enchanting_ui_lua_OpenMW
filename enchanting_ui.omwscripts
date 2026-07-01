@@ -1,2 +1,3 @@
 PLAYER: scripts/enchanting_ui/player.lua
 GLOBAL: scripts/enchanting_ui/create.lua
+GLOBAL: scripts/enchanting_ui/settings_menu.lua

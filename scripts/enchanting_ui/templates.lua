@@ -95,38 +95,62 @@ templates.text_input = function(name, text_length, on_text_changed_fnc)
     }
 end
 
-templates.text_output = function(name, text_length, padding_length, default_text, text_align_h)
-    return {
-        name = name .. "_text_output",
-        type = UI.TYPE.Flex,
+templates.text_output = {}
+templates.text_output.new = function(name, text_length, padding_length, default_text, text_align_h)
+
+    local text_output = {}
+
+    text_output.name = name
+    text_output.text = default_text or ""
+    text_output.text_length = text_length
+    text_output.padding_length = padding_length
+    text_output.text_align_h = text_align_h or UI.ALIGNMENT.Start
+
+    text_output.output = {
+        name = "output",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
         props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-        },
-        content = UI.content {
-            {
-                name = "name",
-                type = UI.TYPE.Text,
-                template = I.MWUI.templates.textNormal,
-                props = {
-                    text = name,
-                    textSize = 20,
-            }},
-            templates.padding(padding_length, 0),
-            {
-                name = "output",
-                type = UI.TYPE.Text,
-                template = I.MWUI.templates.textNormal,
-                props = {
-                    text = default_text,
-                    textSize = 20,
-                    size = v2(text_length,20),
-                    textAlignH = text_align_h, -- TODO: this does not seem to work
-                }
-            },
+            text = text_output.text,
+            textSize = 20,
+            size = v2(text_length, 20),
+            textAlignH = text_output.text_align_h,
         }
     }
+
+    function text_output:set_text(text)
+        self.text = text
+        self.output.props.text = text
+    end
+
+    function text_output:create()
+        self.ui = {
+            name = self.name .. "_text_output",
+            type = UI.TYPE.Flex,
+            props = {
+                horizontal = true,
+                arrange = UI.ALIGNMENT.Start,
+                align = UI.ALIGNMENT.Start,
+            },
+            content = UI.content {
+                {
+                    name = "name",
+                    type = UI.TYPE.Text,
+                    template = I.MWUI.templates.textNormal,
+                    props = {
+                        text = self.name,
+                        textSize = 20,
+                    }
+                },
+                templates.padding(self.padding_length, 0),
+                self.output,
+            }
+        }
+
+        return self.ui
+    end
+
+    return text_output
 end
 
 templates.text_image = function(name, image_size, padding_length, on_image_mouse_click, on_image_focus_gained, on_image_focus_loss)
@@ -193,6 +217,14 @@ templates.list.new = function(name, list_size, generate_items)
     function list:add_item(item)
         print("adding item: ", item.name)
         table.insert(self.items, item)
+
+        -- rebuild the UI content
+        self.items_container.content = UI.content(self.items)
+    end
+
+    function list:remove_item(index)
+        print("removing item: ", index)
+        table.remove(self.items, index)
 
         -- rebuild the UI content
         self.items_container.content = UI.content(self.items)

@@ -76,12 +76,14 @@ end
 enchanting_ui.soul_list = templates.list.new("Souls", v2(600, 500), ui_helpers.make_souls_list)
 enchanting_ui.items_list = templates.list.new("Items", v2(600, 500), ui_helpers.make_enchantable_items_list)
 
-local function on_item_clicked(id, icon)
+local function on_item_clicked(id, icon, enchant_pts)
 
     enchanter.item.id = id
     enchanter.item.icon = icon
+    enchanter.item.enchantment_capacity = enchant_pts
     print("click on item: ", id)
     print("Icon: ", icon)
+    print("enchant_pts: ", tostring(enchant_pts))
     enchanting_ui.item_input.content[3].props.resource = UI.texture({
         path = icon
     })
@@ -192,10 +194,10 @@ local function inputs()
     }
 end
 
-enchanting_ui.stats_enchantment = templates.text_output("Enchantment:", 200, 10, "0", UI.ALIGNMENT.End)
-enchanting_ui.stats_cast_cost = templates.text_output("Cast Cost:", 200, 10, "0", UI.ALIGNMENT.End)
-enchanting_ui.stats_charge = templates.text_output("Charge:", 200, 10, "0", UI.ALIGNMENT.End)
-enchanting_ui.stats_chance = templates.text_output("Chance:", 200, 10, "0", UI.ALIGNMENT.End)
+enchanting_ui.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End)
+enchanting_ui.stats_cast_cost = templates.text_output.new("Cast Cost:", 200, 10, "0", UI.ALIGNMENT.End)
+enchanting_ui.stats_charge = templates.text_output.new("Charge:", 200, 10, "0", UI.ALIGNMENT.End)
+enchanting_ui.stats_chance = templates.text_output.new("Chance:", 200, 10, "0", UI.ALIGNMENT.End)
 
 local function stats()
     return{
@@ -208,10 +210,10 @@ local function stats()
             -- gap = 10,
         },
         content = UI.content {
-            enchanting_ui.stats_enchantment,
-            enchanting_ui.stats_cast_cost,
-            enchanting_ui.stats_charge,
-            enchanting_ui.stats_chance
+            enchanting_ui.stats_enchantment:create(),
+            enchanting_ui.stats_cast_cost:create(),
+            enchanting_ui.stats_charge:create(),
+            enchanting_ui.stats_chance:create()
         }
     }
 end
@@ -321,31 +323,44 @@ end
 
 enchanting_ui.range = templates.button("Self", toggle_range_type, 100, 30)
 
-local function on_effect_clicked(id) print(id) end
-
 local function ok_magic_effect()
     print("ok_magic_effect")
+    local effect_index
     
-    for _, effect in ipairs(enchanter.effects_with_params) do
-        if effect.id == enchanter.effect_to_add.id and enchanter.effect_to_modify==false then
-            -- print message box, item with effect is already added
-            UI.showMessage("This magic effect has already been added")
-            return
+    for index, effect in ipairs(enchanter.effects_with_params) do
+        if effect.id == enchanter.effect_to_add.id then
+            if enchanter.effect_to_modify==false then
+                UI.showMessage("This magic effect has already been added")
+            end
+            effect_index = index
         end
     end
+    print(index)
 
-    table.insert(enchanter.effects_with_params, enchanter.effect_to_add)
-
+    if enchanter.effect_to_modify then 
+        enchanter.effects_with_params[effect_index] = enchanter.effect_to_add -- replace existing entry
+        enchanting_ui.effects:remove_item(effect_index) -- remove UI element, will replace it later
+    else
+        table.insert(enchanter.effects_with_params, enchanter.effect_to_add)
+        
+    end
+    
     local effect_to_add_ui = ui_helpers.create_effect_item(enchanter.effect_to_add, on_effect_clicked)
     enchanting_ui.effects:add_item(effect_to_add_ui)
 
-    auxUi.deepDestroy(enchanting_ui.magic_effect_add)
-    enchanting_ui.magic_effect_add:update()
+    if enchanter.effect_to_modify then 
+        auxUi.deepDestroy(enchanting_ui.magic_effect_modify)
+        enchanting_ui.magic_effect_modify:update()
+    else 
+        auxUi.deepDestroy(enchanting_ui.magic_effect_add)
+        enchanting_ui.magic_effect_add:update()
+    end
     enchanting_ui.root:update()
 end
 
 local function cancel_magic_effect()
     print("cancel_magic_effect")
+    
     if enchanter.effect_to_modify then 
         auxUi.deepDestroy(enchanting_ui.magic_effect_modify)
         enchanting_ui.magic_effect_modify:update()
@@ -359,14 +374,15 @@ local function delete_effect()
     print("delete_effect")
     for i, effect in ipairs(enchanter.effects_with_params) do
         if effect.id == enchanter.effect_to_add.id then
-            print("Removing effect index: ", i)
-            table.remove(enchanter.effects_with_params, i) -- remove magic effect for now
+            enchanting_ui.effects:remove_item(i)
+            table.remove(enchanter.effects_with_params, i)
             break
         end
     end
     enchanter.reset_effect_to_add()
-    auxUi.deepDestroy(enchanting_ui.magic_effect_add)
-    enchanting_ui.magic_effect_add:update()
+    auxUi.deepDestroy(enchanting_ui.magic_effect_modify)
+    enchanting_ui.magic_effect_modify:update()
+    enchanting_ui.root:update()
 end
 
 local function on_magic_effect_clicked(id)
@@ -576,7 +592,7 @@ function on_effect_clicked(id)
     toggle_range_type()
 
     enchanting_ui.root:update()
-    enchanting_ui.magic_effect_add:update()
+    enchanting_ui.magic_effect_modify:update()
 
 end
 
@@ -617,6 +633,7 @@ local function toggle_cast_type()
 end
 
 enchanting_ui.cast_type_btn = templates.button("Cast Once", toggle_cast_type, 100, 30)
+enchanting_ui.price = templates.text_output.new("Price:", 200, 10, "0", UI.ALIGNMENT.End)
 
 footer.element = {
     name = "footer",
@@ -633,7 +650,7 @@ footer.element = {
             templates.padding(10, 0),
             enchanting_ui.cast_type_btn,
             templates.padding(10, 0),
-            templates.text_output("Price", 200, 10, "0", UI.ALIGNMENT.End),
+            enchanting_ui.price:create(),
             templates.padding(200, 0),
             templates.button("Create", (function()
                 print("Clicked Create")
