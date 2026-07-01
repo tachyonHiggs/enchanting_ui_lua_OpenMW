@@ -11,6 +11,7 @@ enchanter.name = ""
 enchanter.item = {
     id = "",
     icon = nil,
+    type = 0,
     enchantment_capacity = 0
 }
 enchanter.soul = {
@@ -39,7 +40,7 @@ enchanter.reset = function()
     enchanter.enchantment.cost = 0
     enchanter.effects_with_params = {}
     enchanter.reset_effect_to_add()
-    enchanter.enchantment.id = 8 -- should be generated
+    enchanter.enchantment.id = 0 -- should be generated
     enchanter.enchantment.isAutocalc = 0
     enchanter.enchantment.type = 0
 
@@ -187,8 +188,8 @@ enchanter.create_item = function()
     print("create_item")
 
     -- Serialize data
+    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item_id=enchanter.item.id, item_type = enchanter.item.type ,enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
 
-    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item_id=enchanter.item.id, enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
 end
 
 -- TODO: make this return if item was created and message
@@ -200,11 +201,14 @@ enchanter.enchant_item = function()
         return
     end
 
-    -- Consume soul gem
+    -- TODO: Consume soul gems
     enchanter.get_enchant_success()
 
     enchanter.create_item()
     -- Destory unenchanted item
+
+    -- Clean up enchanter
+    enchanter.reset() 
 end
 
 -- This fnc is used to calculate the current success rate

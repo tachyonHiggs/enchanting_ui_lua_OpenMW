@@ -115,7 +115,7 @@ local function create_enchantable_item(id, icon, type, name, enchant_pts)
         events = {
             mouseClick = async:callback(function()
                 if on_item_clicked then
-                    on_item_clicked(id, icon, enchant_pts)
+                    on_item_clicked(id, icon, enchant_pts, type_text)
                 end
             end)
         }

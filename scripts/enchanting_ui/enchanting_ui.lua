@@ -76,10 +76,11 @@ end
 enchanting_ui.soul_list = templates.list.new("Souls", v2(600, 500), ui_helpers.make_souls_list)
 enchanting_ui.items_list = templates.list.new("Items", v2(600, 500), ui_helpers.make_enchantable_items_list)
 
-local function on_item_clicked(id, icon, enchant_pts)
+local function on_item_clicked(id, icon, enchant_pts, type_text)
 
     enchanter.item.id = id
     enchanter.item.icon = icon
+    enchanter.item.type = type_text
     enchanter.item.enchantment_capacity = enchant_pts
     print("click on item: ", id)
     print("Icon: ", icon)
@@ -579,6 +580,7 @@ footer.element = {
             templates.button("Cancel", (function()
                 print("Clicked Cancel")
                 ambient.playSound('menu click')
+                enchanter.reset()   -- Clean up enchanter
                 enchanting_ui.hide()
             end), 50, 30),
             templates.padding(10, 0),
