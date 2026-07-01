@@ -1,6 +1,7 @@
 local core = require('openmw.core')
 local types = require('openmw.types')
 local self = require('openmw.self')
+local UI = require('openmw.ui')
 
 -- Main object
 local enchanter = {}
@@ -15,24 +16,28 @@ enchanter.soul = {
     icon = nil
 }
 
-enchanter.reset = function()
-    enchanter.enchantment = {}
-    enchanter.enchantment.charge = 0
-    enchanter.enchantment.cost = 0
-    enchanter.enchantment.effects_with_params = {}
-    enchanter.enchantment.effect_to_add = {
+enchanter.reset_effect_to_add = function()
+    enchanter.effect_to_modify = false
+    enchanter.effect_to_add = {
         affectedAttribute = nil,
         affectedSkill = nil,
         area = 0,
         duration = 0,
-        effect = {},
         id = 0,
         index = 0,
         magnitudeMax = 0,
         magnitudeMin = 0,
         range = 0
     }
-    enchanter.enchantment.id = nil -- should be generated
+end
+
+enchanter.reset = function()
+    enchanter.enchantment = {}
+    enchanter.enchantment.charge = 0
+    enchanter.enchantment.cost = 0
+    enchanter.effects_with_params = {}
+    enchanter.reset_effect_to_add()
+    enchanter.enchantment.id = 8 -- should be generated
     enchanter.enchantment.isAutocalc = 0
     enchanter.enchantment.type = 0
 
@@ -69,7 +74,9 @@ enchanter.get_enchantable_inventory_items = function()
         -- check not enchanted
         if item.enchant == nil then
             local icon = types.Weapon.records[item.recordId].icon
-            table.insert(enchantable_inventory_items, {item.recordId, icon})
+            local name = types.Weapon.records[item.recordId].name
+            local enchant_pts = types.Weapon.records[item.recordId].enchantCapacity
+            table.insert(enchantable_inventory_items, {item.recordId, icon, item.type, name, enchant_pts})
             -- print(item.recordId)
         end
     end
@@ -77,7 +84,9 @@ enchanter.get_enchantable_inventory_items = function()
         -- check not enchanted
         if item.enchant == nil then
             local icon = types.Armor.records[item.recordId].icon
-            table.insert(enchantable_inventory_items, {item.recordId, icon})
+            local name = types.Armor.records[item.recordId].name
+            local enchant_pts = types.Armor.records[item.recordId].enchantCapacity
+            table.insert(enchantable_inventory_items, {item.recordId, icon, item.type, name, enchant_pts})
             -- print(item.recordId)
         end
     end
@@ -85,7 +94,9 @@ enchanter.get_enchantable_inventory_items = function()
         -- check not enchanted
         if item.enchant == nil then
             local icon = types.Clothing.records[item.recordId].icon
-            table.insert(enchantable_inventory_items, {item.recordId, icon})
+            local name = types.Clothing.records[item.recordId].name
+            local enchant_pts = types.Clothing.records[item.recordId].enchantCapacity
+            table.insert(enchantable_inventory_items, {item.recordId, icon, item.type, name, enchant_pts})
             -- print(item.recordId)
         end
     end
@@ -104,7 +115,10 @@ enchanter.get_inventory_souls = function ()
         if soul ~= nil then
             local soul_value = types.Creature.records[soul].soulValue
             local icon = types.Miscellaneous.records[item.recordId].icon
-            table.insert(souls, {item.recordId, soul_value, icon})
+            local soul_name = types.Creature.records[soul].name
+            local name = types.Miscellaneous.records[item.recordId].name
+            -- local quantity = 
+            table.insert(souls, {item.recordId, soul_value, icon, name, soul_name})
         end
     end
 
@@ -114,11 +128,29 @@ end
 enchanter.check_requirements = function()
     print("check_requirements")
 
-    -- Check item is valid
+    -- Check item
+    if enchanter.item.id == "" then
+        UI.showMessage("No item selected")
+        print("Failed: no item selected")
+        return false
+    end 
 
-    -- Check enchantment and soul value are valid
+    -- Check soul
+    if enchanter.soul.id == "" then
+        UI.showMessage("No soul selected")
+        print("Failed: no soul selected")
+        return false
+    end
+
+    -- Check effects
+    if enchanter.effects_with_params[1] == nil then
+        UI.showMessage("No effects selected")
+        print("Failed: no effects selected")
+        return false
+    end
 
     -- check cast cost, charge etc, price
+    return true
 end
 
 enchanter.get_enchant_success = function()
@@ -136,21 +168,25 @@ end
 enchanter.create_item = function()
     print("create_item")
 
-    -- core.sendGlobalEvent('create_enchantment', {id=enchanter.enchantment.id})
-    -- TODO: update this to be not Weapon specific
-    core.sendGlobalEvent('create_item', {name=enchanter.name, item_id=enchanter.item.id, enchantment_id=enchanter.enchantment.id})
+    -- Serialize data
+
+    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item_id=enchanter.item.id, enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
 end
 
 -- TODO: make this return if item was created and message
-enchanter.enchant_item = function(name)
+enchanter.enchant_item = function()
     print("enchant_item")
     
-    enchanter.check_requirements()
+    if enchanter.check_requirements() == false then
+        
+        return
+    end
 
+    -- Consume soul gem
     enchanter.get_enchant_success()
 
     enchanter.create_item()
-
+    -- Destory unenchanted item
 end
 
 -- This fnc is used to calculate the current success rate

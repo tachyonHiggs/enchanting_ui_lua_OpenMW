@@ -17,6 +17,8 @@ templates.make_border = function(size)
             }),
             alpha = 0.5,
             size = size,
+            anchor = v2(0.5, 0.5),
+            relativePosition = v2(0.5, 0.5),
         }
     }
 end
@@ -24,7 +26,7 @@ end
 templates.padding = function(x, y)
     return {
         props = {
-            size = Util.vector2(x, y)
+            size = Util.vector2(x, y),
         }
     }
 end

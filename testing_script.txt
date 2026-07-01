@@ -6,13 +6,13 @@ Player->addsoulgem"golden saint""misc_soulgem_grand"
 Player->addsoulgem"golden saint""misc_soulgem_grand" 
 
 Player->addsoulgem"scamp""misc_soulgem_grand" 
-Player->addsoulgem"scamp""misc_soulgem_grand" 
-Player->addsoulgem"scamp""misc_soulgem_grand" 
+Player->addsoulgem"scamp" 
 
 Player->addsoulgem"scamp""Misc_SoulGem_Azura" 
 Player->addsoulgem"golden saint""Misc_SoulGem_Azura" 
 Player->addsoulgem"vivec_god""Misc_SoulGem_Azura" 
 
 Player->additem "daedric_towershield" 1
+Player->additem "misc_soulgem_grand" 1
 
 player->setenchant 100
