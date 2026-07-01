@@ -328,7 +328,9 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
             self.bar.props.relativePosition - v2(relativeInterval, 0)
 
         self.value = self.value - self.interval
-
+        print(self.value)
+        print(self.min)
+        print(self.bar.props.relativePosition)
         if self.value < self.min or self.bar.props.relativePosition < v2(0,0) then
             self.value = self.min
             self.bar.props.relativePosition = v2(0,0)
@@ -351,13 +353,11 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
             self.bar.props.relativePosition + v2(relativeInterval, 0)
 
         self.value = self.value + self.interval
-        print("Value", self.value)
 
-        if self.value > self.max or self.bar.props.relativePosition > v2(1,0) then
+        if self.value > self.max  then
             self.value = self.max
             self.bar.props.relativePosition = v2(1,0)
         end
-        print("Value", self.value)
 
         self.value_text = tostring(self.value)
         self.value_element.props.text = self.value_text

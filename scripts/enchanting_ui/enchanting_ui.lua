@@ -87,6 +87,7 @@ local function on_item_clicked(id, icon, enchant_pts)
     enchanting_ui.item_input.content[3].props.resource = UI.texture({
         path = icon
     })
+    enchanting_ui.stats_enchantment:set_text("0/"..tostring(enchant_pts))
     enchanting_ui.root:update()
 
     auxUi.deepDestroy(enchanting_ui.item_list)
@@ -119,7 +120,7 @@ local function on_soul_clicked(id, value, icon)
     enchanter.soul.id = id
     enchanter.soul.icon = icon
     enchanter.enchantment.charge = value
-    enchanting_ui.stats_charge.content[3].props.text = tostring(value)
+    enchanting_ui.stats_charge:set_text(tostring(value))
     
     print("click on soul: ", id)
     print("at icon: ", icon)
@@ -348,26 +349,16 @@ local function ok_magic_effect()
     local effect_to_add_ui = ui_helpers.create_effect_item(enchanter.effect_to_add, on_effect_clicked)
     enchanting_ui.effects:add_item(effect_to_add_ui)
 
-    if enchanter.effect_to_modify then 
-        auxUi.deepDestroy(enchanting_ui.magic_effect_modify)
-        enchanting_ui.magic_effect_modify:update()
-    else 
-        auxUi.deepDestroy(enchanting_ui.magic_effect_add)
-        enchanting_ui.magic_effect_add:update()
-    end
+    auxUi.deepDestroy(enchanting_ui.magic_effect_add)
+    enchanting_ui.magic_effect_add:update()
     enchanting_ui.root:update()
 end
 
 local function cancel_magic_effect()
     print("cancel_magic_effect")
     
-    if enchanter.effect_to_modify then 
-        auxUi.deepDestroy(enchanting_ui.magic_effect_modify)
-        enchanting_ui.magic_effect_modify:update()
-    else 
-        auxUi.deepDestroy(enchanting_ui.magic_effect_add)
-        enchanting_ui.magic_effect_add:update()
-    end
+    auxUi.deepDestroy(enchanting_ui.magic_effect_add)
+    enchanting_ui.magic_effect_add:update()
 end
 
 local function delete_effect()
@@ -380,20 +371,22 @@ local function delete_effect()
         end
     end
     enchanter.reset_effect_to_add()
-    auxUi.deepDestroy(enchanting_ui.magic_effect_modify)
-    enchanting_ui.magic_effect_modify:update()
+    auxUi.deepDestroy(enchanting_ui.magic_effect_add)
+    enchanting_ui.magic_effect_add:update()
     enchanting_ui.root:update()
 end
 
-local function on_magic_effect_clicked(id)
+local function create_magic_effect_add_UI(modify, id) 
 
-    print("On magic effect clicked: ", id)
-    enchanter.reset_effect_to_add()
-    enchanter.effect_to_add.id = id
-    enchanter.effect_to_modify = false
+    local delete_btn
+
+    if modify then
+        delete_btn = templates.button("Delete", delete_effect, 100, 30)
+    else
+        delete_btn = nil             
+    end
     
-    print("CREATING MAGIC EFFECT ADD UI")
-    enchanting_ui.magic_effect_add = UI.create{
+    return {
         name = "magic_effect_add",
         layer = "Windows",
         template = I.MWUI.templates.boxSolid,
@@ -473,13 +466,24 @@ local function on_magic_effect_clicked(id)
                     enchanting_ui.magnitude_max:create(),
                     enchanting_ui.duration:create(),
                     enchanting_ui.area:create(),
-                    templates.button("OK", ok_magic_effect, 100, 30),
                     templates.button("Cancel", cancel_magic_effect, 100, 30),
+                    templates.button("OK", ok_magic_effect, 100, 30),
+                    delete_btn,
                 }
             }
         }
     }
-    -- enchanting_ui.root.layout.template = I.MWUI.templates.disabled
+end
+
+local function on_magic_effect_clicked(id)
+
+    print("On magic effect clicked: ", id)
+    enchanter.reset_effect_to_add()
+    enchanter.effect_to_add.id = id
+    enchanter.effect_to_modify = false
+    
+    print("CREATING MAGIC EFFECT ADD UI")
+    enchanting_ui.magic_effect_add = UI.create(create_magic_effect_add_UI(enchanter.effect_to_modify, id))
 
     toggle_range_type()
 
@@ -500,99 +504,12 @@ function on_effect_clicked(id)
     enchanter.effect_to_modify = true
 
     print("CREATING EFFECT ADD UI")
-    enchanting_ui.magic_effect_modify = UI.create{
-        name = "magic_effect_modify",
-        layer = "Windows",
-        template = I.MWUI.templates.boxSolid,
-        props = {
-            
-            relativePosition = v2(0.5, 0.5),
-            anchor = v2(0.5, 0.5),
-        },
-        content = UI.content {
-            templates.make_border(v2(400, 300)),
-            {
-                name = "magic_effect_add_flex",
-                type = UI.TYPE.Flex,
-                props = {
-                    horizontal = false,
-                    arrange = UI.ALIGNMENT.Start,
-                    align = UI.ALIGNMENT.Center,
-                },
-                content = UI.content {
-                    {
-                        name = "effect_icon",
-                        type = UI.TYPE.Flex,
-                        props = {
-                            horizontal = true,
-                            arrange = UI.ALIGNMENT.Start,
-                            align = UI.ALIGNMENT.Start,
-                        },
-                        content = UI.content {
-                            {
-                                name = "icon",
-                                type = UI.TYPE.Image,
-                                template = I.MWUI.templates.borders,
-                                props = {
-                                    resource = UI.texture({
-                                        path = core.magic.effects.records[id].icon
-                                    }),
-                                    alpha = 1,
-                                    size = v2(20,20),
-                                },
-                            },
-                            templates.padding(10, 0),
-                            {
-                                name = "name",
-                                type = UI.TYPE.Text,
-                                template = I.MWUI.templates.textNormal,
-                                props = {
-                                    text = core.magic.effects.records[id].name,
-                                    textSize = 20,
-                                }
-                            },
-                            
-                        }
-                    },
-                    {
-                        name = "effect_icon",
-                        type = UI.TYPE.Flex,
-                        props = {
-                            horizontal = true,
-                            arrange = UI.ALIGNMENT.Start,
-                            align = UI.ALIGNMENT.Start,
-                        },
-                        content = UI.content {
-                            {
-                                name = "range",
-                                type = UI.TYPE.Text,
-                                template = I.MWUI.templates.textNormal,
-                                props = {
-                                    text = "Range",
-                                    textSize = 20,
-                                }
-                            },
-                            templates.padding(100, 0),
-                            enchanting_ui.range,
-                        }
-                    },
-                    enchanting_ui.magnitude:create(),
-                    enchanting_ui.magnitude_max:create(),
-                    enchanting_ui.duration:create(),
-                    enchanting_ui.area:create(),
-                    templates.button("Delete", delete_effect, 100, 30),
-                    templates.button("OK", ok_magic_effect, 100, 30),
-                    templates.button("Cancel", cancel_magic_effect, 100, 30),
-                }
-            }
-        }
-    }
-    -- enchanting_ui.root.layout.template = I.MWUI.templates.disabled
+    enchanting_ui.magic_effect_add = UI.create(create_magic_effect_add_UI(enchanter.effect_to_modify, id))
 
     toggle_range_type()
 
     enchanting_ui.root:update()
-    enchanting_ui.magic_effect_modify:update()
+    enchanting_ui.magic_effect_add:update()
 
 end
 
