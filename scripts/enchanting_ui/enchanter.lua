@@ -75,7 +75,7 @@ enchanter.get_enchantable_inventory_items = function()
 
     for _, item in ipairs(weapons) do
         -- check not enchanted
-        if item.enchant == nil then
+        if types.Weapon.records[item.recordId].enchant == nil then
             local icon = types.Weapon.records[item.recordId].icon
             local name = types.Weapon.records[item.recordId].name
             local enchant_pts = types.Weapon.records[item.recordId].enchantCapacity
@@ -85,7 +85,7 @@ enchanter.get_enchantable_inventory_items = function()
     end
     for _, item in ipairs(armors) do
         -- check not enchanted
-        if item.enchant == nil then
+        if types.Armor.records[item.recordId].enchant == nil then
             local icon = types.Armor.records[item.recordId].icon
             local name = types.Armor.records[item.recordId].name
             local enchant_pts = types.Armor.records[item.recordId].enchantCapacity
@@ -95,7 +95,7 @@ enchanter.get_enchantable_inventory_items = function()
     end
     for _, item in ipairs(clothing) do
         -- check not enchanted
-        if item.enchant == nil then
+        if types.Clothing.records[item.recordId].enchant == nil then
             local icon = types.Clothing.records[item.recordId].icon
             local name = types.Clothing.records[item.recordId].name
             local enchant_pts = types.Clothing.records[item.recordId].enchantCapacity
@@ -238,24 +238,49 @@ end
 enchanter.toggle_cast_type = function()
     local text = ""
 
-    enchanter.enchantment.type = ((enchanter.enchantment.type+1) % 4) -- 0-3)
+    local valid_types = {}
+
+    if enchanter.item.type == nil or enchanter.item.type == 0 then
+        valid_types = {
+            core.magic.ENCHANTMENT_TYPE.CastOnce
+        }
+    elseif enchanter.item.type == "Weapon" then
+        valid_types = {
+            core.magic.ENCHANTMENT_TYPE.CastOnStrike,
+            core.magic.ENCHANTMENT_TYPE.CastOnUse,
+            core.magic.ENCHANTMENT_TYPE.ConstantEffect,
+        }
+    elseif enchanter.item.type == "Armor" or enchanter.item.type == "Clothing" then
+        valid_types = {
+            core.magic.ENCHANTMENT_TYPE.CastOnUse,
+            core.magic.ENCHANTMENT_TYPE.ConstantEffect,
+        }
+    end
+
+    local currentIndex = 0
+    for i, enchantType in ipairs(valid_types) do
+        if enchantType == enchanter.enchantment.type then
+            currentIndex = i
+            break
+        end
+    end
+
+    -- Advance to the next valid type
+    currentIndex = (currentIndex % #valid_types) + 1
+    print(currentIndex)
+    enchanter.enchantment.type = valid_types[currentIndex]
+    print("New type: ", enchanter.enchantment.type)
+
     if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnce then
         text = "Cast Once"
-        print(text)
     elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnStrike then
         text = "Cast on Strike"
-        print(text)
     elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnUse then
         text = "Cast on Use"
-        print(text)
     elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         text = "Constant Effect"
         enchanter.enchantment.isAutocalc = false
-        print(text)
-    else
-        print("Unknown option")
     end
-    print("New type: ", enchanter.enchantment.type)
 
     return text
 end

@@ -15,4 +15,6 @@ Player->addsoulgem"vivec_god""Misc_SoulGem_Azura"
 Player->additem "daedric_towershield" 1
 Player->additem "misc_soulgem_grand" 1
 
+Player->additem "iron spear" 1
+
 player->setenchant 100

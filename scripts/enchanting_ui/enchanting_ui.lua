@@ -70,6 +70,20 @@ enchanting_ui.create_ui = function()
     print("Created UI")
 end
 
+local function toggle_cast_type()
+    print("toggle_cast_type")
+
+    -- TODO: have this toggle update magic effects, for now just clear them
+    enchanter.enchantment.charge = 0
+    enchanter.enchantment.cost = 0
+    enchanter.effects_with_params = {}
+    enchanter.enchantment.isAutocalc = 0
+    enchanting_ui.effects:clear()
+    enchanting_ui.root:update()
+    
+    enchanting_ui.cast_type_btn.content[2].props.text = enchanter.toggle_cast_type()
+end
+
 -- header
 
 -- header input list fncs
@@ -88,12 +102,15 @@ local function on_item_clicked(id, icon, enchant_pts, type_text)
     enchanting_ui.item_input.content[3].props.resource = UI.texture({
         path = icon
     })
+    
+    enchanter.enchantment.type = 0
+    enchanting_ui.cast_type_btn.content[2].props.text = "Cast Once"
     enchanting_ui.stats_enchantment:set_text("0/"..tostring(enchant_pts))
+    toggle_cast_type()
     enchanting_ui.root:update()
 
     auxUi.deepDestroy(enchanting_ui.item_list)
     enchanting_ui.item_list:update()
-
 end
 
 local function show_item_list()
@@ -282,13 +299,17 @@ local function toggle_range_type()
         end
     end
 
+    local force_no_duration = false
+    local force_no_area = false
+
     -- however, if constant effect only self is allowed
     if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         print("Constant Effect")
-
         range = core.magic.RANGE.Self -- range has to be self
         text = "Self"
         enchanter.enchantment.isAutocalc = false -- disable autocalc
+        force_no_duration = true
+        force_no_area = true
     end
 
     enchanter.effect_to_add.range = range
@@ -310,7 +331,7 @@ local function toggle_range_type()
     end
 
     enchanter.effect_to_add.duration = 0
-    set_visible(enchanting_ui.duration, core.magic.effects.records[enchanter.effect_to_add.id].hasDuration)
+    set_visible(enchanting_ui.duration, (core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and force_no_duration==false))
     
     enchanter.effect_to_add.magnitudeMax = 0
     enchanter.effect_to_add.magnitudeMin = 0
@@ -318,7 +339,7 @@ local function toggle_range_type()
     set_visible(enchanting_ui.magnitude_max, core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude)
 
     enchanter.effect_to_add.area = 0
-    set_visible(enchanting_ui.area, enchanter.effect_to_add.range ~= core.magic.RANGE.Self)
+    set_visible(enchanting_ui.area, (enchanter.effect_to_add.range ~= core.magic.RANGE.Self and force_no_area==false))
 
     enchanting_ui.magic_effect_add:update()
 end
@@ -337,7 +358,6 @@ local function ok_magic_effect()
             effect_index = index
         end
     end
-    print(index)
 
     if enchanter.effect_to_modify then 
         enchanter.effects_with_params[effect_index] = enchanter.effect_to_add -- replace existing entry
@@ -493,7 +513,7 @@ local function on_magic_effect_clicked(id)
 
 end
 
-function on_effect_clicked(id)
+local function on_effect_clicked(id)
 
     print("On effect clicked: ", id)
     for i, effect in ipairs(enchanter.effects_with_params) do
@@ -543,12 +563,6 @@ main_content.element = {
 -- End main_content
 
 -- footer
-
-local function toggle_cast_type()
-    print("toggle_cast_type")
-    enchanting_ui.cast_type_btn.content[2].props.text = enchanter.toggle_cast_type()
-    enchanting_ui.root:update()
-end
 
 enchanting_ui.cast_type_btn = templates.button("Cast Once", toggle_cast_type, 100, 30)
 enchanting_ui.price = templates.text_output.new("Price:", 200, 10, "0", UI.ALIGNMENT.End)

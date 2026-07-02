@@ -1,6 +1,7 @@
 # Enchanting UI
 
 ## TO DO
+- Add the ability to enchant scrolls
 
 ### Vanilla Features
 

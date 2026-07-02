@@ -10,10 +10,9 @@ local function create_enchantment_and_item(data)
     print("create_enchantment_and_item")
     local name = data.name
     local item_id = data.item_id
-    local item_type = data.item_type
+    local type_text = data.item_type
     local enchantment = data.enchantment
     local effects = data.effects
-    local effects_with_params = {}
 
     -- for each effect in effects
     for _, effect in ipairs(effects) do
@@ -28,30 +27,36 @@ local function create_enchantment_and_item(data)
     print(new_enchantment.id)
 
     -- Create item
-    local type = 0
+    local originalRecord
     if type_text == "Weapon" then
-        type = types.Weapon
-    elseif type_text == "Weapon" then
-        type = types.Armor
+        originalRecord = types.Weapon.records[item_id]
+    elseif type_text == "Armor" then
+        originalRecord = types.Armor.records[item_id]
     else
-        type = types.Clothing
+        originalRecord = types.Clothing.records[item_id]
     end
 
-    local originalRecord = type.records[item_id]
-
     if name == "" then
+        print(originalRecord)
+        print(originalRecord.name)
         name = originalRecord.name
     end
     print("The item shall be called: ", name)
     
     local item_table = {name = name, enchant = new_enchantment.id, template = originalRecord}
-    local new_item_draft = type.createRecordDraft(item_table)
+    local new_item_draft
+    if type_text == "Weapon" then
+        new_item_draft = types.Weapon.createRecordDraft(item_table)
+    elseif type_text == "Armor" then
+        new_item_draft = types.Armor.createRecordDraft(item_table)
+    else
+        new_item_draft = types.Clothing.createRecordDraft(item_table)
+    end
     local new_item = world.createRecord(new_item_draft) 
     local new_item_instance = world.createObject(new_item.id, 1)
 
     -- Move to player inventory
     new_item_instance:moveInto(world.players[1])
-    -- world.players[1]
     -- TODO: remove OG item from player inventory
 end
 
