@@ -22,6 +22,8 @@ local header = {element = {}}
 local footer = {element = {}}
 local main_content = {element = {}}
 
+local function on_effect_clicked() end
+
 enchanting_ui.create_ui = function() 
 
     print("create_ui")
@@ -263,8 +265,8 @@ header.element = {
 
 -- enchanting_ui attribute
 -- enchanting_ui skill
-enchanting_ui.magnitude = templates.slider.new("Magnitude", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMin = value enchanting_ui.magic_effect_add:update() end)
-enchanting_ui.magnitude_max = templates.slider.new("         ", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMax = value enchanting_ui.magic_effect_add:update() end)
+enchanting_ui.magnitude = templates.slider.new("Magnitude Min", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMin = value enchanting_ui.magic_effect_add:update() end)
+enchanting_ui.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMax = value enchanting_ui.magic_effect_add:update() end)
 enchanting_ui.duration = templates.slider.new("Duration", 1440, 1, 1, 1, function(value) enchanter.effect_to_add.duration = value enchanting_ui.magic_effect_add:update() end)
 enchanting_ui.area = templates.slider.new("Area", 50, 0, 0, 1, function(value) enchanter.effect_to_add.area = value enchanting_ui.magic_effect_add:update() end)
 
@@ -354,6 +356,7 @@ local function ok_magic_effect()
         if effect.id == enchanter.effect_to_add.id then
             if enchanter.effect_to_modify==false then
                 UI.showMessage("This magic effect has already been added")
+                return
             end
             effect_index = index
         end
@@ -412,7 +415,7 @@ local function create_magic_effect_add_UI(modify, id)
         layer = "Windows",
         template = I.MWUI.templates.boxSolid,
         props = {
-            
+            size = v2(400, 300),
             relativePosition = v2(0.5, 0.5),
             anchor = v2(0.5, 0.5),
         },
@@ -448,7 +451,7 @@ local function create_magic_effect_add_UI(modify, id)
                                     size = v2(20,20),
                                 },
                             },
-                            templates.padding(10, 0),
+                            templates.padding(40, 0),
                             {
                                 name = "name",
                                 type = UI.TYPE.Text,
@@ -456,13 +459,15 @@ local function create_magic_effect_add_UI(modify, id)
                                 props = {
                                     text = core.magic.effects.records[id].name,
                                     textSize = 20,
+                                    autoSize = false,
                                 }
                             },
                             
                         }
                     },
+                    templates.padding(30, 0),
                     {
-                        name = "effect_icon",
+                        name = "range",
                         type = UI.TYPE.Flex,
                         props = {
                             horizontal = true,
@@ -471,7 +476,7 @@ local function create_magic_effect_add_UI(modify, id)
                         },
                         content = UI.content {
                             {
-                                name = "range",
+                                name = "range_text",
                                 type = UI.TYPE.Text,
                                 template = I.MWUI.templates.textNormal,
                                 props = {
@@ -483,12 +488,19 @@ local function create_magic_effect_add_UI(modify, id)
                             enchanting_ui.range,
                         }
                     },
+                    templates.padding(30, 0),
                     enchanting_ui.magnitude:create(),
+                    templates.padding(10, 0),
                     enchanting_ui.magnitude_max:create(),
+                    templates.padding(10, 0),
                     enchanting_ui.duration:create(),
+                    templates.padding(10, 0),
                     enchanting_ui.area:create(),
+                    templates.padding(30, 0),
                     templates.button("Cancel", cancel_magic_effect, 100, 30),
+                    templates.padding(10, 0),
                     templates.button("OK", ok_magic_effect, 100, 30),
+                    templates.padding(10, 0),
                     delete_btn,
                 }
             }
@@ -513,7 +525,7 @@ local function on_magic_effect_clicked(id)
 
 end
 
-local function on_effect_clicked(id)
+function on_effect_clicked(id)
 
     print("On effect clicked: ", id)
     for i, effect in ipairs(enchanter.effects_with_params) do
@@ -564,8 +576,8 @@ main_content.element = {
 
 -- footer
 
-enchanting_ui.cast_type_btn = templates.button("Cast Once", toggle_cast_type, 100, 30)
-enchanting_ui.price = templates.text_output.new("Price:", 200, 10, "0", UI.ALIGNMENT.End)
+enchanting_ui.cast_type_btn = templates.button("Cast Once", toggle_cast_type, 140, 30)
+enchanting_ui.price = templates.text_output.new("Price:", 100, 10, "0", UI.ALIGNMENT.End)
 
 footer.element = {
     name = "footer",
@@ -589,14 +601,14 @@ footer.element = {
                 ambient.playSound('menu click')
                 enchanting_ui.enchant_item()
                 return true
-            end), 50, 30),
+            end), 80, 30),
             templates.padding(10, 0),
             templates.button("Cancel", (function()
                 print("Clicked Cancel")
                 ambient.playSound('menu click')
                 enchanter.reset()   -- Clean up enchanter
                 enchanting_ui.hide()
-            end), 50, 30),
+            end), 80, 30),
             templates.padding(10, 0),
         }
     } }

@@ -25,6 +25,8 @@ local function create_enchantment_and_item(data)
     local new_enchantment_draft = core.magic.enchantments.createRecordDraft(enchantment_table)
     local new_enchantment = world.createRecord(new_enchantment_draft)
     print(new_enchantment.id)
+    print("Cost: ", new_enchantment.cost)
+    print("Cost: ", new_enchantment.isAutocalc)
 
     -- Create item
     local originalRecord

@@ -25,6 +25,8 @@ end
 
 templates.padding = function(x, y)
     return {
+        template = I.MWUI.templates.padding,
+        type = UI.TYPE.Container,
         props = {
             size = Util.vector2(x, y),
         }
@@ -38,7 +40,7 @@ templates.button = function(name, on_click_fnc, size_x, size_y)
         type = UI.TYPE.Container,
         template = I.MWUI.templates.bordersThick,
         props = {
-            size = v2(size_x, size_y)
+            size = v2(size_x, size_y),
         },
         content = UI.content {
             templates.padding(size_x, size_y),
@@ -49,6 +51,8 @@ templates.button = function(name, on_click_fnc, size_x, size_y)
                 props = {
                     text = name,
                     textSize = 20,
+                    size = v2(size_x, size_y),
+                    autoSize = false
                 },
                 events = {
                     mouseClick = async:callback(on_click_fnc)
@@ -315,7 +319,8 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
         props = {
             text = slider.value_text,
             textSize = 20,
-            size = v2(100,20)
+            size = v2(60,20),
+            autoSize = false
         }
     }
 
@@ -382,8 +387,9 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
                     props = {
                         text = self.text .. ":   ",
                         textSize = 20,
-                        size = v2(100, 20),
-                        visible = true
+                        size = v2(140, 20),
+                        visible = true,
+                        autoSize = false,
                     },
                     content = UI.content {}
                 }, 
