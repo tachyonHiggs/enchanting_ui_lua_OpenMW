@@ -234,6 +234,16 @@ templates.list.new = function(name, list_size, generate_items)
         self.items_container.content = UI.content(self.items)
     end
 
+    function list:update_item(index, new_item)
+        if not self.items[index] then
+            return false
+        end
+
+        self.items[index] = new_item
+        self.items_container.content = UI.content(self.items)
+        return true
+    end
+
     function list:clear()
         self.items = {}
         self.items_container.content = UI.content({})

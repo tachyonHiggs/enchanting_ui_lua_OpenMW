@@ -1,11 +1,33 @@
 local I = require('openmw.interfaces')
 
 I.Settings.registerGroup {
+    key = 'options_enchanting_ui',
+    page = 'enchanting_ui_page',
+    l10n = 'enchanting_ui',
+    name = 'Enchanting Remastered Options',
+    description = 'Options - Vanilla Plus',
+    permanentStorage = true,
+    settings = {
+        {
+            key = 'remove_compound_effect_cost',
+            renderer = 'checkbox',
+            name = 'Remove compounding cost of multiple effects',
+            description = 'When set to yes, makes added effects past the first one have the same cost instead of the Vanilla implementation (Vanilla uses compounding effects costs after the first effect)',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+
+   	},
+}
+
+I.Settings.registerGroup {
     key = 'cheats_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Enchanting Remastered Cheats',
-    description = '.',
+    description = 'Cheats',
     permanentStorage = true,
     settings = {
         {

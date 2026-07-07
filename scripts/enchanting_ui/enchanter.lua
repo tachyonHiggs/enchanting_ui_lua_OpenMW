@@ -16,7 +16,8 @@ enchanter.item = {
 }
 enchanter.soul = {
     id = "",
-    icon = nil
+    icon = nil,
+    charge = 0,
 }
 
 enchanter.reset_effect_to_add = function()
@@ -30,13 +31,13 @@ enchanter.reset_effect_to_add = function()
         index = 0,
         magnitudeMax = 0,
         magnitudeMin = 0,
-        range = 0
+        range = 0,
+        cost = 0,
     }
 end
 
 enchanter.reset = function()
     enchanter.enchantment = {}
-    enchanter.enchantment.charge = 0
     enchanter.enchantment.cost = 0
     enchanter.effects_with_params = {}
     enchanter.reset_effect_to_add()
@@ -45,6 +46,27 @@ enchanter.reset = function()
     enchanter.enchantment.type = 0
 
     enchanter.chance = 0
+
+    enchanter.name = ""
+    enchanter.item = {
+        id = "",
+        icon = nil,
+        type = 0,
+        enchantment_capacity = 0
+    }
+    enchanter.soul = {
+        id = "",
+        icon = nil
+    }
+end
+
+enchanter.get_effects_total_cost = function()
+    local sum = 0
+    for _, effect in ipairs(enchanter.effects_with_params) do
+        sum = sum + effect.cost
+    end
+
+    return sum
 end
 
 enchanter.reset()
@@ -188,7 +210,7 @@ enchanter.create_item = function()
     print("create_item")
 
     -- Serialize data
-    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item_id=enchanter.item.id, item_type = enchanter.item.type ,enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
+    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item=enchanter.item, soul = enchanter.soul, enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
 
 end
 

@@ -9,7 +9,8 @@ local storage = require('openmw.storage')
 local function create_enchantment_and_item(data)
     print("create_enchantment_and_item")
     local name = data.name
-    local item_id = data.item_id
+    local item = data.item
+    local soul = data.soul
     local type_text = data.item_type
     local enchantment = data.enchantment
     local effects = data.effects
@@ -21,7 +22,7 @@ local function create_enchantment_and_item(data)
 
     -- Create enchantment
     local template_enchantment_record = core.magic.enchantments.records[1]
-    local enchantment_table = {id = enchantment.id, charge = enchantment.charge, cost = enchantment.cost, effects = effects, isAutocalc = enchantment.isAutocalc, type = enchantment.type, template = template_enchantment_record}
+    local enchantment_table = {id = enchantment.id, charge = soul.charge, cost = enchantment.cost, effects = effects, isAutocalc = enchantment.isAutocalc, type = enchantment.type, template = template_enchantment_record}
     local new_enchantment_draft = core.magic.enchantments.createRecordDraft(enchantment_table)
     local new_enchantment = world.createRecord(new_enchantment_draft)
     print(new_enchantment.id)
@@ -31,11 +32,11 @@ local function create_enchantment_and_item(data)
     -- Create item
     local originalRecord
     if type_text == "Weapon" then
-        originalRecord = types.Weapon.records[item_id]
+        originalRecord = types.Weapon.records[item.id]
     elseif type_text == "Armor" then
-        originalRecord = types.Armor.records[item_id]
+        originalRecord = types.Armor.records[item.id]
     else
-        originalRecord = types.Clothing.records[item_id]
+        originalRecord = types.Clothing.records[item.id]
     end
 
     if name == "" then
