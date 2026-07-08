@@ -200,6 +200,8 @@ end
 templates.list = {}
 templates.list.new = function(name, list_size, generate_items)
 
+    -- TODO: add sorting 
+
     local list = {}
 
     list.name = name
@@ -289,7 +291,7 @@ templates.list.new = function(name, list_size, generate_items)
         }        
         return self.ui
     end
-    
+
     return list
 end
 
@@ -299,7 +301,8 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
 
     slider.ui = {}
     slider.text = text -- sets the slider name and starting text value
-    slider.value = min
+
+    slider.value = start
     slider.value_text = tostring(slider.value)
     
     slider.min = min
@@ -333,6 +336,49 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
             autoSize = false
         }
     }
+
+    function slider:set_initial_value(value)
+        print("set_value")
+
+        self.value = value
+        
+        if self.value < self.min then
+            self.value = self.min
+            self.bar.props.relativePosition = v2(0,0)
+        end
+
+        if self.value > self.max then
+            self.value = self.max
+            self.bar.props.relativePosition = v2(1,0)
+        end
+
+        self.value_text = tostring(self.value)
+        self.value_element.props.text = self.value_text
+
+    end
+
+    function slider:set_value(value)
+        print("set_value")
+
+        self.value = value
+        
+        if self.value < self.min then
+            self.value = self.min
+            self.bar.props.relativePosition = v2(0,0)
+        end
+
+        if self.value > self.max then
+            self.value = self.max
+            self.bar.props.relativePosition = v2(1,0)
+        end
+
+        self.value_text = tostring(self.value)
+        self.value_element.props.text = self.value_text
+
+        if self.update_target then
+            self.update_target(self.value)
+        end
+    end
 
     function slider:move_left()
         print("Moving slider left")
@@ -461,12 +507,11 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
     end
 
     function slider:show() 
-        print("hiding: ", self.text)
-        if self.update_target then
-            print(self.value)
-            self.update_target(self.value)
-        end
+        print("show: ", self.text)
         self.ui.props.visible = true
+        -- if self.update_target then
+        --     self.update_target(self.value)
+        -- end
     end
 
     return slider

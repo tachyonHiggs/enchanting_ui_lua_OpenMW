@@ -228,6 +228,7 @@ end
 -- MAGIC EFFECTS
 
 local function create_magic_effect_item(id, name)
+    -- TODO: add more like magic school info
     return 
     {
         name = id,
@@ -284,15 +285,15 @@ function helper.create_effect_item(effect, on_effect_clicked)
 
     local parts = { name }
 
-    if effect.magnitudeMax > 0 then
+    if core.magic.effects.records[effect.id].hasMagnitude then
         table.insert(parts, ("%d to %d"):format(effect.magnitudeMin, effect.magnitudeMax))
     end
 
-    if effect.duration > 0 then
+    if core.magic.effects.records[effect.id].hasDuration and enchanter.enchantment.type ~= core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         table.insert(parts, ("for %d sec"):format(effect.duration))
     end
 
-    if effect.area > 0 then
+    if core.magic.effects.records[effect.id].hasArea then
         table.insert(parts, ("in %d ft"):format(effect.area))
     end
 

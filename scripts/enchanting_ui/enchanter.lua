@@ -62,10 +62,19 @@ end
 
 enchanter.get_effects_total_cost = function()
     local sum = 0
-    for _, effect in ipairs(enchanter.effects_with_params) do
-        sum = sum + effect.cost
-    end
 
+    if storage.globalSection("options_enchanting_ui"):get("remove_compound_effect_cost") then
+        for _, effect in ipairs(enchanter.effects_with_params) do
+            sum = sum + effect.cost
+        end
+
+    else
+        local total_num_effects = table.getn(enchanter.effects_with_params)
+        for index, effect in ipairs(enchanter.effects_with_params) do
+            sum = sum + (effect.cost * (total_num_effects - index + 1))
+        end
+    end
+    
     return sum
 end
 

@@ -36,18 +36,19 @@ enchanting_ui.create_ui = function()
         type = UI.TYPE.Widget,
         template = nil,
         props = {
-            size = v2(600, 500),
+            size = v2(700, 500),
             relativePosition = v2(0.5, 0.5),
             anchor = v2(0.5, 0.5),
         },
         content = UI.content { 
-            templates.make_border(v2(600, 500)),
+            templates.make_border(v2(700, 500)),
             {
                 name = "root_padding",
                 template = I.MWUI.templates.padding,
                 props = {
                     anchor = v2(0.5, 0.5),
                     relativePosition = v2(0.5, 0.5),
+                    size = v2(700, 500),
                 },
                 content = UI.content { 
                     {
@@ -89,7 +90,7 @@ end
 -- header
 
 -- header input list fncs
-enchanting_ui.soul_list = templates.list.new("Souls", v2(600, 500), ui_helpers.make_souls_list)
+enchanting_ui.souls_list = templates.list.new("Souls", v2(600, 500), ui_helpers.make_souls_list)
 enchanting_ui.items_list = templates.list.new("Items", v2(600, 500), ui_helpers.make_enchantable_items_list)
 
 local function on_item_clicked(id, icon, enchant_pts, type_text)
@@ -104,10 +105,12 @@ local function on_item_clicked(id, icon, enchant_pts, type_text)
     enchanting_ui.item_input.content[3].props.resource = UI.texture({
         path = icon
     })
+
+    -- TODO: reset stuff here
     
     enchanter.enchantment.type = 0
     enchanting_ui.cast_type_btn.content[2].props.text = "Cast Once"
-    enchanting_ui.stats_enchantment:set_text("0/"..tostring(enchant_pts))
+    enchanting_ui.stats_enchantment:set_text(tostring(enchanter.enchantment.cost).."/"..tostring(enchanter.item.enchantment_capacity))
     toggle_cast_type()
     enchanting_ui.root:update()
 
@@ -140,7 +143,7 @@ local function on_soul_clicked(id, value, icon)
     enchanter.soul.id = id
     enchanter.soul.icon = icon
     enchanter.soul.charge = value
-    enchanting_ui.stats_charge:set_text(tostring(enchanter.enchantment.cost), "/", tostring(enchanter.soul.charge ))
+    enchanting_ui.stats_charge:set_text(tostring(enchanter.enchantment.cost).. "/".. tostring(enchanter.soul.charge ))
     
     print("click on soul: ", id)
     print("at icon: ", icon)
@@ -170,7 +173,7 @@ local function show_soul_list()
             anchor = v2(0.5, 0.5),
         },
         content = UI.content {
-            enchanting_ui.soul_list:create()
+            enchanting_ui.souls_list:create()
         }
     }
 end
@@ -292,9 +295,11 @@ enchanting_ui.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, 1, 1
 enchanting_ui.duration = templates.slider.new("Duration", 1440, 1, 1, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost() end)
 enchanting_ui.area = templates.slider.new("Area", 50, 0, 0, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost() end)
 
-local function toggle_range_type()
-    print("toggle_range_type")
-    local text = ""
+
+local function show_valid_effect_sliders()
+
+    local force_no_duration = false
+    local force_no_area = false
 
     local function set_visible(control, visible)
         if visible then
@@ -303,6 +308,45 @@ local function toggle_range_type()
             control:hide()
         end
     end
+
+    -- however, if constant effect only self is allowed
+    if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        print("Constant Effect")
+        force_no_duration = true
+        force_no_area = true
+    end
+
+    -- Now get all possible parameters to customize
+    if core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute then
+        print("Effect has attribute")
+
+    else
+        
+    end
+    if core.magic.effects.records[enchanter.effect_to_add.id].hasSkill then
+        print("Effect has skill")
+        
+    else
+        
+    end
+
+    enchanter.effect_to_add.duration = 0
+    set_visible(enchanting_ui.duration, (core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and force_no_duration==false))
+    
+    enchanter.effect_to_add.magnitudeMax = 1
+    enchanter.effect_to_add.magnitudeMin = 1
+    set_visible(enchanting_ui.magnitude, core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude)
+    set_visible(enchanting_ui.magnitude_max, core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude)
+
+    enchanter.effect_to_add.area = 0
+    set_visible(enchanting_ui.area, (enchanter.effect_to_add.range ~= core.magic.RANGE.Self and force_no_area==false))
+
+    enchanting_ui.magic_effect_add:update()
+end
+
+local function toggle_range_type()
+    print("toggle_range_type")
+    local text = ""
 
     -- Find next valid range for magic id
     local range = enchanter.effect_to_add.range
@@ -323,47 +367,19 @@ local function toggle_range_type()
         end
     end
 
-    local force_no_duration = false
-    local force_no_area = false
-
     -- however, if constant effect only self is allowed
     if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         print("Constant Effect")
         range = core.magic.RANGE.Self -- range has to be self
         text = "Self"
         enchanter.enchantment.isAutocalc = false -- disable autocalc
-        force_no_duration = true
-        force_no_area = true
     end
 
     enchanter.effect_to_add.range = range
     enchanting_ui.range.content[2].props.text = text
     print("New range: ", text)
 
-    -- Now get all possible parameters to customize
-    if core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute then
-        print("Effect has attribute")
-
-    else
-        
-    end
-    if core.magic.effects.records[enchanter.effect_to_add.id].hasSkill then
-        print("Effect has skill")
-        
-    else
-        
-    end
-
-    enchanter.effect_to_add.duration = 0
-    set_visible(enchanting_ui.duration, (core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and force_no_duration==false))
-    
-    enchanter.effect_to_add.magnitudeMax = 0
-    enchanter.effect_to_add.magnitudeMin = 0
-    set_visible(enchanting_ui.magnitude, core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude)
-    set_visible(enchanting_ui.magnitude_max, core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude)
-
-    enchanter.effect_to_add.area = 0
-    set_visible(enchanting_ui.area, (enchanter.effect_to_add.range ~= core.magic.RANGE.Self and force_no_area==false))
+    show_valid_effect_sliders()
 
     enchanting_ui.magic_effect_add:update()
 end
@@ -385,6 +401,7 @@ local function ok_magic_effect()
         end
     end
 
+    print("Effect to modify duration: ", enchanter.effect_to_add.duration)
     local effect_to_add_ui = ui_helpers.create_effect_item(enchanter.effect_to_add, on_effect_clicked)
 
     if enchanter.effect_to_modify then 
@@ -396,7 +413,8 @@ local function ok_magic_effect()
     end
     
     enchanter.enchantment.cost = enchanter.get_effects_total_cost()
-    enchanting_ui.stats_charge:set_text(tostring(enchanter.enchantment.cost), "/", tostring(enchanter.soul.charge))
+    enchanting_ui.stats_charge:set_text(tostring(enchanter.enchantment.cost) .. "/" .. tostring(enchanter.soul.charge))
+    enchanting_ui.stats_enchantment:set_text(tostring(enchanter.enchantment.cost).."/"..tostring(enchanter.item.enchantment_capacity))
 
     auxUi.deepDestroy(enchanting_ui.magic_effect_add)
     enchanting_ui.magic_effect_add:update()
@@ -422,21 +440,41 @@ local function delete_effect()
     enchanter.reset_effect_to_add()
 
     enchanter.enchantment.cost = enchanter.get_effects_total_cost()
-    enchanting_ui.stats_charge:set_text(tostring(enchanter.enchantment.cost), "/", tostring(enchanter.soul.charge))
+    enchanting_ui.stats_charge:set_text(tostring(enchanter.enchantment.cost).. "/".. tostring(enchanter.soul.charge))
 
     auxUi.deepDestroy(enchanting_ui.magic_effect_add)
     enchanting_ui.magic_effect_add:update()
     enchanting_ui.root:update()
 end
 
-local function create_magic_effect_add_UI(modify, id) 
+local function create_magic_effect_add_UI(modify, effect_to_add ) 
 
-    local delete_btn
+    local id = effect_to_add.id
 
+    enchanter.effect_to_add.cost = 0
+    enchanting_ui.cost:set_text(tostring(cost))
+
+    print("Range for effect to add: ", effect_to_add.range)
+    print("Effect to modify duration: ", enchanter.effect_to_add.duration)
+
+    local delete_btn = nil
+
+    -- enchanting_ui attribute
+    -- enchanting_ui skill
+    
     if modify then
         delete_btn = templates.button("Delete", delete_effect, 100, 30)
+
+        enchanting_ui.magnitude = templates.slider.new("Magnitude Min", 100, 1, effect_to_add.magnitudeMin, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost() end)
+        enchanting_ui.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, effect_to_add.magnitudeMax, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost() end)
+        enchanting_ui.duration = templates.slider.new("Duration", 1440, 1, effect_to_add.duration, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost() end)
+        enchanting_ui.area = templates.slider.new("Area", 50, 0, effect_to_add.area, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost() end)
     else
-        delete_btn = nil             
+        enchanting_ui.magnitude = templates.slider.new("Magnitude Min", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost() end)
+        enchanting_ui.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost() end)
+        enchanting_ui.duration = templates.slider.new("Duration", 1440, 1, 1, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost() end)
+        enchanting_ui.area = templates.slider.new("Area", 50, 0, 0, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost() end)
+    
     end
     
     return {
@@ -556,9 +594,9 @@ local function on_magic_effect_clicked(id)
     enchanter.effect_to_add.id = id
     enchanter.effect_to_modify = false
 
-    enchanting_ui.magic_effect_add = UI.create(create_magic_effect_add_UI(enchanter.effect_to_modify, id))
+    enchanting_ui.magic_effect_add = UI.create(create_magic_effect_add_UI(enchanter.effect_to_modify, enchanter.effect_to_add ))
 
-    toggle_range_type()
+    show_valid_effect_sliders()
 
     enchanting_ui.root:update()
     enchanting_ui.magic_effect_add:update()
@@ -586,9 +624,9 @@ function on_effect_clicked(id)
     enchanter.effect_to_modify = true
 
     print("CREATING EFFECT ADD UI")
-    enchanting_ui.magic_effect_add = UI.create(create_magic_effect_add_UI(enchanter.effect_to_modify, id))
+    enchanting_ui.magic_effect_add = UI.create(create_magic_effect_add_UI(enchanter.effect_to_modify, enchanter.effect_to_add))
 
-    toggle_range_type()
+    show_valid_effect_sliders()
 
     enchanting_ui.root:update()
     enchanting_ui.magic_effect_add:update()
