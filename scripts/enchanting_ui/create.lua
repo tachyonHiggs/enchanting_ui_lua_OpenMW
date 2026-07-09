@@ -31,7 +31,9 @@ local function create_enchantment_and_item(data)
 
     -- Create item
     local originalRecord
-    if type_text == "Weapon" then
+    print("type: ", item.type)
+    print("item id: ", item.id)
+    if item.type == types.Weapon then
         originalRecord = types.Weapon.records[item.id]
     elseif type_text == "Armor" then
         originalRecord = types.Armor.records[item.id]

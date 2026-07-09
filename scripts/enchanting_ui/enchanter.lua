@@ -60,6 +60,25 @@ enchanter.reset = function()
     }
 end
 
+enchanter.get_effect_to_add_cost = function ()
+
+    local cost
+
+    local constant_effect_bool = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect
+    local base_cost = core.magic.effects.records[enchanter.effect_to_add.id].baseCost
+    local min_plus_max = enchanter.effect_to_add.magnitudeMin + enchanter.effect_to_add.magnitudeMax
+
+    if constant_effect_bool then
+        cost = base_cost * (min_plus_max*100 + enchanter.effect_to_add.area) / 40
+    elseif enchanter.effect_to_add.range == core.magic.RANGE.Self or enchanter.effect_to_add.range == core.magic.RANGE.Touch then
+        cost = base_cost * (min_plus_max*enchanter.effect_to_add.duration + enchanter.effect_to_add.area) / 40
+    elseif enchanter.effect_to_add.range == core.magic.RANGE.Target then
+        cost = 1.5 * base_cost * (min_plus_max*enchanter.effect_to_add.duration + enchanter.effect_to_add.area) / 40
+    end 
+
+    return cost
+end
+
 enchanter.get_effects_total_cost = function()
     local sum = 0
 

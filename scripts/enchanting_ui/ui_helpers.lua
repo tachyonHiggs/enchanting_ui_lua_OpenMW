@@ -14,8 +14,6 @@ local helper = {}
 
 local on_item_clicked = nil
 local on_soul_clicked = nil
-local on_magic_effect_clicked = nil
-local on_effect_clicked = nil
 
 function helper.set_on_item_clicked(callback)
     on_item_clicked = callback
@@ -23,13 +21,6 @@ end
 function helper.set_on_soul_clicked(callback)
     on_soul_clicked = callback
 end
-function helper.set_on_magic_effect_clicked(callback)
-    on_magic_effect_clicked = callback
-end
-function helper.set_on_effect_clicked(callback)
-    on_effect_clicked = callback
-end
-
 
 -- ITEMS
 
@@ -227,118 +218,6 @@ end
 
 -- MAGIC EFFECTS
 
-local function create_magic_effect_item(id, name)
-    -- TODO: add more like magic school info
-    return 
-    {
-        name = id,
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = name,
-            textSize = 20,
-        },
-        events = {
-            mouseClick = async:callback(function()
-                if on_magic_effect_clicked then
-                    on_magic_effect_clicked(id)
-                end
-            end)
-        }
-    }
-end
 
-function helper.make_magic_effects_list()
-    local known_magic_effects = enchanter.get_known_magic_effects()
-    if known_magic_effects == nil then
-        print("!! ERROR magic_effects_list is NIL")
-        return
-    end
-    local items = {}
-
-    for id, name in pairs(known_magic_effects) do
-        table.insert(items, create_magic_effect_item(id, name)) -- TODO: on click fnc
-    end
-
-    return items or {} -- return the list or just an empty one
-end
-
--- EFFECTS
-
-function helper.create_effect_item(effect, on_effect_clicked)
-    print("create_effect_item")
-    print(effect.id)
-    local name = core.magic.effects.records[effect.id].name
-
-    local icon_element = {
-        name = "icon",
-        type = UI.TYPE.Image,
-        template = I.MWUI.templates.borders,
-        props = {
-            resource = UI.texture({
-                path = core.magic.effects.records[effect.id].icon
-            }),
-            alpha = 1,
-            size = v2(20,20),
-        },
-    }
-
-    local parts = { name }
-
-    if core.magic.effects.records[effect.id].hasMagnitude then
-        table.insert(parts, ("%d to %d"):format(effect.magnitudeMin, effect.magnitudeMax))
-    end
-
-    if core.magic.effects.records[effect.id].hasDuration and enchanter.enchantment.type ~= core.magic.ENCHANTMENT_TYPE.ConstantEffect then
-        table.insert(parts, ("for %d sec"):format(effect.duration))
-    end
-
-    if core.magic.effects.records[effect.id].hasArea then
-        table.insert(parts, ("in %d ft"):format(effect.area))
-    end
-
-    if effect.range == core.magic.RANGE.Self then
-        table.insert(parts, "on Self")
-    elseif effect.range == core.magic.RANGE.Target then
-        table.insert(parts, "on Target")
-    else 
-        table.insert(parts, "on Touch")
-    end
-
-    local text = table.concat(parts, " ")
-    print(effect.range)
-    
-    local text_element = {
-        name = effect.id,
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = text,
-            textSize = 20,
-        },
-    }
-
-    return 
-    {
-        name = name.."_effect_item",
-        type = UI.TYPE.Flex,
-        props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-        },
-        content = UI.content {
-            icon_element,
-            text_element,
-        },
-        events = {
-            mouseClick = async:callback(function()
-                if on_effect_clicked then
-                    on_effect_clicked(effect.id)
-                end
-            end)
-        }
-    }
-end
 
 return helper
