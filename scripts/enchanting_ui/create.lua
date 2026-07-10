@@ -11,7 +11,6 @@ local function create_enchantment_and_item(data)
     local name = data.name
     local item = data.item
     local soul = data.soul
-    local type_text = data.item_type
     local enchantment = data.enchantment
     local effects = data.effects
 
@@ -33,9 +32,9 @@ local function create_enchantment_and_item(data)
     local originalRecord
     print("type: ", item.type)
     print("item id: ", item.id)
-    if item.type == types.Weapon then
+    if item.type == "Weapon" then
         originalRecord = types.Weapon.records[item.id]
-    elseif type_text == "Armor" then
+    elseif item.type == "Armor" then
         originalRecord = types.Armor.records[item.id]
     else
         originalRecord = types.Clothing.records[item.id]
@@ -50,9 +49,9 @@ local function create_enchantment_and_item(data)
     
     local item_table = {name = name, enchant = new_enchantment.id, template = originalRecord}
     local new_item_draft
-    if type_text == "Weapon" then
+    if item.type == "Weapon" then
         new_item_draft = types.Weapon.createRecordDraft(item_table)
-    elseif type_text == "Armor" then
+    elseif item.type == "Armor" then
         new_item_draft = types.Armor.createRecordDraft(item_table)
     else
         new_item_draft = types.Clothing.createRecordDraft(item_table)

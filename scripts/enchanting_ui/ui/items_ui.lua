@@ -1,28 +1,55 @@
 local UI = require('openmw.ui')
-local auxUi = require("openmw_aux.ui")
-local async = require('openmw.async')
+local I = require('openmw.interfaces')
 local Util = require('openmw.util')
 local v2 = Util.vector2
-local I = require('openmw.interfaces')
+local auxUi = require("openmw_aux.ui")
+local ambient = require('openmw.ambient')
+local self = require('openmw.self')
+local async = require('openmw.async')
 local core = require('openmw.core')
 local types = require('openmw.types')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
+local elements = require("scripts.enchanting_ui.ui.elements")
 
-local helper = {}
 
-local on_item_clicked = nil
-local on_soul_clicked = nil
+local items_ui = {}
 
-function helper.set_on_item_clicked(callback)
-    on_item_clicked = callback
+
+local function on_item_clicked(id, icon, enchant_pts, type_text)
+
+    enchanter.item.id = id
+    enchanter.item.icon = icon
+    enchanter.item.type = type_text
+    enchanter.item.enchantment_capacity = enchant_pts
+    print("click on item: ", id)
+    print("Icon: ", icon)
+    print("Type: ", type_text)
+    print("enchant_pts: ", tostring(enchant_pts))
+    items_ui.item_input.content[3].props.resource = UI.texture({
+        path = icon
+    })
+    
+    elements.stats_enchantment:set_text(tostring(enchanter.enchantment.cost).."/"..tostring(enchanter.item.enchantment_capacity))
+
+    -- TODo: this is just toggle cast type function
+    enchanter.enchantment.type = 0
+    enchanter.soul.charge = 0
+    enchanter.enchantment.cost = 0
+    enchanter.effects_with_params = {}
+    enchanter.enchantment.isAutocalc = 0
+
+    elements.effects:clear()
+    
+    elements.cast_type_btn.content[2].props.text = enchanter.toggle_cast_type()
+    -- ENd todo
+
+    elements.root:update()
+
+    auxUi.deepDestroy(items_ui.ui)
+    items_ui.ui:update()
 end
-function helper.set_on_soul_clicked(callback)
-    on_soul_clicked = callback
-end
-
--- ITEMS
 
 local function create_enchantable_item(id, icon, type, name, enchant_pts)
     print("create_effect_item")
@@ -113,7 +140,7 @@ local function create_enchantable_item(id, icon, type, name, enchant_pts)
     }
 end
 
-function helper.make_enchantable_items_list()
+function items_ui.make_enchantable_items_list()
     local valid_items = {}
 
     local items = enchanter.get_enchantable_inventory_items()
@@ -124,100 +151,25 @@ function helper.make_enchantable_items_list()
     return valid_items or {}
 end
 
-
--- SOULS
-
-local function create_soul(id, value, icon, name, soul_name)
-    local icon_element = {
-        name = "icon",
-        type = UI.TYPE.Image,
-        template = I.MWUI.templates.borders,
+function items_ui.show_item_list()
+    items_ui.ui = UI.create{
+        name = "item_list",
+        layer = "Windows",
+        template = I.MWUI.templates.boxSolid,
         props = {
-            resource = UI.texture({
-                path = icon
-            }),
-            alpha = 1,
-            size = v2(50,50),
-        },
-    }
-    local name = {
-        name = "name",
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = name,
-            textSize = 20,
-            size = v2(150,20),
-            autoSize = false
-        },
-    }
-
-    local soul_value = {
-        name = "value",
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = tostring(value),
-            textSize = 20,
-            size = v2(80,20),
-            autoSize = false
-        },
-    }
-
-    local soul_name = {
-        name = "soul_name",
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = soul_name,
-            textSize = 20,
-            size = v2(200,20),
-            autoSize = false
-        },
-    }
-
-    return {
-        name = id,
-        type = UI.TYPE.Flex,
-        props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-            size = v2(600, 20)
+            relativeSize = v2(1, 1),
+            relativePosition = v2(0.5, 0.5),
+            anchor = v2(0.5, 0.5),
         },
         content = UI.content {
-            icon_element,
-            templates.padding(20, 20),
-            name,
-            templates.padding(20, 20),
-            soul_value,
-            templates.padding(20, 20),
-            soul_name,
-        },
-        events = {
-            mouseClick = async:callback(function()
-                if on_soul_clicked then
-                    print(icon)
-                    on_soul_clicked(id, value, icon)
-                end
-            end)
+            items_ui.items_list:create()
         }
     }
 end
 
-function helper.make_souls_list()
-    local valid_items = {}
+items_ui.items_list = templates.list.new("Items", v2(600, 500), items_ui.make_enchantable_items_list)
+elements.items_list = items_ui.items_list
 
-    local items = enchanter.get_inventory_souls()
-    for __, item in pairs(items) do
-        table.insert(valid_items, create_soul(item[1], item[2], item[3], item[4], item[5]))
-    end
+items_ui.item_input = templates.text_image("Item", v2(75,75), 10, items_ui.show_item_list, nil, nil)
 
-    return valid_items or {}
-end
-
--- MAGIC EFFECTS
-
-
-
-return helper
+return items_ui

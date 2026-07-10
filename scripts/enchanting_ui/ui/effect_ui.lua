@@ -11,12 +11,12 @@ local types = require('openmw.types')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
-local elements = require("scripts.enchanting_ui.enchanting_ui_elements")
+local elements = require("scripts.enchanting_ui.ui.elements")
 
 
-local add_effect_ui = {}
+local effect_ui = {}
 
-add_effect_ui.on_magic_effect_clicked = function(id)
+effect_ui.on_magic_effect_clicked = function(id)
 
     print("On magic effect clicked: ", id)
 
@@ -31,7 +31,7 @@ add_effect_ui.on_magic_effect_clicked = function(id)
     enchanter.effect_to_modify = false
 
     print("CREATING MAGIC EFFECT ADD UI")
-    elements.effects_root = UI.create(add_effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add):create())
+    elements.effects_root = UI.create(effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add):create())
     elements.effects_root:update()
     elements.root:update()
 
@@ -50,13 +50,13 @@ local function create_magic_effect_item(id, name)
         },
         events = {
             mouseClick = async:callback(function()
-                add_effect_ui.on_magic_effect_clicked(id)
+                effect_ui.on_magic_effect_clicked(id)
             end)
         }
     }
 end
 
-function add_effect_ui.make_magic_effects_list()
+function effect_ui.make_magic_effects_list()
     local known_magic_effects = enchanter.get_known_magic_effects()
     if known_magic_effects == nil then
         print("!! ERROR magic_effects_list is NIL")
@@ -71,8 +71,7 @@ function add_effect_ui.make_magic_effects_list()
     return items or {} -- return the list or just an empty one
 end
 
-
-add_effect_ui.on_effect_clicked = function(id)
+effect_ui.on_effect_clicked = function(id)
 
     print("On effect clicked: ", id)
     enchanter.reset_effect_to_add()
@@ -93,14 +92,14 @@ add_effect_ui.on_effect_clicked = function(id)
     enchanter.effect_to_modify = true
 
     print("CREATING EFFECT ADD UI")
-    add_effect_ui.effects = add_effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add)
-    elements.effects_root = UI.create(elements.effects:create())
+    effect_ui.effects_ui = effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add)
+    elements.effects_root = UI.create(effect_ui.effects_ui:create())
     elements.effects_root:update()
     elements.root:update()
 
 end
 
-add_effect_ui.create_effect_item = function(effect)
+effect_ui.create_effect_item = function(effect)
     print("create_effect_item")
     print(effect.id)
     local name = core.magic.effects.records[effect.id].name
@@ -168,9 +167,9 @@ add_effect_ui.create_effect_item = function(effect)
         },
         events = {
             mouseClick = async:callback(function()
-                if add_effect_ui.on_effect_clicked then
+                if effect_ui.on_effect_clicked then
                     print("EFFECT CLICKED")
-                    add_effect_ui.on_effect_clicked(effect.id)
+                    effect_ui.on_effect_clicked(effect.id)
                 end
             end)
         }
@@ -178,7 +177,7 @@ add_effect_ui.create_effect_item = function(effect)
 end
 
 
-add_effect_ui.new = function(modify, effect_to_add) 
+effect_ui.new = function(modify, effect_to_add) 
 
     local instance = {}
 
@@ -208,8 +207,8 @@ add_effect_ui.new = function(modify, effect_to_add)
             force_no_area = true
         end
 
-        -- set_visible(add_effect_ui.magnitude, core.magic.effects.records[enchanter.effect_to_add.id].hasSkill)
-        -- set_visible(add_effect_ui.magnitude_max, core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute)
+        -- set_visible(effect_ui.magnitude, core.magic.effects.records[enchanter.effect_to_add.id].hasSkill)
+        -- set_visible(effect_ui.magnitude_max, core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute)
 
         -- enchanter.effect_to_add.duration = 0
         set_visible(instance.duration, (core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and force_no_duration==false))
@@ -281,14 +280,14 @@ add_effect_ui.new = function(modify, effect_to_add)
         end
 
         print("Effect to modify duration: ", enchanter.effect_to_add.duration)
-        local effect_to_add_ui = add_effect_ui.create_effect_item(enchanter.effect_to_add)
+        local effect_to_add_ui = effect_ui.create_effect_item(enchanter.effect_to_add)
 
         if enchanter.effect_to_modify then 
             enchanter.effects_with_params[effect_index] = enchanter.effect_to_add -- replace existing entry
-            add_effect_ui.effects:update_item(effect_index, effect_to_add_ui)
+            effect_ui.effects:update_item(effect_index, effect_to_add_ui)
         else
             table.insert(enchanter.effects_with_params, enchanter.effect_to_add)
-            add_effect_ui.effects:add_item(effect_to_add_ui)
+            effect_ui.effects:add_item(effect_to_add_ui)
         end
         
         enchanter.enchantment.cost = enchanter.get_effects_total_cost()
@@ -311,7 +310,7 @@ add_effect_ui.new = function(modify, effect_to_add)
         print("delete_effect")
         for i, effect in ipairs(enchanter.effects_with_params) do
             if effect.id == enchanter.effect_to_add.id then
-                add_effect_ui.effects:remove_item(i)
+                effect_ui.effects:remove_item(i)
                 table.remove(enchanter.effects_with_params, i)
                 break
             end
@@ -473,7 +472,11 @@ add_effect_ui.new = function(modify, effect_to_add)
     
 end
 
-add_effect_ui.magic_effects = templates.list.new("Magic Effects", v2(200,300), add_effect_ui.make_magic_effects_list)
-add_effect_ui.effects = templates.list.new("Effects", v2(350,300), function() end)
 
-return add_effect_ui
+effect_ui.magic_effects = templates.list.new("Magic Effects", v2(200,300), effect_ui.make_magic_effects_list)
+effect_ui.effects = templates.list.new("Effects", v2(350,300), function() end)
+
+elements.magic_effects = effect_ui.magic_effects
+elements.effects = effect_ui.effects
+
+return effect_ui
