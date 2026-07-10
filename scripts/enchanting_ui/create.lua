@@ -30,19 +30,17 @@ local function create_enchantment_and_item(data)
 
     -- Create item
     local originalRecord
-    print("type: ", item.type)
-    print("item id: ", item.id)
     if item.type == "Weapon" then
         originalRecord = types.Weapon.records[item.id]
     elseif item.type == "Armor" then
         originalRecord = types.Armor.records[item.id]
-    else
+    elseif item.type == "Clothing" then
         originalRecord = types.Clothing.records[item.id]
+    else
+        originalRecord = types.Book.records[item.id]
     end
 
     if name == "" then
-        print(originalRecord)
-        print(originalRecord.name)
         name = originalRecord.name
     end
     print("The item shall be called: ", name)
@@ -53,8 +51,10 @@ local function create_enchantment_and_item(data)
         new_item_draft = types.Weapon.createRecordDraft(item_table)
     elseif item.type == "Armor" then
         new_item_draft = types.Armor.createRecordDraft(item_table)
-    else
+    elseif item.type == "Clothing" then
         new_item_draft = types.Clothing.createRecordDraft(item_table)
+    else
+        new_item_draft = types.Book.createRecordDraft(item_table)
     end
     local new_item = world.createRecord(new_item_draft) 
     local new_item_instance = world.createObject(new_item.id, 1)
@@ -62,6 +62,8 @@ local function create_enchantment_and_item(data)
     -- Move to player inventory
     new_item_instance:moveInto(world.players[1])
     -- TODO: remove OG item from player inventory
+
+    return true
 end
 
 return {

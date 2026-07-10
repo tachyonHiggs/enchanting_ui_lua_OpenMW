@@ -127,6 +127,13 @@ templates.text_output.new = function(name, text_length, padding_length, default_
         self.output.props.text = text
     end
 
+    function text_output:show()
+        self.ui.props.visible = true
+    end
+    function text_output:hide()
+        self.ui.props.visible = false
+    end
+
     function text_output:create()
         self.ui = {
             name = self.name .. "_text_output",
@@ -135,6 +142,7 @@ templates.text_output.new = function(name, text_length, padding_length, default_
                 horizontal = true,
                 arrange = UI.ALIGNMENT.Start,
                 align = UI.ALIGNMENT.Start,
+                visible = true,
             },
             content = UI.content {
                 {

@@ -2,6 +2,8 @@ local I = require('openmw.interfaces')
 
 local enchanting_ui = require("scripts.enchanting_ui.enchanting_ui")
 
+local is_vendor_enchant = true
+
 -- For the menu settings tab
 I.Settings.registerPage ({
     key = 'enchanting_ui_page',
@@ -12,11 +14,11 @@ I.Settings.registerPage ({
 
 
 local function show()
-    enchanting_ui.show()
+    enchanting_ui.show(not is_vendor_enchant)
 end
     
 local function hide()
-    enchanting_ui.hide()
+    enchanting_ui.hide(not is_vendor_enchant)
 end
 
 local function onMouseWheel()

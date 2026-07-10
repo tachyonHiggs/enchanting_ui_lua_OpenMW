@@ -24,11 +24,14 @@ local header = {element = {}}
 local footer = {element = {}}
 local main_content = {element = {}}
 
+local is_vendor_enchant = false
+
 local function on_effect_clicked() end
 
-enchanting_ui.create_ui = function() 
+enchanting_ui.create_ui = function(is_vendor_enchant_bool) 
 
     print("create_ui")
+    is_vendor_enchant = is_vendor_enchant_bool
 
     enchanter.reset()
 
@@ -38,12 +41,12 @@ enchanting_ui.create_ui = function()
         type = UI.TYPE.Widget,
         template = nil,
         props = {
-            size = v2(700, 500),
+            size = v2(800, 600),
             relativePosition = v2(0.5, 0.5),
             anchor = v2(0.5, 0.5),
         },
         content = UI.content { 
-            templates.make_border(v2(700, 500)),
+            templates.make_border(v2(800, 600)),
             {
                 name = "root_padding",
                 template = I.MWUI.templates.padding,
@@ -235,6 +238,10 @@ footer = {
         }
     } }
 }
+
+if not is_vendor_enchant then
+    elements.price:hide()
+end
 -- End footer
 
 enchanting_ui.show = function()

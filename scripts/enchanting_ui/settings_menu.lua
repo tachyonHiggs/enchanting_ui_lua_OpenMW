@@ -46,8 +46,18 @@ I.Settings.registerGroup {
         {
             key = 'remove_enchant_cap_limit',
             renderer = 'checkbox',
-            name = 'Remove enchantment capacitiy limit',
-            description = 'When set to yes, allows enchantments to exceed an items enchantment capacity.',
+            name = 'Remove Enchantment Capacitiy limit',
+            description = 'When set to yes, allows enchantments to ignore an items enchantment capacity.',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
+            key = 'remove_soul_charge_limit',
+            renderer = 'checkbox',
+            name = 'Remove Soul Charge limit',
+            description = 'When set to yes, allows enchantments to ignore a Souls charge.',
             default = false,
 			argument = {
                 disabled = false,

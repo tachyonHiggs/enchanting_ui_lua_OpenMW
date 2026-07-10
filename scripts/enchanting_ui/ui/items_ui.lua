@@ -17,9 +17,10 @@ local elements = require("scripts.enchanting_ui.ui.elements")
 local items_ui = {}
 
 
-local function on_item_clicked(id, icon, enchant_pts, type_text)
+local function on_item_clicked(id, object_id, icon, enchant_pts, type_text)
 
     enchanter.item.id = id
+    enchanter.item.object_id = object_id
     enchanter.item.icon = icon
     enchanter.item.type = type_text
     enchanter.item.enchantment_capacity = enchant_pts
@@ -51,7 +52,7 @@ local function on_item_clicked(id, icon, enchant_pts, type_text)
     items_ui.ui:update()
 end
 
-local function create_enchantable_item(id, icon, type, name, enchant_pts)
+local function create_enchantable_item(id, object_id, icon, type, name, enchant_pts)
     print("create_effect_item")
 
     local icon_element = {
@@ -72,8 +73,10 @@ local function create_enchantable_item(id, icon, type, name, enchant_pts)
         type_text = "Weapon"
     elseif type == types.Armor then
         type_text = "Armor"
-    else
+    elseif type == types.Clothing then
         type_text = "Clothing"
+    else 
+        type_text = "Book"
     end
 
     local type_element = {
@@ -132,9 +135,7 @@ local function create_enchantable_item(id, icon, type, name, enchant_pts)
         },
         events = {
             mouseClick = async:callback(function()
-                if on_item_clicked then
-                    on_item_clicked(id, icon, enchant_pts, type_text)
-                end
+                on_item_clicked(id, object_id, icon, enchant_pts, type_text)
             end)
         }
     }
@@ -145,7 +146,7 @@ function items_ui.make_enchantable_items_list()
 
     local items = enchanter.get_enchantable_inventory_items()
     for __, item in pairs(items) do
-        table.insert(valid_items, create_enchantable_item(item[1], item[2], item[3], item[4], item[5]))
+        table.insert(valid_items, create_enchantable_item(item[1], item[2], item[3], item[4], item[5], item[6]))
     end
 
     return valid_items or {}

@@ -1,11 +1,13 @@
 # Enchanting UI
 
-## TO DO
+## TODO / Change Log
 
 ### Vanilla Features
-- Add the ability to enchant scrolls
 - Add attribute and skill magic effects
 - Be able to easily close the gosh darn enchanting menu 
+- Add enchanting for arrows
+- Add vendor enchanting UI, added some foundation for this 
+
 
 ### Expanded Features
 - Implement constant effect as always possible with any soul but reduces enchantment capacity

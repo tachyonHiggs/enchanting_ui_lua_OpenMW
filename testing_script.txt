@@ -17,4 +17,6 @@ Player->additem "misc_soulgem_grand" 1
 
 Player->additem "iron spear" 1
 
+Player->additem "bk_Warehouse_log" 1
+
 player->setenchant 100

@@ -473,7 +473,7 @@ effect_ui.new = function(modify, effect_to_add)
 end
 
 
-effect_ui.magic_effects = templates.list.new("Magic Effects", v2(200,300), effect_ui.make_magic_effects_list)
+effect_ui.magic_effects = templates.list.new("Magic Effects", v2(350,300), effect_ui.make_magic_effects_list)
 effect_ui.effects = templates.list.new("Effects", v2(350,300), function() end)
 
 elements.magic_effects = effect_ui.magic_effects

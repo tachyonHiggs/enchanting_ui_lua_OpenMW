@@ -17,9 +17,10 @@ local elements = require("scripts.enchanting_ui.ui.elements")
 local souls_ui = {}
 
 
-local function on_soul_clicked(id, value, icon)
+local function on_soul_clicked(id, object_id, value, icon)
 
     enchanter.soul.id = id
+    enchanter.soul.object_id = object_id
     enchanter.soul.icon = icon
     enchanter.soul.charge = value
     elements.stats_charge:set_text(tostring(enchanter.enchantment.cost).. "/".. tostring(enchanter.soul.charge ))
@@ -58,7 +59,7 @@ function souls_ui.show_soul_list()
     souls_ui.ui:update()
 end
 
-local function create_soul(id, value, icon, name, soul_name)
+local function create_soul(id, object_id, value, icon, name, soul_name)
     local icon_element = {
         name = "icon",
         type = UI.TYPE.Image,
@@ -127,7 +128,7 @@ local function create_soul(id, value, icon, name, soul_name)
         },
         events = {
             mouseClick = async:callback(function()
-                on_soul_clicked(id, value, icon)
+                on_soul_clicked(id, object_id, value, icon)
             end)
         }
     }
@@ -138,7 +139,7 @@ function souls_ui.make_souls_list()
 
     local items = enchanter.get_inventory_souls()
     for __, item in pairs(items) do
-        table.insert(valid_items, create_soul(item[1], item[2], item[3], item[4], item[5]))
+        table.insert(valid_items, create_soul(item[1], item[2], item[3], item[4], item[5], item[6]))
     end
 
     return valid_items or {}
