@@ -113,8 +113,6 @@ enchanter.get_effects_total_cost = function()
     return sum
 end
 
-enchanter.reset()
-
 enchanter.get_known_magic_effects = function()
 
     local known_magic_effects = {}
@@ -298,7 +296,11 @@ enchanter.enchant_item = function()
     end
 
     -- Remove Soul gem
-    core.sendGlobalEvent('remove_object', {object = enchanter.soul.object, count = 1, type = "soul"})
+
+    if not storage.globalSection("cheats_enchanting_ui"):get("dont_consume_item_and_soul") then
+        core.sendGlobalEvent('remove_object', {object = enchanter.soul.object, count = 1, type = "soul"})
+    end
+
     if (enchanter.soul.id == 'misc_soulgem_azura') then
         core.sendGlobalEvent('move_into_player', { id = "misc_soulgem_azura", count = 1 })
     end
@@ -311,7 +313,9 @@ enchanter.enchant_item = function()
     enchanter.create_item()
 
     -- Remove unenchanted item
-    core.sendGlobalEvent('remove_object', {object = enchanter.item.object, count = 1, type = "item"})
+    if not storage.globalSection("cheats_enchanting_ui"):get("dont_consume_item_and_soul") then
+        core.sendGlobalEvent('remove_object', {object = enchanter.item.object, count = 1, type = "item"})
+    end
 
     -- Clean up enchanter
     enchanter.reset() 

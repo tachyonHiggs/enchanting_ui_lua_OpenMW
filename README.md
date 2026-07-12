@@ -14,6 +14,7 @@
 ### Expanded Features
 - Implement constant effect as always possible with any soul but reduces enchantment capacity
 - Implement cheat modes: disable enchantment capacity, disable cost, disable charge, etc
+- Potentially add the ability use vendor's soul gems while enchanting
 
 
 ### Development

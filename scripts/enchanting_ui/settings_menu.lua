@@ -73,6 +73,16 @@ I.Settings.registerGroup {
                 disabled = false,
             }
         },
+        {
+            key = 'dont_consume_item_and_soul',
+            renderer = 'checkbox',
+            name = 'Do not consume Soul Gem and Item on Enchant',
+            description = 'When set to yes, attempts and successfull enchantments no longer consume soul gems and items',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
 
    	},
 }

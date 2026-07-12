@@ -33,8 +33,6 @@ enchanting_ui.create_ui = function(is_vendor_enchant_bool)
     print("create_ui")
     is_vendor_enchant = is_vendor_enchant_bool
 
-    enchanter.reset()
-
     elements.root = UI.create{
         name = "root",
         layer = "Windows",
@@ -45,7 +43,7 @@ enchanting_ui.create_ui = function(is_vendor_enchant_bool)
             relativePosition = v2(0.5, 0.5),
             anchor = v2(0.5, 0.5),
         },
-        content = UI.content { 
+        content = UI.content{ 
             templates.make_border(v2(800, 600)),
             {
                 name = "root_padding",
@@ -71,7 +69,7 @@ enchanting_ui.create_ui = function(is_vendor_enchant_bool)
                         }
                     }
                 }
-           }
+            }
         }
     }
     
@@ -108,7 +106,7 @@ local function inputs()
             size = v2(300,50),
         },
         content = UI.content {
-            elements.name_input,
+            elements.name_input:create(),
             templates.padding(10, 0),
             {
                 name = "item_soul_flex",
@@ -119,9 +117,9 @@ local function inputs()
                     align = UI.ALIGNMENT.Start,
                 },
                 content = UI.content {
-                    elements.item_input,
+                    elements.item_input:create(),
                     templates.padding(10, 0),
-                    elements.soul_input,
+                    elements.soul_input:create(),
                 }
             },
             templates.padding(10, 0),
@@ -230,7 +228,6 @@ footer = {
             templates.button("Cancel", (function()
                 print("Clicked Cancel")
                 ambient.playSound('menu click')
-                enchanter.reset()   -- Clean up enchanter
                 enchanting_ui.hide()
             end), 80, 30),
             templates.padding(10, 0),
@@ -253,12 +250,17 @@ end
 enchanting_ui.hide = function()
     print("Menu Hide")
 
-    -- Reset enchanter
-    -- reset icons
-
-    auxUi.deepDestroy(elements.root)
-    elements.root:update()
     I.UI.removeMode('EnchantingDialog')
+    if not is_vendor_enchant then
+        I.UI.setMode("Interface")
+    else 
+        -- TODO: this to dialog
+        I.UI.setMode("Interface")
+    end
+    
+    -- Reset
+    enchanting_ui.reset()
+
 end
 
 enchanting_ui.enchant_item = function()
@@ -270,14 +272,10 @@ enchanting_ui.enchant_item = function()
 
     -- Now handle updating UI elements depending on enchanting success
     if icons_to_reset >= 1 then
-        elements.soul_input.content[3].props.resource = UI.texture({
-            path = "black" -- TODO: constant for this
-        })
+        elements.soul_input:reset_image()
     end
     if icons_to_reset >= 2 then
-        elements.item_input.content[3].props.resource = UI.texture({
-            path = "black" -- TODO: constant for this
-        })
+        elements.item_input:reset_image()
     end
 
     elements.root:update()
@@ -287,6 +285,28 @@ enchanting_ui.update_lists = function()
     print("update_lists")
     elements.souls_list:regenerate_items()
     elements.items_list:regenerate_items()
+end
+
+enchanting_ui.destroy = function()
+    print("enchanting_ui.destroy")
+    
+    enchanting_ui.hide()
+
+    auxUi.deepDestroy(elements.root)
+    elements.root:update()
+end
+
+enchanting_ui.reset = function()
+    print("enchanting_ui.reset")
+    
+    enchanter.reset()
+
+    elements.name_input:clear()
+    elements.soul_input:reset_image()
+    elements.item_input:reset_image()
+
+    
+
 end
 
 return enchanting_ui

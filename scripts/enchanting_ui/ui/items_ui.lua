@@ -28,9 +28,7 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     print("Icon: ", icon)
     print("Type: ", type_text)
     print("enchant_pts: ", tostring(enchant_pts))
-    elements.item_input.content[3].props.resource = UI.texture({
-        path = icon
-    })
+    elements.item_input:set_image(icon)
     
     elements.stats_enchantment:set_text(tostring(enchanter.enchantment.cost).."/"..tostring(enchanter.item.enchantment_capacity))
 
@@ -172,6 +170,6 @@ end
 
 elements.items_list = templates.list.new("Items", v2(600, 500), items_ui.make_enchantable_items_list)
 
-elements.item_input = templates.text_image("Item", v2(75,75), 10, items_ui.show_item_list, nil, nil)
+elements.item_input = templates.text_image.new("Item", v2(75,75), 10, items_ui.show_item_list)
 
 return items_ui

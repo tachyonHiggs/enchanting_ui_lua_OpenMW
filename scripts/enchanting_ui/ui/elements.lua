@@ -19,7 +19,7 @@ local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = {}
 
 -- Inputs
-elements.name_input = templates.text_input("Name", 200, function(text) enchanter.name = text end)
+elements.name_input = templates.text_input.new("Name", 200, function(text) enchanter.name = text end, function() elements.root:update() end)
 elements.soul_input = {}
 elements.item_input = {}
 

@@ -62,41 +62,106 @@ templates.button = function(name, on_click_fnc, size_x, size_y)
     }
 end
 
-templates.text_input = function(name, text_length, on_text_changed_fnc)
-    print("template.text_input")
-    return {
-        name = name .. "_text_input",
-        type = UI.TYPE.Flex,
+templates.text_input = {}
+templates.text_input.new = function(name, text_length, on_text_changed_fnc, update_ui)
+
+    local text_input = {}
+
+    text_input.name = name
+    text_input.text = ""
+    text_input.text_length = text_length
+
+    text_input.input = {
+        name = name .. "_input",
+        type = UI.TYPE.TextEdit,
+        template = I.MWUI.templates.textEditLine,
         props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
+            text = text_input.text,
+            textSize = 20,
+            size = v2(text_length, 20),
         },
-        content = UI.content {
-            {
-                name =  name .. "name",
-                type = UI.TYPE.Text,
-                template = I.MWUI.templates.textNormal,
-                props = {
-                    text = name,
-                    textSize = 20,
-            }},
-            templates.padding(10, 0),
-            {
-                name =  name .. "input",
-                type = UI.TYPE.TextEdit,
-                template = I.MWUI.templates.textEditLine,
-                props = {
-                    text = "",
-                    textSize = 20,
-                    size = v2(text_length,20),
-                },
-                events = {
-                    textChanged = async:callback(on_text_changed_fnc)
-                }
-            },
+        events = {
+            textChanged = async:callback(function(...)
+                -- Keep the stored text in sync
+                text_input.text = text_input.input.props.text
+
+                if on_text_changed_fnc then
+                    return on_text_changed_fnc(...)
+                end
+            end)
         }
     }
+
+    function text_input:set_text(text)
+        self.text = text
+        self.input.props.text = text
+    end
+
+    function text_input:get_text()
+        return self.text
+    end
+
+    function text_input:clear()
+        self:set_text("")
+    end
+
+    function text_input:show()
+        self.ui.props.visible = true
+    end
+
+    function text_input:hide()
+        self.ui.props.visible = false
+    end
+
+    function text_input:create()
+        self.ui = {
+            name = self.name .. "_text_input",
+            type = UI.TYPE.Flex,
+            props = {
+                horizontal = true,
+                arrange = UI.ALIGNMENT.Start,
+                align = UI.ALIGNMENT.Start,
+                visible = true,
+            },
+            content = UI.content {
+                {
+                    name = self.name .. "_name",
+                    type = UI.TYPE.Text,
+                    template = I.MWUI.templates.textNormal,
+                    props = {
+                        text = self.name,
+                        textSize = 20,
+                    }
+                },
+                templates.padding(10, 0),
+                self.input,
+                {
+                    name = "refresh",
+                    type = UI.TYPE.Image,
+                    template = I.MWUI.templates.borders,
+                    props = {
+                        resource = UI.texture({
+                            path = "Textures/menu_bar_yellow.dds"
+                        }),
+                        alpha = 1,
+                        size = v2(20,20),
+                    },
+                    events = {
+                        mouseClick = async:callback(function()
+                            text_input:clear()
+                            if update_ui then
+                                update_ui()
+                            end
+                        end),
+                    }
+                }
+            }
+        }
+
+        return self.ui
+    end
+
+    return text_input
 end
 
 templates.text_output = {}
@@ -166,119 +231,79 @@ templates.text_output.new = function(name, text_length, padding_length, default_
 end
 
 -- TODO: test and implement this
--- templates.text_image = {}
--- templates.text_image.new = function(name, image_size, padding_length, on_image_mouse_click)
+templates.text_image = {}
+templates.text_image.new = function(name, image_size, padding_length, on_image_mouse_click)
 
---     local text_image = {}
+    local text_image = {}
 
---     text_image.name = name
---     text_image.image_size = image_size
---     text_image.padding_length = padding_length
---     text_image.default_image = "black"
+    text_image.name = name
+    text_image.image_size = image_size
+    text_image.padding_length = padding_length
+    text_image.default_image = "black"
 
---     text_image.image = {
---         name = "image",
---         type = UI.TYPE.Image,
---         template = I.MWUI.templates.borders,
---         props = {
---             resource = UI.texture({
---                 path = text_image.default_image
---             }),
---             alpha = 1,
---             size = image_size,
---         },
---         events = {
---             mouseClick = async:callback(on_image_mouse_click),
---         }
---     }
-
---     function text_image:set_image(path)
---         self.image.props.resource = UI.texture({
---             path = path
---         })
---     end
-
---     function text_image:reset_image()
---         self:set_image(self.default_image)
---     end
-
---     function text_image:show()
---         self.ui.props.visible = true
---     end
-
---     function text_image:hide()
---         self.ui.props.visible = false
---     end
-
---     function text_image:create()
---         self.ui = {
---             name = self.name .. "_text_image",
---             type = UI.TYPE.Flex,
---             props = {
---                 horizontal = true,
---                 arrange = UI.ALIGNMENT.Start,
---                 align = UI.ALIGNMENT.Start,
---                 visible = true,
---             },
---             content = UI.content {
---                 {
---                     name = "name",
---                     type = UI.TYPE.Text,
---                     template = I.MWUI.templates.textNormal,
---                     props = {
---                         text = self.name,
---                         textSize = 20,
---                     }
---                 },
---                 templates.padding(self.padding_length, 0),
---                 self.image,
---             }
---         }
-
---         return self.ui
---     end
-
---     return text_image
--- end
-
-templates.text_image = function(name, image_size, padding_length, on_image_mouse_click, on_image_focus_gained, on_image_focus_loss)
-    return {
-        name = name .. "_text_image",
-        type = UI.TYPE.Flex,
+    text_image.image = {
+        name = "image",
+        type = UI.TYPE.Image,
+        template = I.MWUI.templates.borders,
         props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
+            resource = UI.texture({
+                path = text_image.default_image
+            }),
+            alpha = 1,
+            size = image_size,
         },
-        content = UI.content {
-            {
-                name = "name",
-                type = UI.TYPE.Text,
-                template = I.MWUI.templates.textNormal,
-                props = {
-                    text = name,
-                    textSize = 20,
-            }},
-            templates.padding(padding_length, 0),
-            {
-                name = "image",
-                type = UI.TYPE.Image,
-                template = I.MWUI.templates.borders,
-                props = {
-                    resource = UI.texture({
-                        path = "black"
-                    }),
-                    alpha = 1,
-                    size = image_size,
-                },
-                events = {
-                    mouseClick = async:callback(on_image_mouse_click),
-                    -- focusGain = async:callback(on_image_focus_gained),
-                    -- focusLoss = async:callback(on_image_focus_loss),
-                }
-            },
+        events = {
+            mouseClick = async:callback(on_image_mouse_click),
         }
     }
+
+    function text_image:set_image(path)
+        self.image.props.resource = UI.texture({
+            path = path
+        })
+    end
+
+    function text_image:reset_image()
+        self:set_image(self.default_image)
+    end
+
+    function text_image:show()
+        self.ui.props.visible = true
+    end
+
+    function text_image:hide()
+        self.ui.props.visible = false
+    end
+
+    function text_image:create()
+        self.ui = {
+            name = self.name .. "_text_image",
+            type = UI.TYPE.Flex,
+            props = {
+                horizontal = true,
+                arrange = UI.ALIGNMENT.Start,
+                align = UI.ALIGNMENT.Start,
+                visible = true,
+            },
+            content = UI.content {
+                {
+                    name = "name",
+                    type = UI.TYPE.Text,
+                    template = I.MWUI.templates.textNormal,
+                    props = {
+                        text = self.name,
+                        textSize = 20,
+                    }
+                },
+                templates.padding(self.padding_length, 0),
+                self.image,
+            }
+        }
+
+        return self.ui
+    end
+
+    return text_image
 end
 
 templates.list = {}

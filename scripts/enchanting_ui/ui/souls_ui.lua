@@ -28,9 +28,7 @@ local function on_soul_clicked(id, object, value, icon)
     print("click on soul: ", id)
     print("at icon: ", icon)
     print("with a soul value of: ", value)
-    elements.soul_input.content[3].props.resource = UI.texture({
-        path = icon
-    })
+    elements.soul_input:set_image(icon)
     enable_ui(elements.root)
 
     auxUi.deepDestroy(souls_ui.ui)
@@ -151,6 +149,6 @@ souls_ui.souls_list = templates.list.new("Souls", v2(600, 500), souls_ui.make_so
 elements.souls_list = souls_ui.souls_list
 
 
-elements.soul_input = templates.text_image("Soul", v2(75,75), 10, souls_ui.show_soul_list, nil, nil)
+elements.soul_input = templates.text_image.new("Soul", v2(75,75), 10, souls_ui.show_soul_list)
 
 return souls_ui

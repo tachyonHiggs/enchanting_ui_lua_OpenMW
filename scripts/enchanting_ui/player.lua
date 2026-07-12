@@ -1,4 +1,5 @@
 local I = require('openmw.interfaces')
+local auxUi = require("openmw_aux.ui")
 
 local enchanting_ui = require("scripts.enchanting_ui.enchanting_ui")
 
@@ -19,7 +20,7 @@ local function show()
 end
     
 local function hide()
-    enchanting_ui.hide(not is_vendor_enchant)
+    enchanting_ui.destroy()
 end
 
 local function onMouseWheel()
@@ -35,7 +36,10 @@ local function onSave()
 end
 
 local function onLoad(data)
+
+    -- Register Window amd reset
     I.UI.registerWindow('EnchantingDialog', show, hide)
+    enchanting_ui.reset()
 end
 
 return {
@@ -49,6 +53,15 @@ return {
     eventHandlers = {
         UiModeChanged = function(data)
             print('UiModeChanged from', data.oldMode , 'to', data.newMode, '('..tostring(data.arg)..')')
+            -- TODO: use arg here to make it the soul gem
+            if data.newMode == 'EnchantingDialog' then
+                -- TODO: change this to be talking to NPC
+                -- if data.oldMode == 'interface' then
+                    -- SEND event that is vendor
+                -- end
+                
+            end
+
         end,
         update_enchant_ui_after_object_removed = function(data)
             print("update_enchant_ui_after_object_removed")
