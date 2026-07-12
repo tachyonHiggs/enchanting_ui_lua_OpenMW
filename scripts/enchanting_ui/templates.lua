@@ -330,6 +330,11 @@ templates.list.new = function(name, list_size, generate_items)
         return true
     end
 
+    function list:regenerate_items()
+        self.items = generate_items() or {}
+        self.items_container.content = UI.content(self.items)
+    end
+
     function list:clear()
         self.items = {}
         self.items_container.content = UI.content({})

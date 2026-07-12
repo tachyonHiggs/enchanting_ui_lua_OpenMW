@@ -136,6 +136,7 @@ local function create_soul(id, object, value, icon, name, soul_name)
 end
 
 function souls_ui.make_souls_list()
+    print("make_souls_list")
     local valid_items = {}
 
     local items = enchanter.get_inventory_souls()

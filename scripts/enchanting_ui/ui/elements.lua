@@ -21,12 +21,7 @@ local elements = {}
 -- Inputs
 elements.name_input = templates.text_input("Name", 200, function(text) enchanter.name = text end)
 elements.soul_input = {}
-elements.reset_soul = function()
-    elements.soul_input.content[3].props.resource = UI.texture({
-        path = "black"
-    })
-    enchanter.reset_soul()
-end
+elements.item_input = {}
 
 -- Stats
 elements.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End)

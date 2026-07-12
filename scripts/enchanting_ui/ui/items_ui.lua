@@ -28,7 +28,7 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     print("Icon: ", icon)
     print("Type: ", type_text)
     print("enchant_pts: ", tostring(enchant_pts))
-    items_ui.item_input.content[3].props.resource = UI.texture({
+    elements.item_input.content[3].props.resource = UI.texture({
         path = icon
     })
     
@@ -142,6 +142,7 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
 end
 
 function items_ui.make_enchantable_items_list()
+    print("make_enchantable_items_list")
     local valid_items = {}
 
     local items = enchanter.get_enchantable_inventory_items()
@@ -164,14 +165,13 @@ function items_ui.show_item_list()
             anchor = v2(0.5, 0.5),
         },
         content = UI.content {
-            items_ui.items_list:create()
+            elements.items_list:create()
         }
     }
 end
 
-items_ui.items_list = templates.list.new("Items", v2(600, 500), items_ui.make_enchantable_items_list)
-elements.items_list = items_ui.items_list
+elements.items_list = templates.list.new("Items", v2(600, 500), items_ui.make_enchantable_items_list)
 
-items_ui.item_input = templates.text_image("Item", v2(75,75), 10, items_ui.show_item_list, nil, nil)
+elements.item_input = templates.text_image("Item", v2(75,75), 10, items_ui.show_item_list, nil, nil)
 
 return items_ui

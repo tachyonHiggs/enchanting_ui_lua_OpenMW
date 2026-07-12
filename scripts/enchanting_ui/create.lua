@@ -67,19 +67,17 @@ end
 local function remove_object(data)
     print("remove_object")
     local count = data.count
-    print("Count: ", count)
     local object = data.object
-    print("Object: ", object)
+    local type = data.type
 
     object:remove(count)
+
+    world.players[1]:sendEvent("update_enchant_ui_after_object_removed", {})
 end
 
 local function move_into_player(data)
-    print("move_into_player")
-    local count = data.count
-    print("Count: ", count)
     local id = data.id
-    print("Id: ", id)
+    print("move_into_player ID: ", id)
 
     world.createObject(id, count):moveInto(world.players[1])
 end

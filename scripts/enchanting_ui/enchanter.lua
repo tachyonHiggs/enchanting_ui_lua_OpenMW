@@ -294,34 +294,29 @@ enchanter.enchant_item = function()
     
     if enchanter.check_requirements() == false then
         
-        return
+        return 0  -- Don't reset any icons
     end
 
     -- Remove Soul gem
-    core.sendGlobalEvent('remove_object', {object = enchanter.soul.object, count = 1})
-    -- TOOD: if azuras star, give empty one
+    core.sendGlobalEvent('remove_object', {object = enchanter.soul.object, count = 1, type = "soul"})
     if (enchanter.soul.id == 'misc_soulgem_azura') then
-        print("Azuras star!")
         core.sendGlobalEvent('move_into_player', { id = "misc_soulgem_azura", count = 1 })
     end
 
-
     if enchanter.get_enchant_success() == false then
-        elements.reset_soul()
-        elements.root:update()
-        return
+        enchanter.reset_soul()
+        return 1 -- reset soul gem icon
     end
 
     enchanter.create_item()
 
     -- Remove unenchanted item
-    core.sendGlobalEvent('remove_object', {object = enchanter.item.object, count = 1})
+    core.sendGlobalEvent('remove_object', {object = enchanter.item.object, count = 1, type = "item"})
 
     -- Clean up enchanter
-    elements.reset_soul()
-    -- elements.reset_item()
     enchanter.reset() 
-    elements.root:update()
+
+    return 2 -- Reset both soul gem and item icon
 end
 
 -- This fnc is used to calculate the current success rate

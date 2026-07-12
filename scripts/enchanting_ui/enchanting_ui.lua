@@ -119,7 +119,7 @@ local function inputs()
                     align = UI.ALIGNMENT.Start,
                 },
                 content = UI.content {
-                    items_ui.item_input,
+                    elements.item_input,
                     templates.padding(10, 0),
                     elements.soul_input,
                 }
@@ -223,7 +223,6 @@ footer = {
             templates.padding(200, 0),
             templates.button("Create", (function()
                 print("Clicked Create")
-                ambient.playSound('menu click')
                 enchanting_ui.enchant_item()
                 return true
             end), 80, 30),
@@ -253,6 +252,10 @@ end
 -- TODO: fix this
 enchanting_ui.hide = function()
     print("Menu Hide")
+
+    -- Reset enchanter
+    -- reset icons
+
     auxUi.deepDestroy(elements.root)
     elements.root:update()
     I.UI.removeMode('EnchantingDialog')
@@ -260,7 +263,30 @@ end
 
 enchanting_ui.enchant_item = function()
     print("enchant_item")
-    enchanter.enchant_item()
+
+    ambient.playSound('menu click')
+
+    local icons_to_reset = enchanter.enchant_item()
+
+    -- Now handle updating UI elements depending on enchanting success
+    if icons_to_reset >= 1 then
+        elements.soul_input.content[3].props.resource = UI.texture({
+            path = "black" -- TODO: constant for this
+        })
+    end
+    if icons_to_reset >= 2 then
+        elements.item_input.content[3].props.resource = UI.texture({
+            path = "black" -- TODO: constant for this
+        })
+    end
+
+    elements.root:update()
+end
+
+enchanting_ui.update_lists = function()
+    print("update_lists")
+    elements.souls_list:regenerate_items()
+    elements.items_list:regenerate_items()
 end
 
 return enchanting_ui

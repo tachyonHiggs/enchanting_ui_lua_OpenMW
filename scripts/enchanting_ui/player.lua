@@ -14,6 +14,7 @@ I.Settings.registerPage ({
 
 
 local function show()
+    enchanting_ui.update_lists()
     enchanting_ui.show(not is_vendor_enchant)
 end
     
@@ -46,6 +47,12 @@ return {
         onFrame = onFrame,
     },
     eventHandlers = {
-
+        UiModeChanged = function(data)
+            print('UiModeChanged from', data.oldMode , 'to', data.newMode, '('..tostring(data.arg)..')')
+        end,
+        update_enchant_ui_after_object_removed = function(data)
+            print("update_enchant_ui_after_object_removed")
+            enchanting_ui.update_lists()
+        end,
     }
 }
