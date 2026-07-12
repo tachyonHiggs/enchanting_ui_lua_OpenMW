@@ -61,13 +61,33 @@ local function create_enchantment_and_item(data)
 
     -- Move to player inventory
     new_item_instance:moveInto(world.players[1])
-    -- TODO: remove OG item from player inventory
 
-    return true
+end
+
+local function remove_object(data)
+    print("remove_object")
+    local count = data.count
+    print("Count: ", count)
+    local object = data.object
+    print("Object: ", object)
+
+    object:remove(count)
+end
+
+local function move_into_player(data)
+    print("move_into_player")
+    local count = data.count
+    print("Count: ", count)
+    local id = data.id
+    print("Id: ", id)
+
+    world.createObject(id, count):moveInto(world.players[1])
 end
 
 return {
     eventHandlers = {
         create_enchantment_and_item = create_enchantment_and_item,
+        remove_object = remove_object,
+        move_into_player = move_into_player,
     }
 }

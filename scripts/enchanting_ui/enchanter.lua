@@ -3,6 +3,7 @@ local types = require('openmw.types')
 local self = require('openmw.self')
 local UI = require('openmw.ui')
 local storage = require('openmw.storage')
+local ambient = require('openmw.ambient')
 
 -- Main object
 local enchanter = {}
@@ -10,14 +11,14 @@ local enchanter = {}
 enchanter.name = ""
 enchanter.item = {
     id = "",
-    object_id = "",
+    object = "",
     icon = nil,
     type = 0,
     enchantment_capacity = 0
 }
 enchanter.soul = {
     id = "",
-    object_id = "",
+    object = "",
     icon = nil,
     charge = 0,
 }
@@ -38,6 +39,25 @@ enchanter.reset_effect_to_add = function()
     }
 end
 
+enchanter.reset_item = function()
+    enchanter.item = {
+        id = "",
+        object = {},
+        icon = nil,
+        type = 0,
+        enchantment_capacity = 0
+    }
+end
+
+enchanter.reset_soul = function()
+    enchanter.soul = {
+        id = "",
+        object = {},
+        icon = nil,
+        charge = 0
+    }
+end
+
 enchanter.reset = function()
     enchanter.enchantment = {}
     -- charge is covered by soul gem
@@ -50,19 +70,10 @@ enchanter.reset = function()
     enchanter.chance = 0
 
     enchanter.name = ""
-    enchanter.item = {
-        id = "",
-        object_id = "",
-        icon = nil,
-        type = 0,
-        enchantment_capacity = 0
-    }
-    enchanter.soul = {
-        id = "",
-        object_id = "",
-        icon = nil,
-        charge = 0
-    }
+
+    enchanter.reset_soul()
+    enchanter.reset_item()
+    
 end
 
 enchanter.get_effect_to_add_cost = function ()
@@ -132,44 +143,40 @@ enchanter.get_enchantable_inventory_items = function()
     for _, item in ipairs(weapons) do
         -- check not enchanted
         if types.Weapon.records[item.recordId].enchant == nil then
-            local object_id = item.id
             local icon = types.Weapon.records[item.recordId].icon
             local name = types.Weapon.records[item.recordId].name
             local enchant_pts = types.Weapon.records[item.recordId].enchantCapacity
-            table.insert(enchantable_inventory_items, {item.recordId, object_id, icon, item.type, name, enchant_pts})
+            table.insert(enchantable_inventory_items, {item.recordId, item, icon, item.type, name, enchant_pts})
             -- print(item.recordId)
         end
     end
     for _, item in ipairs(armors) do
         -- check not enchanted
         if types.Armor.records[item.recordId].enchant == nil then
-            local object_id = item.id
             local icon = types.Armor.records[item.recordId].icon
             local name = types.Armor.records[item.recordId].name
             local enchant_pts = types.Armor.records[item.recordId].enchantCapacity
-            table.insert(enchantable_inventory_items, {item.recordId, object_id, icon, item.type, name, enchant_pts})
+            table.insert(enchantable_inventory_items, {item.recordId, item, icon, item.type, name, enchant_pts})
             -- print(item.recordId)
         end
     end
     for _, item in ipairs(clothing) do
         -- check not enchanted
         if types.Clothing.records[item.recordId].enchant == nil then
-            local object_id = item.id
             local icon = types.Clothing.records[item.recordId].icon
             local name = types.Clothing.records[item.recordId].name
             local enchant_pts = types.Clothing.records[item.recordId].enchantCapacity
-            table.insert(enchantable_inventory_items, {item.recordId, object_id, icon, item.type, name, enchant_pts})
+            table.insert(enchantable_inventory_items, {item.recordId, item, icon, item.type, name, enchant_pts})
             -- print(item.recordId)
         end
     end
     for _, item in ipairs(books) do
         -- check not enchanted
         if types.Book.records[item.recordId].enchant == nil then
-            local object_id = item.id
             local icon = types.Book.records[item.recordId].icon
             local name = types.Book.records[item.recordId].name
             local enchant_pts = types.Book.records[item.recordId].enchantCapacity
-            table.insert(enchantable_inventory_items, {item.recordId, object_id, icon, item.type, name, enchant_pts})
+            table.insert(enchantable_inventory_items, {item.recordId, item, icon, item.type, name, enchant_pts})
             -- print(item.recordId)
         end
     end
@@ -191,7 +198,7 @@ enchanter.get_inventory_souls = function ()
             local soul_name = types.Creature.records[soul].name
             local name = types.Miscellaneous.records[item.recordId].name
             -- local quantity = 
-            table.insert(souls, {item.recordId, item.id, soul_value, icon, name, soul_name})
+            table.insert(souls, {item.recordId, item, soul_value, icon, name, soul_name})
         end
     end
 
@@ -251,16 +258,23 @@ enchanter.get_enchant_success = function()
     
     if storage.globalSection("cheats_enchanting_ui"):get("always_success") == false then
 
-        local success_percent = enchanter.calculate_success_rate()
+        -- Vanilla success rate
+        local success_percent = enchanter.calculate_vanilla_success_rate()
         print("calculated success is at: ", success_percent)
         
-        -- if success_percent < some random dice roll
-            -- return true
-        -- else
-            -- return false
+        local dice_roll = math.random(0, 100)
+        print("random dice roll: ", dice_roll)
+        if success_percent < dice_roll then
+            UI.showMessage("Failed to create enchanted item")
+            print("Failed: Failed to create enchanted item")
+            ambient.playSound('enchant fail')
+            return false
+        end
 
     end
 
+    print("Success: Passed")
+    ambient.playSound('enchant success')
     return true
 end
 
@@ -268,9 +282,8 @@ end
 enchanter.create_item = function()
     print("create_item")
 
-    -- Serialize data
-    local result = core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item=enchanter.item, soul = enchanter.soul, enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
-    print(result)
+    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item=enchanter.item, soul = enchanter.soul, enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
+
 end
 
 -- TODO: make this return if item was created and message
@@ -284,25 +297,36 @@ enchanter.enchant_item = function()
         return
     end
 
-    -- TODO: Consume soul gems
-    -- types.Actor.inventory(self):find(enchanter.soul.id, 1)
+    -- Remove Soul gem
+    core.sendGlobalEvent('remove_object', {object = enchanter.soul.object, count = 1})
+    -- TOOD: if azuras star, give empty one
+    if (enchanter.soul.id == 'misc_soulgem_azura') then
+        print("Azuras star!")
+        core.sendGlobalEvent('move_into_player', { id = "misc_soulgem_azura", count = 1 })
+    end
+
 
     if enchanter.get_enchant_success() == false then
-
+        elements.reset_soul()
+        elements.root:update()
         return
     end
 
     enchanter.create_item()
-    -- Destory unenchanted item
-    -- types.Actor.inventory(self):remove(enchanter.item.object_id, 1)
+
+    -- Remove unenchanted item
+    core.sendGlobalEvent('remove_object', {object = enchanter.item.object, count = 1})
 
     -- Clean up enchanter
+    elements.reset_soul()
+    -- elements.reset_item()
     enchanter.reset() 
+    elements.root:update()
 end
 
 -- This fnc is used to calculate the current success rate
-enchanter.calculate_success_rate = function()
-    print("calculate_success_rate")
+enchanter.calculate_vanilla_success_rate = function()
+    print("calculate_vanilla_success_rate")
 
     -- Get relevant skills and attributes
     local enchant_skill = types.Player.stats["skills"]["enchant"](self.object).modified

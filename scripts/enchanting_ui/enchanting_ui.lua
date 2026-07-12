@@ -121,7 +121,7 @@ local function inputs()
                 content = UI.content {
                     items_ui.item_input,
                     templates.padding(10, 0),
-                    souls_ui.soul_input,
+                    elements.soul_input,
                 }
             },
             templates.padding(10, 0),

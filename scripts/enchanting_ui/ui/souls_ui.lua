@@ -17,10 +17,10 @@ local elements = require("scripts.enchanting_ui.ui.elements")
 local souls_ui = {}
 
 
-local function on_soul_clicked(id, object_id, value, icon)
+local function on_soul_clicked(id, object, value, icon)
 
     enchanter.soul.id = id
-    enchanter.soul.object_id = object_id
+    enchanter.soul.object = object
     enchanter.soul.icon = icon
     enchanter.soul.charge = value
     elements.stats_charge:set_text(tostring(enchanter.enchantment.cost).. "/".. tostring(enchanter.soul.charge ))
@@ -28,10 +28,10 @@ local function on_soul_clicked(id, object_id, value, icon)
     print("click on soul: ", id)
     print("at icon: ", icon)
     print("with a soul value of: ", value)
-    souls_ui.soul_input.content[3].props.resource = UI.texture({
+    elements.soul_input.content[3].props.resource = UI.texture({
         path = icon
     })
-    elements.root:update()
+    enable_ui(elements.root)
 
     auxUi.deepDestroy(souls_ui.ui)
     souls_ui.ui:update()
@@ -41,6 +41,7 @@ end
 function souls_ui.show_soul_list()
 
     print("CREATING SOUL UI")
+    disable_ui(elements.root)
 
     souls_ui.ui = UI.create{
         name = "souls_list",
@@ -59,7 +60,7 @@ function souls_ui.show_soul_list()
     souls_ui.ui:update()
 end
 
-local function create_soul(id, object_id, value, icon, name, soul_name)
+local function create_soul(id, object, value, icon, name, soul_name)
     local icon_element = {
         name = "icon",
         type = UI.TYPE.Image,
@@ -128,7 +129,7 @@ local function create_soul(id, object_id, value, icon, name, soul_name)
         },
         events = {
             mouseClick = async:callback(function()
-                on_soul_clicked(id, object_id, value, icon)
+                on_soul_clicked(id, object, value, icon)
             end)
         }
     }
@@ -149,6 +150,6 @@ souls_ui.souls_list = templates.list.new("Souls", v2(600, 500), souls_ui.make_so
 elements.souls_list = souls_ui.souls_list
 
 
-souls_ui.soul_input = templates.text_image("Soul", v2(75,75), 10, souls_ui.show_soul_list, nil, nil)
+elements.soul_input = templates.text_image("Soul", v2(75,75), 10, souls_ui.show_soul_list, nil, nil)
 
 return souls_ui

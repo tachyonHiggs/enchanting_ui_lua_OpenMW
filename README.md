@@ -7,11 +7,17 @@
 - Be able to easily close the gosh darn enchanting menu 
 - Add enchanting for arrows
 - Add vendor enchanting UI, added some foundation for this 
+- Add tool tips
+- Add consistent sound effects
 
 
 ### Expanded Features
 - Implement constant effect as always possible with any soul but reduces enchantment capacity
 - Implement cheat modes: disable enchantment capacity, disable cost, disable charge, etc
+
+
+### Development
+- Add descriptions,params, fields etc to functions and files
 
 
 ## Known Issues

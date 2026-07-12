@@ -17,10 +17,10 @@ local elements = require("scripts.enchanting_ui.ui.elements")
 local items_ui = {}
 
 
-local function on_item_clicked(id, object_id, icon, enchant_pts, type_text)
+local function on_item_clicked(id, object, icon, enchant_pts, type_text)
 
     enchanter.item.id = id
-    enchanter.item.object_id = object_id
+    enchanter.item.object = object
     enchanter.item.icon = icon
     enchanter.item.type = type_text
     enchanter.item.enchantment_capacity = enchant_pts
@@ -46,13 +46,13 @@ local function on_item_clicked(id, object_id, icon, enchant_pts, type_text)
     elements.cast_type_btn.content[2].props.text = enchanter.toggle_cast_type()
     -- ENd todo
 
-    elements.root:update()
+    enable_ui(elements.root)
 
     auxUi.deepDestroy(items_ui.ui)
     items_ui.ui:update()
 end
 
-local function create_enchantable_item(id, object_id, icon, type, name, enchant_pts)
+local function create_enchantable_item(id, object, icon, type, name, enchant_pts)
     print("create_effect_item")
 
     local icon_element = {
@@ -135,7 +135,7 @@ local function create_enchantable_item(id, object_id, icon, type, name, enchant_
         },
         events = {
             mouseClick = async:callback(function()
-                on_item_clicked(id, object_id, icon, enchant_pts, type_text)
+                on_item_clicked(id, object, icon, enchant_pts, type_text)
             end)
         }
     }
@@ -153,6 +153,7 @@ function items_ui.make_enchantable_items_list()
 end
 
 function items_ui.show_item_list()
+    disable_ui(elements.root)
     items_ui.ui = UI.create{
         name = "item_list",
         layer = "Windows",

@@ -15,7 +15,7 @@ templates.make_border = function(size)
             resource = UI.texture({
             path = "black"
             }),
-            alpha = 0.5,
+            alpha = 0.75,
             size = size,
             anchor = v2(0.5, 0.5),
             relativePosition = v2(0.5, 0.5),
@@ -164,6 +164,82 @@ templates.text_output.new = function(name, text_length, padding_length, default_
 
     return text_output
 end
+
+-- TODO: test and implement this
+-- templates.text_image = {}
+-- templates.text_image.new = function(name, image_size, padding_length, on_image_mouse_click)
+
+--     local text_image = {}
+
+--     text_image.name = name
+--     text_image.image_size = image_size
+--     text_image.padding_length = padding_length
+--     text_image.default_image = "black"
+
+--     text_image.image = {
+--         name = "image",
+--         type = UI.TYPE.Image,
+--         template = I.MWUI.templates.borders,
+--         props = {
+--             resource = UI.texture({
+--                 path = text_image.default_image
+--             }),
+--             alpha = 1,
+--             size = image_size,
+--         },
+--         events = {
+--             mouseClick = async:callback(on_image_mouse_click),
+--         }
+--     }
+
+--     function text_image:set_image(path)
+--         self.image.props.resource = UI.texture({
+--             path = path
+--         })
+--     end
+
+--     function text_image:reset_image()
+--         self:set_image(self.default_image)
+--     end
+
+--     function text_image:show()
+--         self.ui.props.visible = true
+--     end
+
+--     function text_image:hide()
+--         self.ui.props.visible = false
+--     end
+
+--     function text_image:create()
+--         self.ui = {
+--             name = self.name .. "_text_image",
+--             type = UI.TYPE.Flex,
+--             props = {
+--                 horizontal = true,
+--                 arrange = UI.ALIGNMENT.Start,
+--                 align = UI.ALIGNMENT.Start,
+--                 visible = true,
+--             },
+--             content = UI.content {
+--                 {
+--                     name = "name",
+--                     type = UI.TYPE.Text,
+--                     template = I.MWUI.templates.textNormal,
+--                     props = {
+--                         text = self.name,
+--                         textSize = 20,
+--                     }
+--                 },
+--                 templates.padding(self.padding_length, 0),
+--                 self.image,
+--             }
+--         }
+
+--         return self.ui
+--     end
+
+--     return text_image
+-- end
 
 templates.text_image = function(name, image_size, padding_length, on_image_mouse_click, on_image_focus_gained, on_image_focus_loss)
     return {

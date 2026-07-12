@@ -33,7 +33,7 @@ effect_ui.on_magic_effect_clicked = function(id)
     print("CREATING MAGIC EFFECT ADD UI")
     elements.effects_root = UI.create(effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add):create())
     elements.effects_root:update()
-    elements.root:update()
+    disable_ui(elements.root)
 
 end
 
@@ -95,7 +95,7 @@ effect_ui.on_effect_clicked = function(id)
     effect_ui.effects_ui = effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add)
     elements.effects_root = UI.create(effect_ui.effects_ui:create())
     elements.effects_root:update()
-    elements.root:update()
+    enable_ui(elements.root)
 
 end
 
@@ -296,7 +296,7 @@ effect_ui.new = function(modify, effect_to_add)
 
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()
-        elements.root:update()
+        enable_ui(elements.root)
     end
 
     local function cancel_magic_effect()
@@ -304,6 +304,7 @@ effect_ui.new = function(modify, effect_to_add)
         
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()
+        enable_ui(elements.root)
     end
 
     local function delete_effect()
@@ -322,7 +323,7 @@ effect_ui.new = function(modify, effect_to_add)
 
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()
-        elements.root:update()
+        enable_ui(elements.root)
     end
 
     local function update_effect_to_add_cost(update_ui)
@@ -365,7 +366,7 @@ effect_ui.new = function(modify, effect_to_add)
             layer = "Windows",
             template = I.MWUI.templates.boxSolid,
             props = {
-                size = v2(400, 400),
+                relativeSize = v2(1, 1),
                 relativePosition = v2(0.5, 0.5),
                 anchor = v2(0.5, 0.5),
             },

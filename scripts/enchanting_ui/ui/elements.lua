@@ -20,6 +20,13 @@ local elements = {}
 
 -- Inputs
 elements.name_input = templates.text_input("Name", 200, function(text) enchanter.name = text end)
+elements.soul_input = {}
+elements.reset_soul = function()
+    elements.soul_input.content[3].props.resource = UI.texture({
+        path = "black"
+    })
+    enchanter.reset_soul()
+end
 
 -- Stats
 elements.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End)
@@ -36,6 +43,15 @@ elements.magic_effects = {}
 elements.effects = {}
 
 elements.root = {}
+function enable_ui(element)
+    element.layout.content[2].template = I.MWUI.templates.padding
+    element:update()
+end
+function disable_ui(element)
+    element.layout.content[2].template = I.MWUI.templates.disabled
+    element:update()
+end
+
 elements.effects_root = {}
 
 return elements
