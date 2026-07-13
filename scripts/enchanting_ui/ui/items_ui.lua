@@ -19,39 +19,37 @@ local items_ui = {}
 
 local function on_item_clicked(id, object, icon, enchant_pts, type_text)
 
+    enchanter.reset()
+    elements.effects:clear()
+
     enchanter.item.id = id
     enchanter.item.object = object
     enchanter.item.icon = icon
     enchanter.item.type = type_text
     enchanter.item.enchantment_capacity = enchant_pts
+
     print("click on item: ", id)
     print("Icon: ", icon)
     print("Type: ", type_text)
     print("enchant_pts: ", tostring(enchant_pts))
     elements.item_input:set_image(icon)
     
-    elements.stats_enchantment:set_text(tostring(enchanter.enchantment.cost).."/"..tostring(enchanter.item.enchantment_capacity))
 
-    -- TODo: this is just toggle cast type function
-    enchanter.enchantment.type = 0
-    enchanter.soul.charge = 0
-    enchanter.enchantment.cost = 0
-    enchanter.effects_with_params = {}
-    enchanter.enchantment.isAutocalc = 0
-
-    elements.effects:clear()
-    
+    -- TODO: this is just toggle cast type function
     elements.cast_type_btn.content[2].props.text = enchanter.toggle_cast_type()
     -- ENd todo
 
-    enable_ui(elements.root)
+    elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..tostring(enchanter.item.enchantment_capacity))
+    elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost) .. "/" .. tostring(enchanter.soul.charge))
+
+    elements.enable_ui(elements.root)
 
     auxUi.deepDestroy(items_ui.ui)
     items_ui.ui:update()
 end
 
 local function create_enchantable_item(id, object, icon, type, name, enchant_pts)
-    print("create_effect_item")
+    print("create_enchantable_item")
 
     local icon_element = {
         name = "icon",
@@ -152,7 +150,7 @@ function items_ui.make_enchantable_items_list()
 end
 
 function items_ui.show_item_list()
-    disable_ui(elements.root)
+    elements.disable_ui(elements.root)
     items_ui.ui = UI.create{
         name = "item_list",
         layer = "Windows",
@@ -166,6 +164,7 @@ function items_ui.show_item_list()
             elements.items_list:create()
         }
     }
+    items_ui.ui:update()
 end
 
 elements.items_list = templates.list.new("Items", v2(600, 500), items_ui.make_enchantable_items_list)

@@ -37,7 +37,7 @@ end
 
 local function onLoad(data)
 
-    -- Register Window amd reset
+    -- Register Window and reset
     I.UI.registerWindow('EnchantingDialog', show, hide)
     enchanting_ui.reset()
 end

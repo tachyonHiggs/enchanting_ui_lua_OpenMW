@@ -8,21 +8,6 @@ local ambient = require('openmw.ambient')
 -- Main object
 local enchanter = {}
 
-enchanter.name = ""
-enchanter.item = {
-    id = "",
-    object = "",
-    icon = nil,
-    type = 0,
-    enchantment_capacity = 0
-}
-enchanter.soul = {
-    id = "",
-    object = "",
-    icon = nil,
-    charge = 0,
-}
-
 enchanter.reset_effect_to_add = function()
     enchanter.effect_to_modify = false
     enchanter.effect_to_add = {
@@ -64,8 +49,10 @@ enchanter.reset = function()
     enchanter.effects_with_params = {}
     enchanter.reset_effect_to_add()
     enchanter.enchantment.id = 0 -- should be generated
-    enchanter.enchantment.isAutocalc = 0
+    enchanter.enchantment.isAutocalc = true
     enchanter.enchantment.type = 0
+    enchanter.enchantment.base_cost = 0
+    enchanter.enchantment.effective_cost = 0
 
     enchanter.chance = 0
 
@@ -85,7 +72,8 @@ enchanter.get_effect_to_add_cost = function ()
     local min_plus_max = enchanter.effect_to_add.magnitudeMin + enchanter.effect_to_add.magnitudeMax
 
     if constant_effect_bool then
-        cost = base_cost * (min_plus_max*100 + enchanter.effect_to_add.area) / 40
+        local fEnchantmentConstantDurationMult = core.getGMST('fEnchantmentConstantDurationMult')
+        cost = base_cost * (min_plus_max*fEnchantmentConstantDurationMult + enchanter.effect_to_add.area) / 40
     elseif enchanter.effect_to_add.range == core.magic.RANGE.Self or enchanter.effect_to_add.range == core.magic.RANGE.Touch then
         cost = base_cost * (min_plus_max*enchanter.effect_to_add.duration + enchanter.effect_to_add.area) / 40
     elseif enchanter.effect_to_add.range == core.magic.RANGE.Target then
@@ -95,7 +83,7 @@ enchanter.get_effect_to_add_cost = function ()
     return cost
 end
 
-enchanter.get_effects_total_cost = function()
+enchanter.get_effects_total_base_cost = function()
     local sum = 0
 
     if storage.globalSection("options_enchanting_ui"):get("remove_compound_effect_cost") then
@@ -104,7 +92,7 @@ enchanter.get_effects_total_cost = function()
         end
 
     else
-        local total_num_effects = table.getn(enchanter.effects_with_params)
+        local total_num_effects = #enchanter.effects_with_params
         for index, effect in ipairs(enchanter.effects_with_params) do
             sum = sum + (effect.cost * (total_num_effects - index + 1))
         end
@@ -113,16 +101,27 @@ enchanter.get_effects_total_cost = function()
     return sum
 end
 
+enchanter.get_effective_cost = function()
+    local enchant_skill = types.Player.stats["skills"]["enchant"](self.object).modified
+    local effective_cost = enchanter.enchantment.base_cost - (enchanter.enchantment.base_cost / 100) * (enchant_skill - 10)
+
+    if effective_cost < 1 then
+        effective_cost = 1
+    end
+
+    return effective_cost
+end
+
 enchanter.get_known_magic_effects = function()
 
     local known_magic_effects = {}
-    local seen = {}
     local spells = types.Player.spells(self)
 
     for _, spell in ipairs(spells) do
-        if (spell.type ~= core.magic.SPELL_TYPE.Power) then
+        if spell.type == core.magic.SPELL_TYPE.Spell then
             for _, effect in ipairs(spell.effects) do
                 known_magic_effects[effect.effect.id] = effect.effect.name
+                print(effect.effect.name)
             end
         end
     end
@@ -229,7 +228,7 @@ enchanter.check_requirements = function()
 
     -- Check enchantment capacity limit
     if storage.globalSection("cheats_enchanting_ui"):get("remove_enchant_cap_limit") == false then
-        if enchanter.enchantment.cost > enchanter.item.enchantment_capacity then
+        if enchanter.enchantment.base_cost > enchanter.item.enchantment_capacity then
             UI.showMessage("Enchantment Cost beyond Item Capacity")
             print("Failed: Enchantment Cost beyond Item Capacity")
             return false
@@ -238,12 +237,26 @@ enchanter.check_requirements = function()
 
     -- Check charge
     if storage.globalSection("cheats_enchanting_ui"):get("remove_soul_charge_limit") == false then
-        if enchanter.enchantment.cost > enchanter.soul.charge then
+
+        if enchanter.enchantment.base_cost > enchanter.soul.charge then
             UI.showMessage("Enchantment Cost beyond Soul Charge")
             print("Failed: Enchantment Cost beyond Soul Charge")
             return false
         end
+
+        if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+            local constant_effect_threshold = storage.globalSection("options_enchanting_ui"):get("constant_effect_threshold")
+            if enchanter.soul.charge < constant_effect_threshold then
+                UI.showMessage("Soul Charge below Constant Effect Threshold")
+                print("Failed: Soul Charge below Constant Effect Threshold")
+                return false
+            end
+        end
+    else 
+        enchanter.enchantment.base_cost = 0
     end
+
+    
 
     -- Check price
     -- if player has enough gold
@@ -263,7 +276,7 @@ enchanter.get_enchant_success = function()
         local dice_roll = math.random(0, 100)
         print("random dice roll: ", dice_roll)
         if success_percent < dice_roll then
-            UI.showMessage("Failed to create enchanted item")
+            UI.showMessage("Failed to Create Enchanted Item")
             print("Failed: Failed to create enchanted item")
             ambient.playSound('enchant fail')
             return false
@@ -271,6 +284,7 @@ enchanter.get_enchant_success = function()
 
     end
 
+    UI.showMessage("Created Enchanted Item")
     print("Success: Passed")
     ambient.playSound('enchant success')
     return true
@@ -287,8 +301,6 @@ end
 -- TODO: make this return if item was created and message
 enchanter.enchant_item = function()
     print("enchant_item")
-
-    enchanter.get_enchant_success()
     
     if enchanter.check_requirements() == false then
         
@@ -342,13 +354,14 @@ enchanter.calculate_vanilla_success_rate = function()
     local enchantment_chance_mult = core.getGMST('fEnchantmentChanceMult')
     local enchantment_const_chance_mult = core.getGMST('fEnchantmentConstantChanceMult')
     print("enchantment_chance_mult: ", enchantment_chance_mult)
+    print("enchantment_const_chance_mult: ", enchantment_const_chance_mult)
 
     -- Get is constant effect
     local is_effect_constant = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect and 1 or 0
     print("Is effect constant: ", is_effect_constant)
 
     -- From: "Enchanting success rate" at https://en.uesp.net/wiki/Morrowind:Enchant
-    local rate = (0.75 + (fatigue_percent/2)) * (1 - (enchantment_const_chance_mult * is_effect_constant)) * (enchant_skill + (intelligence/5) + (luck/10) - (enchantment_chance_mult * enchanter.enchantment.cost))
+    local rate = (0.75 + (fatigue_percent/2)) * (1 - (enchantment_const_chance_mult * is_effect_constant)) * (enchant_skill + (intelligence/5) + (luck/10) - (enchantment_chance_mult * enchanter.enchantment.base_cost))
 
     return rate
 end
@@ -393,6 +406,7 @@ enchanter.toggle_cast_type = function()
     enchanter.enchantment.type = valid_types[currentIndex]
     print("New type: ", enchanter.enchantment.type)
 
+    enchanter.enchantment.isAutocalc = true
     if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnce then
         text = "Cast Once"
     elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnStrike then

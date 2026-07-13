@@ -7,6 +7,7 @@ local storage = require('openmw.storage')
 
 
 local function create_enchantment_and_item(data)
+
     print("create_enchantment_and_item")
     local name = data.name
     local item = data.item
@@ -21,12 +22,17 @@ local function create_enchantment_and_item(data)
 
     -- Create enchantment
     local template_enchantment_record = core.magic.enchantments.records[1]
-    local enchantment_table = {id = enchantment.id, charge = soul.charge, cost = enchantment.cost, effects = effects, isAutocalc = enchantment.isAutocalc, type = enchantment.type, template = template_enchantment_record}
+
+    -- Update the enchantment field cost for specific cases
+    if enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        enchantment.base_cost = 0
+    elseif enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnce then
+        enchantment.base_cost = enchantment.charge
+    end
+
+    local enchantment_table = {id = enchantment.id, charge = soul.charge, cost = enchantment.base_cost, effects = effects, isAutocalc = enchantment.isAutocalc, type = enchantment.type, template = template_enchantment_record}
     local new_enchantment_draft = core.magic.enchantments.createRecordDraft(enchantment_table)
     local new_enchantment = world.createRecord(new_enchantment_draft)
-    print(new_enchantment.id)
-    print("Cost: ", new_enchantment.cost)
-    print("Cost: ", new_enchantment.isAutocalc)
 
     -- Create item
     local originalRecord
@@ -77,6 +83,7 @@ end
 
 local function move_into_player(data)
     local id = data.id
+    local count = data.count
     print("move_into_player ID: ", id)
 
     world.createObject(id, count):moveInto(world.players[1])

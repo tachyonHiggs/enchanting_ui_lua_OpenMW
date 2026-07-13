@@ -23,13 +23,13 @@ local function on_soul_clicked(id, object, value, icon)
     enchanter.soul.object = object
     enchanter.soul.icon = icon
     enchanter.soul.charge = value
-    elements.stats_charge:set_text(tostring(enchanter.enchantment.cost).. "/".. tostring(enchanter.soul.charge ))
+    elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost).. "/".. tostring(enchanter.soul.charge ))
     
     print("click on soul: ", id)
     print("at icon: ", icon)
     print("with a soul value of: ", value)
     elements.soul_input:set_image(icon)
-    enable_ui(elements.root)
+    elements.enable_ui(elements.root)
 
     auxUi.deepDestroy(souls_ui.ui)
     souls_ui.ui:update()
@@ -39,7 +39,7 @@ end
 function souls_ui.show_soul_list()
 
     print("CREATING SOUL UI")
-    disable_ui(elements.root)
+    elements.disable_ui(elements.root)
 
     souls_ui.ui = UI.create{
         name = "souls_list",

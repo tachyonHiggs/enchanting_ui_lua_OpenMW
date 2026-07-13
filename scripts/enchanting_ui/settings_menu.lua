@@ -9,6 +9,19 @@ I.Settings.registerGroup {
     permanentStorage = true,
     settings = {
         {
+            key = 'constant_effect_threshold',
+            renderer = 'number',
+            name = 'Constant Effect Threshold',
+            description = 'Sets the threshold a Soul needs to have to allow constant effects.',
+            default = 400,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 1,
+                max = 1000,
+            }
+        },
+        {
             key = 'remove_compound_effect_cost',
             renderer = 'checkbox',
             name = 'Remove compounding cost of multiple effects',
@@ -30,19 +43,6 @@ I.Settings.registerGroup {
     description = 'Cheats',
     permanentStorage = true,
     settings = {
-        {
-            key = 'MaxMult',
-            renderer = 'number',
-            name = 'Max Multiplier',
-            description = 'The maximum an items enchantment capacity can increase by, in one altar improvement.',
-            default = 13,
-			argument = {
-                disabled = false,
-                integer = false,
-                min = 1,
-                max = 1000,
-            }
-        },
         {
             key = 'remove_enchant_cap_limit',
             renderer = 'checkbox',

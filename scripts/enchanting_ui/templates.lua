@@ -141,6 +141,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
                     template = I.MWUI.templates.borders,
                     props = {
                         resource = UI.texture({
+                            -- TODO: this icon lol
                             path = "Textures/menu_bar_yellow.dds"
                         }),
                         alpha = 1,
@@ -150,6 +151,10 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
                         mouseClick = async:callback(function()
                             text_input:clear()
                             if update_ui then
+                                text_input.text = text_input.input.props.text
+                                if on_text_changed_fnc then
+                                    on_text_changed_fnc()
+                                end
                                 update_ui()
                             end
                         end),

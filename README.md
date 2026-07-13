@@ -4,7 +4,6 @@
 
 ### Vanilla Features
 - Add attribute and skill magic effects
-- Be able to easily close the gosh darn enchanting menu 
 - Add enchanting for arrows
 - Add vendor enchanting UI, added some foundation for this 
 - Add tool tips
@@ -19,6 +18,7 @@
 
 ### Development
 - Add descriptions,params, fields etc to functions and files
+- Make it so that changing item does not cause the enchanting menu to reset
 
 
 ## Known Issues

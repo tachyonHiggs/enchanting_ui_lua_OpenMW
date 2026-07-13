@@ -20,7 +20,7 @@ effect_ui.on_magic_effect_clicked = function(id)
 
     print("On magic effect clicked: ", id)
 
-    if table.getn(enchanter.effects_with_params) >= 8 then
+    if #enchanter.effects_with_params >= 8 then
         print("Max effects added, returning!")
         UI.showMessage("Max number of effects reached")
         return
@@ -33,7 +33,7 @@ effect_ui.on_magic_effect_clicked = function(id)
     print("CREATING MAGIC EFFECT ADD UI")
     elements.effects_root = UI.create(effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add):create())
     elements.effects_root:update()
-    disable_ui(elements.root)
+    elements.disable_ui(elements.root)
 
 end
 
@@ -95,7 +95,7 @@ effect_ui.on_effect_clicked = function(id)
     effect_ui.effects_ui = effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add)
     elements.effects_root = UI.create(effect_ui.effects_ui:create())
     elements.effects_root:update()
-    enable_ui(elements.root)
+    elements.disable_ui(elements.root)
 
 end
 
@@ -226,6 +226,20 @@ effect_ui.new = function(modify, effect_to_add)
         end
     end
 
+    local function update_effect_to_add_cost(update_ui)
+        print("update_effect_to_add_cost")
+
+        local cost = enchanter.get_effect_to_add_cost()
+
+        enchanter.effect_to_add.cost = cost
+        instance.cost:set_text(tostring(cost))
+        print("effect cost: ", cost)
+
+        if update_ui then
+            elements.effects_root:update()
+        end
+    end
+
     local function toggle_range_type()
         print("toggle_range_type")
         local text = ""
@@ -262,6 +276,7 @@ effect_ui.new = function(modify, effect_to_add)
         print("New range: ", text)
 
         show_valid_effect_sliders()
+        update_effect_to_add_cost(false)
         elements.effects_root:update()
     end
 
@@ -284,19 +299,21 @@ effect_ui.new = function(modify, effect_to_add)
 
         if enchanter.effect_to_modify then 
             enchanter.effects_with_params[effect_index] = enchanter.effect_to_add -- replace existing entry
-            effect_ui.effects:update_item(effect_index, effect_to_add_ui)
+            elements.effects:update_item(effect_index, effect_to_add_ui)
         else
             table.insert(enchanter.effects_with_params, enchanter.effect_to_add)
-            effect_ui.effects:add_item(effect_to_add_ui)
+            elements.effects:add_item(effect_to_add_ui)
         end
         
-        enchanter.enchantment.cost = enchanter.get_effects_total_cost()
-        elements.stats_charge:set_text(tostring(enchanter.enchantment.cost) .. "/" .. tostring(enchanter.soul.charge))
-        elements.stats_enchantment:set_text(tostring(enchanter.enchantment.cost).."/"..tostring(enchanter.item.enchantment_capacity))
+        enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
+        enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
+        
+        elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..tostring(enchanter.item.enchantment_capacity))
+        elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost) .. "/" .. tostring(enchanter.soul.charge))
 
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()
-        enable_ui(elements.root)
+        elements.enable_ui(elements.root)
     end
 
     local function cancel_magic_effect()
@@ -304,40 +321,29 @@ effect_ui.new = function(modify, effect_to_add)
         
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()
-        enable_ui(elements.root)
+        elements.enable_ui(elements.root)
     end
 
     local function delete_effect()
         print("delete_effect")
         for i, effect in ipairs(enchanter.effects_with_params) do
             if effect.id == enchanter.effect_to_add.id then
-                effect_ui.effects:remove_item(i)
+                elements.effects:remove_item(i)
                 table.remove(enchanter.effects_with_params, i)
                 break
             end
         end
         enchanter.reset_effect_to_add()
 
-        enchanter.enchantment.cost = enchanter.get_effects_total_cost()
-        elements.stats_charge:set_text(tostring(enchanter.enchantment.cost).. "/".. tostring(enchanter.soul.charge))
+        enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
+        enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
+
+        elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..tostring(enchanter.item.enchantment_capacity))
+        elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost) .. "/" .. tostring(enchanter.soul.charge))
 
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()
-        enable_ui(elements.root)
-    end
-
-    local function update_effect_to_add_cost(update_ui)
-        print("update_effect_to_add_cost")
-
-        local cost = enchanter.get_effect_to_add_cost()
-
-        enchanter.effect_to_add.cost = cost
-        instance.cost:set_text(tostring(cost))
-        print("effect cost: ", cost)
-
-        if update_ui then
-            elements.effects_root:update()
-        end
+        elements.enable_ui(elements.root)
     end
 
     instance.range = templates.button("Self", toggle_range_type, 100, 30)
@@ -474,10 +480,7 @@ effect_ui.new = function(modify, effect_to_add)
 end
 
 
-effect_ui.magic_effects = templates.list.new("Magic Effects", v2(350,300), effect_ui.make_magic_effects_list)
-effect_ui.effects = templates.list.new("Effects", v2(350,300), function() end)
-
-elements.magic_effects = effect_ui.magic_effects
-elements.effects = effect_ui.effects
+elements.magic_effects = templates.list.new("Magic Effects", v2(350,300), effect_ui.make_magic_effects_list)
+elements.effects = templates.list.new("Effects", v2(350,300), function() end)
 
 return effect_ui

@@ -51,7 +51,7 @@ enchanting_ui.create_ui = function(is_vendor_enchant_bool)
                 props = {
                     anchor = v2(0.5, 0.5),
                     relativePosition = v2(0.5, 0.5),
-                    size = v2(700, 500),
+                    size = v2(800, 600),
                 },
                 content = UI.content { 
                     {
@@ -81,9 +81,10 @@ local function toggle_cast_type()
 
     -- TODO: have this toggle update magic effects, for now just clear them
     enchanter.soul.charge = 0
-    enchanter.enchantment.cost = 0
+    enchanter.enchantment.base_cost = 0
+    enchanter.enchantment.effective_cost = 0
     enchanter.effects_with_params = {}
-    enchanter.enchantment.isAutocalc = 0
+    enchanter.enchantment.isAutocalc = true
     elements.effects:clear()
     elements.root:update()
     
@@ -141,7 +142,6 @@ local function stats()
         content = UI.content {
             elements.stats_enchantment:create(),
             elements.stats_charge:create(),
-            elements.stats_chance:create()
         }
     }
 end
@@ -216,6 +216,8 @@ footer = {
         content = UI.content {
             templates.padding(10, 0),
             elements.cast_type_btn,
+            templates.padding(50, 0),
+            elements.chance:create(),
             templates.padding(10, 0),
             elements.price:create(),
             templates.padding(200, 0),
@@ -237,6 +239,8 @@ footer = {
 
 if not is_vendor_enchant then
     elements.price:hide()
+else
+    elements.chance:hide()
 end
 -- End footer
 
@@ -273,9 +277,10 @@ enchanting_ui.enchant_item = function()
     -- Now handle updating UI elements depending on enchanting success
     if icons_to_reset >= 1 then
         elements.soul_input:reset_image()
+        elements.stats_charge:set_text("0")
     end
     if icons_to_reset >= 2 then
-        elements.item_input:reset_image()
+        enchanting_ui.reset()
     end
 
     elements.root:update()
@@ -283,6 +288,8 @@ end
 
 enchanting_ui.update_lists = function()
     print("update_lists")
+    elements.magic_effects:regenerate_items()
+
     elements.souls_list:regenerate_items()
     elements.items_list:regenerate_items()
 end
@@ -305,8 +312,14 @@ enchanting_ui.reset = function()
     elements.soul_input:reset_image()
     elements.item_input:reset_image()
 
-    
+    elements.stats_enchantment:set_text("0/0")
+    elements.stats_charge:set_text("0/0")
 
+    elements.chance:set_text("0")
+    elements.price:set_text("0")
+
+    elements.effects:clear()
+    elements.magic_effects:clear()
 end
 
 return enchanting_ui
