@@ -19,7 +19,9 @@ local items_ui = {}
 
 local function on_item_clicked(id, object, icon, enchant_pts, type_text)
 
-    enchanter.reset()
+    enchanter.reset_enchantment()
+    enchanter.reset_item()
+
     elements.effects:clear()
 
     enchanter.item.id = id
@@ -44,8 +46,8 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
 
     elements.enable_ui(elements.root)
 
-    auxUi.deepDestroy(items_ui.ui)
-    items_ui.ui:update()
+    auxUi.deepDestroy(elements.items_root)
+    elements.items_root:update()
 end
 
 local function create_enchantable_item(id, object, icon, type, name, enchant_pts)
@@ -111,6 +113,18 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
         },
     }
 
+    local count_element = {
+        name = "count",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = tostring(object.count),
+            textSize = 20,
+            size = v2(50,20),
+            autoSize = false
+        },
+    }
+
     return 
     {
         name = id,
@@ -128,6 +142,8 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
             type_element,
             templates.padding(20, 20),
             enchant_points_element,
+            templates.padding(20, 20),
+            count_element
         },
         events = {
             mouseClick = async:callback(function()
@@ -151,7 +167,7 @@ end
 
 function items_ui.show_item_list()
     elements.disable_ui(elements.root)
-    items_ui.ui = UI.create{
+    elements.items_root = UI.create{
         name = "item_list",
         layer = "Windows",
         template = I.MWUI.templates.boxSolid,
@@ -164,7 +180,7 @@ function items_ui.show_item_list()
             elements.items_list:create()
         }
     }
-    items_ui.ui:update()
+    elements.items_root:update()
 end
 
 elements.items_list = templates.list.new("Items", v2(600, 500), items_ui.make_enchantable_items_list)

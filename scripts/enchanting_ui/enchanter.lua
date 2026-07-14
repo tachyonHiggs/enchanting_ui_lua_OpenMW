@@ -43,24 +43,25 @@ enchanter.reset_soul = function()
     }
 end
 
-enchanter.reset = function()
-    enchanter.enchantment = {}
-    -- charge is covered by soul gem
+enchanter.reset_enchantment = function()
+    enchanter.chance = 0
+    enchanter.name = ""
+
     enchanter.effects_with_params = {}
     enchanter.reset_effect_to_add()
-    enchanter.enchantment.id = 0 -- should be generated
+
+    enchanter.enchantment = {}
+    enchanter.enchantment.id = 0
     enchanter.enchantment.isAutocalc = true
     enchanter.enchantment.type = 0
     enchanter.enchantment.base_cost = 0
     enchanter.enchantment.effective_cost = 0
+end
 
-    enchanter.chance = 0
-
-    enchanter.name = ""
-
+enchanter.reset = function()
+    enchanter.reset_enchantment()
     enchanter.reset_soul()
     enchanter.reset_item()
-    
 end
 
 enchanter.get_effect_to_add_cost = function ()

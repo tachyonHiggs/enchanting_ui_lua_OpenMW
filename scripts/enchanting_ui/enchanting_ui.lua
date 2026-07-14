@@ -300,6 +300,19 @@ enchanting_ui.destroy = function()
     enchanting_ui.hide()
 
     auxUi.deepDestroy(elements.root)
+    if elements.effects_root.layout then
+        auxUi.deepDestroy(elements.effects_root)
+        elements.effects_root:update()
+    end
+    if elements.items_root.layout then
+        auxUi.deepDestroy(elements.items_root)
+        elements.items_root:update()
+    end
+    if elements.souls_root.layout then
+        auxUi.deepDestroy(elements.souls_root)
+        elements.souls_root:update()
+    end
+    
     elements.root:update()
 end
 

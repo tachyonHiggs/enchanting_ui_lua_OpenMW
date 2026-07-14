@@ -3,6 +3,7 @@ local I = require('openmw.interfaces')
 local Util = require('openmw.util')
 local v2 = Util.vector2
 local async = require('openmw.async')
+local ambient = require('openmw.ambient')
 
 local templates = {}
 
@@ -55,7 +56,14 @@ templates.button = function(name, on_click_fnc, size_x, size_y)
                     autoSize = false
                 },
                 events = {
-                    mouseClick = async:callback(on_click_fnc)
+                    mouseClick = async:callback(
+                    function()
+                        ambient.playSound('menu click')
+                        if on_click_fnc then
+                            on_click_fnc()
+                        end
+                    end
+                    )
                 }
             }
         }

@@ -48,5 +48,7 @@ elements.disable_ui = function(element)
 end
 
 elements.effects_root = {}
+elements.souls_root = {}
+elements.items_root = {}
 
 return elements

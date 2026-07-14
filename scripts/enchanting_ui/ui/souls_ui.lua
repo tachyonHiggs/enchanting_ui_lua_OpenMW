@@ -31,8 +31,8 @@ local function on_soul_clicked(id, object, value, icon)
     elements.soul_input:set_image(icon)
     elements.enable_ui(elements.root)
 
-    auxUi.deepDestroy(souls_ui.ui)
-    souls_ui.ui:update()
+    auxUi.deepDestroy(elements.souls_root)
+    elements.souls_root:update()
 
 end
 
@@ -41,7 +41,7 @@ function souls_ui.show_soul_list()
     print("CREATING SOUL UI")
     elements.disable_ui(elements.root)
 
-    souls_ui.ui = UI.create{
+    elements.souls_root = UI.create{
         name = "souls_list",
         layer = "Windows",
         template = I.MWUI.templates.boxSolid,
@@ -55,7 +55,7 @@ function souls_ui.show_soul_list()
         }
     }
 
-    souls_ui.ui:update()
+    elements.souls_root:update()
 end
 
 local function create_soul(id, object, value, icon, name, soul_name)
@@ -107,6 +107,18 @@ local function create_soul(id, object, value, icon, name, soul_name)
         },
     }
 
+    local count_element = {
+        name = "count",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = tostring(object.count),
+            textSize = 20,
+            size = v2(50,20),
+            autoSize = false
+        },
+    }
+
     return {
         name = id,
         type = UI.TYPE.Flex,
@@ -124,6 +136,8 @@ local function create_soul(id, object, value, icon, name, soul_name)
             soul_value,
             templates.padding(20, 20),
             soul_name,
+            templates.padding(20, 20),
+            count_element,
         },
         events = {
             mouseClick = async:callback(function()

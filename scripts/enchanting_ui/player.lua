@@ -16,7 +16,7 @@ I.Settings.registerPage ({
 
 local function show()
     enchanting_ui.update_lists()
-    enchanting_ui.show(not is_vendor_enchant)
+    enchanting_ui.show()
 end
     
 local function hide()
