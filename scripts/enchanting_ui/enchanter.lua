@@ -237,13 +237,6 @@ enchanter.check_requirements = function()
 
     -- Check charge
     if storage.globalSection("cheats_enchanting_ui"):get("remove_soul_charge_limit") == false then
-
-        if enchanter.enchantment.base_cost > enchanter.soul.charge then
-            UI.showMessage("Enchantment Cost beyond Soul Charge")
-            print("Failed: Enchantment Cost beyond Soul Charge")
-            return false
-        end
-
         if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
             local constant_effect_threshold = storage.globalSection("options_enchanting_ui"):get("constant_effect_threshold")
             if enchanter.soul.charge < constant_effect_threshold then
@@ -253,7 +246,9 @@ enchanter.check_requirements = function()
             end
         end
     else 
+
         enchanter.enchantment.base_cost = 0
+        enchanter.enchantment.isAutocalc = false -- Override this to use the above "0" cost
     end
 
     
@@ -376,11 +371,25 @@ enchanter.toggle_cast_type = function()
             core.magic.ENCHANTMENT_TYPE.CastOnce
         }
     elseif enchanter.item.type == "Weapon" then
-        valid_types = {
-            core.magic.ENCHANTMENT_TYPE.CastOnStrike,
-            core.magic.ENCHANTMENT_TYPE.CastOnUse,
-            core.magic.ENCHANTMENT_TYPE.ConstantEffect,
-        }
+        local weapon_type = types.Weapon.records[enchanter.item.id].type
+        print("Weapon type: ", weapon_type)
+
+        if weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown then
+            valid_types = {
+                core.magic.ENCHANTMENT_TYPE.CastOnStrike
+            }
+        elseif weapon_type == types.Weapon.TYPE.MarksmanBow or weapon_type == types.Weapon.TYPE.MarksmanCrossbow then
+            valid_types = {
+                core.magic.ENCHANTMENT_TYPE.CastOnUse,
+                core.magic.ENCHANTMENT_TYPE.ConstantEffect, -- TODO: in vanilla this is not allowed, should it be here? or add a settings menu
+            }
+        else
+            valid_types = {
+                core.magic.ENCHANTMENT_TYPE.CastOnStrike,
+                core.magic.ENCHANTMENT_TYPE.CastOnUse,
+                core.magic.ENCHANTMENT_TYPE.ConstantEffect,
+            }
+        end
     elseif enchanter.item.type == "Armor" or enchanter.item.type == "Clothing" then
         valid_types = {
             core.magic.ENCHANTMENT_TYPE.CastOnUse,

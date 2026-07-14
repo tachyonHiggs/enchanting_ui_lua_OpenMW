@@ -14,6 +14,7 @@
 - Implement constant effect as always possible with any soul but reduces enchantment capacity
 - Implement cheat modes: disable enchantment capacity, disable cost, disable charge, etc
 - Potentially add the ability use vendor's soul gems while enchanting
+- Allow a user to enchant multiple of the same items at the same time (use case is ammo here)
 
 
 ### Development
