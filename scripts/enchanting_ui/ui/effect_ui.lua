@@ -46,7 +46,7 @@ local function create_magic_effect_item(id, name)
         template = I.MWUI.templates.textNormal,
         props = {
             text = name,
-            textSize = 20,
+            textSize = elements.text_size,
         },
         events = {
             mouseClick = async:callback(function()
@@ -113,7 +113,7 @@ effect_ui.create_effect_item = function(effect)
                 path = core.magic.effects.records[effect.id].icon
             }),
             alpha = 1,
-            size = v2(20,20),
+            size = elements.effect_icon_size,
         },
     }
 
@@ -148,7 +148,7 @@ effect_ui.create_effect_item = function(effect)
         template = I.MWUI.templates.textNormal,
         props = {
             text = text,
-            textSize = 20,
+            textSize = elements.text_size,
         },
     }
 
@@ -158,7 +158,7 @@ effect_ui.create_effect_item = function(effect)
         type = UI.TYPE.Flex,
         props = {
             horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
+            arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.Start,
         },
         content = UI.content {
@@ -370,22 +370,25 @@ effect_ui.new = function(modify, effect_to_add)
         instance.ui = {
             name = "effect_add",
             layer = "Windows",
-            template = I.MWUI.templates.boxSolid,
+            type = UI.TYPE.Widget,
+            -- template = I.MWUI.templates.boxSolid,
             props = {
                 relativeSize = v2(1, 1),
                 relativePosition = v2(0.5, 0.5),
                 anchor = v2(0.5, 0.5),
             },
             content = UI.content {
-                templates.make_border(v2(400, 400)),
+                templates.make_border(v2(elements.effects_size[1], elements.effects_size[2])),
                 {
                     name = "magic_effect_add_flex",
                     type = UI.TYPE.Flex,
                     props = {
                         horizontal = false,
                         arrange = UI.ALIGNMENT.Start,
-                        align = UI.ALIGNMENT.Center,
-                        size = v2(500, 300),
+                        align = UI.ALIGNMENT.Start,
+                        relativePosition = v2(0.5, 0.5),
+                        anchor = v2(0.5, 0.5),
+                        size = v2(elements.effects_size[1], elements.effects_size[2]),
                         autoSize = false,
                     },
                     content = UI.content {
@@ -407,7 +410,7 @@ effect_ui.new = function(modify, effect_to_add)
                                             path = core.magic.effects.records[id].icon
                                         }),
                                         alpha = 1,
-                                        size = v2(20,20),
+                                        size = elements.effect_icon_size,
                                     },
                                 },
                                 templates.padding(40, 0),
@@ -417,7 +420,7 @@ effect_ui.new = function(modify, effect_to_add)
                                     template = I.MWUI.templates.textNormal,
                                     props = {
                                         text = tostring(core.magic.effects.records[id].name),
-                                        textSize = 20,
+                                        textSize = elements.text_size,
                                     }
                                 },
                                 
@@ -439,8 +442,8 @@ effect_ui.new = function(modify, effect_to_add)
                                     template = I.MWUI.templates.textNormal,
                                     props = {
                                         text = "Range",
-                                        textSize = 20,
-                                        size = v2(100, 20)
+                                        textSize = elements.text_size,
+                                        size = v2(100, elements.text_size)
                                     }
                                 },
                                 templates.padding(100, 0),

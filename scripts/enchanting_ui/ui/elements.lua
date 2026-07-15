@@ -14,9 +14,9 @@ local enchanter = require("scripts.enchanting_ui.enchanter")
 
 -- TODO: add description
 
-
-
 local elements = {}
+elements.text_size = 20
+elements.padding_size = 20
 
 -- Inputs
 elements.name_input = templates.text_input.new("Name", 200, function(text) enchanter.name = text end, function() elements.root:update() end)
@@ -38,6 +38,7 @@ elements.magic_effects = {}
 elements.effects = {}
 
 elements.root = {}
+elements.root_size = {800, 600}
 elements.enable_ui = function(element)
     element.layout.content[2].template = I.MWUI.templates.padding
     element:update()
@@ -48,7 +49,15 @@ elements.disable_ui = function(element)
 end
 
 elements.effects_root = {}
+elements.effects_size = {500, 300}
+elements.effect_icon_size = v2(20,20)
+
 elements.souls_root = {}
+elements.souls_list_column_names = {"Icon", "Name", "Charge", "Soul Name", "Count"}
+elements.souls_list_sizes = {50, 250, 80, 200, 80}
+
 elements.items_root = {}
+elements.items_list_column_names = {"Icon", "Name", "Enchant Pts", "Type", "Count"}
+elements.items_list_sizes = {50, 250, 150, 80, 80}
 
 return elements

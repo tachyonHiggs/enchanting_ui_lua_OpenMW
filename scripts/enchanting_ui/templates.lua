@@ -7,6 +7,8 @@ local ambient = require('openmw.ambient')
 
 local templates = {}
 
+-- TODO: replace text size with a passed in parameter
+
 -- Helper fncs
 templates.make_border = function(size)
     return {
@@ -320,15 +322,62 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
 end
 
 templates.list = {}
-templates.list.new = function(name, list_size, generate_items)
+templates.list.new = function(name, list_size, generate_items, column_names, colum_widths)
 
     -- TODO: add sorting 
 
     local list = {}
 
     list.name = name
+    print("Creating new list called: ", name)
     list.size = list_size
     list.items = generate_items() or {}
+
+
+    list.header = {}
+    if column_names then
+
+        if #column_names ~= #colum_widths then
+            print("Error: incorrectly sized column names and column sizes")
+            return
+        end
+
+        local column_elements = {}
+        for index, column_name in ipairs(column_names) do
+            print(column_name)
+            print(colum_widths[index])
+
+            local column_element = {
+                name = name..index,
+                type = UI.TYPE.Text,
+                template = I.MWUI.templates.textNormal,
+                props = {
+                    text = column_name,
+                    textSize = 20,
+                    size = v2(colum_widths[index],20),
+                    autoSize = false
+                },
+            }
+            table.insert(column_elements, column_element)
+        end 
+
+        list.header = {
+            name = "column_header",
+            type = UI.TYPE.Flex,
+            props = {
+                horizontal = true,
+                arrange = UI.ALIGNMENT.Start,
+                align = UI.ALIGNMENT.Start,
+            },
+            content = UI.content (
+                column_elements
+            ),
+            events = {
+                -- mouseClick = async:callback(function()end)
+            }
+        }
+        
+    end
 
     list.items_container = {
         name = "items",
@@ -339,7 +388,9 @@ templates.list.new = function(name, list_size, generate_items)
             align = UI.ALIGNMENT.Start,
             size = list_size,
         },
-        content = UI.content(list.items)
+        content = UI.content{
+            table.unpack(list.items)
+        }
     }
 
     function list:add_item(item)
@@ -347,7 +398,9 @@ templates.list.new = function(name, list_size, generate_items)
         table.insert(self.items, item)
 
         -- rebuild the UI content
-        self.items_container.content = UI.content(self.items)
+        self.items_container.content = UI.content({
+            table.unpack(list.items)
+        })
     end
 
     function list:remove_item(index)
@@ -355,7 +408,9 @@ templates.list.new = function(name, list_size, generate_items)
         table.remove(self.items, index)
 
         -- rebuild the UI content
-        self.items_container.content = UI.content(self.items)
+        self.items_container.content = UI.content({
+            table.unpack(list.items)
+        })
     end
 
     function list:update_item(index, new_item)
@@ -364,13 +419,18 @@ templates.list.new = function(name, list_size, generate_items)
         end
 
         self.items[index] = new_item
-        self.items_container.content = UI.content(self.items)
+        self.items_container.content = UI.content({
+            table.unpack(list.items)
+        })
         return true
     end
 
     function list:regenerate_items()
         self.items = generate_items() or {}
-        self.items_container.content = UI.content(self.items)
+        
+        self.items_container.content = UI.content({
+            table.unpack(list.items)
+        })
     end
 
     function list:clear()
@@ -396,12 +456,13 @@ templates.list.new = function(name, list_size, generate_items)
                         {
                             name = "name",
                             type = UI.TYPE.Text,
-                            template = I.MWUI.templates.textNormal,
+                            template = I.MWUI.templates.textHeader,
                             props = {
                                 text = self.name,
-                                textSize = 20,
+                                textSize = 22,
                             }
                         },
+                        list.header,
                         {
                             name = "border",
                             template = I.MWUI.templates.boxSolid,

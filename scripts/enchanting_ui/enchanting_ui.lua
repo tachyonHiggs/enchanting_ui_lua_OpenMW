@@ -28,10 +28,26 @@ local is_vendor_enchant = false
 
 local function on_effect_clicked() end
 
+local title = {
+    name = "title",
+    type = UI.TYPE.Text,
+    template = I.MWUI.templates.textNormal,
+    props = {
+        text = "Enchanting Menu",
+        textSize = elements.text_size,
+        size = v2(elements.root_size[1],elements.text_size),
+        autoSize = false,
+        textAlignH = UI.ALIGNMENT.Center,
+        textAlignV = UI.ALIGNMENT.Center,
+    },
+}
+
 enchanting_ui.create_ui = function(is_vendor_enchant_bool) 
 
     print("create_ui")
     is_vendor_enchant = is_vendor_enchant_bool
+
+    local v2_size = v2(elements.root_size[1], elements.root_size[2])
 
     elements.root = UI.create{
         name = "root",
@@ -39,19 +55,20 @@ enchanting_ui.create_ui = function(is_vendor_enchant_bool)
         type = UI.TYPE.Widget,
         template = nil,
         props = {
-            size = v2(800, 600),
+            size = v2_size,
             relativePosition = v2(0.5, 0.5),
             anchor = v2(0.5, 0.5),
         },
         content = UI.content{ 
-            templates.make_border(v2(800, 600)),
+            templates.make_border(v2_size),
             {
                 name = "root_padding",
+                type = UI.TYPE.Container, -- Here for disabling the UI, since works with this template
                 template = I.MWUI.templates.padding,
                 props = {
-                    anchor = v2(0.5, 0.5),
-                    relativePosition = v2(0.5, 0.5),
-                    size = v2(800, 600),
+                    -- anchor = v2(0.5, 0.5),
+                    -- relativePosition = v2(0.5, 0.5),
+                    size = v2_size,
                 },
                 content = UI.content { 
                     {
@@ -63,6 +80,8 @@ enchanting_ui.create_ui = function(is_vendor_enchant_bool)
                             align = UI.ALIGNMENT.Start,
                         },
                         content = UI.content {
+                            title,
+                            templates.padding(0, elements.text_size),
                             header,
                             main_content,
                             footer,
@@ -156,13 +175,12 @@ header = {
             horizontal = true,
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
-            -- gap = 20,
         },
         content = UI.content {
-            templates.padding(20, 0),
+            templates.padding(elements.padding_size, 0),
             inputs(),
             stats(),
-            templates.padding(20, 0),
+            templates.padding(elements.padding_size, 0),
         }
     } }
 }
@@ -183,7 +201,6 @@ main_content = {
             horizontal = true,
             arrange = UI.ALIGNMENT.Start,
             align = UI.ALIGNMENT.Start,
-            -- gap = 20,
         },
         content = UI.content {
             templates.padding(10, 0),

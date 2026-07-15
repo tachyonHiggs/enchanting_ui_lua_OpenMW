@@ -4,7 +4,7 @@
 
 ### Vanilla Features
 - Add attribute and skill magic effects
-- Add enchanting for arrows
+- Add openmw enchant multiple projectiles at once: https://openmw.readthedocs.io/en/latest/reference/modding/settings/game.html#projectiles-enchant-multiplier
 - Add vendor enchanting UI, added some foundation for this 
 - Add tool tips
 - Add consistent sound effects
@@ -14,7 +14,6 @@
 - Implement constant effect as always possible with any soul but reduces enchantment capacity
 - Implement cheat modes: disable enchantment capacity, disable cost, disable charge, etc
 - Potentially add the ability use vendor's soul gems while enchanting
-- Allow a user to enchant multiple of the same items at the same time (use case is ammo here)
 
 
 ### Development

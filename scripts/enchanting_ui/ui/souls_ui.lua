@@ -68,7 +68,7 @@ local function create_soul(id, object, value, icon, name, soul_name)
                 path = icon
             }),
             alpha = 1,
-            size = v2(50,50),
+            size = v2(elements.souls_list_sizes[1],50),
         },
     }
     local name = {
@@ -77,8 +77,8 @@ local function create_soul(id, object, value, icon, name, soul_name)
         template = I.MWUI.templates.textNormal,
         props = {
             text = name,
-            textSize = 20,
-            size = v2(150,20),
+            textSize = elements.text_size,
+            size = v2(elements.souls_list_sizes[2],elements.text_size),
             autoSize = false
         },
     }
@@ -89,8 +89,8 @@ local function create_soul(id, object, value, icon, name, soul_name)
         template = I.MWUI.templates.textNormal,
         props = {
             text = tostring(value),
-            textSize = 20,
-            size = v2(80,20),
+            textSize = elements.text_size,
+            size = v2(elements.souls_list_sizes[3],elements.text_size),
             autoSize = false
         },
     }
@@ -101,8 +101,8 @@ local function create_soul(id, object, value, icon, name, soul_name)
         template = I.MWUI.templates.textNormal,
         props = {
             text = soul_name,
-            textSize = 20,
-            size = v2(200,20),
+            textSize = elements.text_size,
+            size = v2(elements.souls_list_sizes[4],elements.text_size),
             autoSize = false
         },
     }
@@ -113,8 +113,8 @@ local function create_soul(id, object, value, icon, name, soul_name)
         template = I.MWUI.templates.textNormal,
         props = {
             text = tostring(object.count),
-            textSize = 20,
-            size = v2(50,20),
+            textSize = elements.text_size,
+            size = v2(elements.souls_list_sizes[5], elements.text_size),
             autoSize = false
         },
     }
@@ -124,19 +124,19 @@ local function create_soul(id, object, value, icon, name, soul_name)
         type = UI.TYPE.Flex,
         props = {
             horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
+            arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.Start,
-            size = v2(600, 20)
+            size = v2(600, elements.text_size)
         },
         content = UI.content {
             icon_element,
-            templates.padding(20, 20),
+            templates.padding(elements.padding_size, elements.padding_size),
             name,
-            templates.padding(20, 20),
+            templates.padding(elements.padding_size, elements.padding_size),
             soul_value,
-            templates.padding(20, 20),
+            templates.padding(elements.padding_size, elements.padding_size),
             soul_name,
-            templates.padding(20, 20),
+            templates.padding(elements.padding_size, elements.padding_size),
             count_element,
         },
         events = {
@@ -159,7 +159,7 @@ function souls_ui.make_souls_list()
     return valid_items or {}
 end
 
-souls_ui.souls_list = templates.list.new("Souls", v2(600, 500), souls_ui.make_souls_list)
+souls_ui.souls_list = templates.list.new("Souls", v2(elements.root_size[1], elements.root_size[2]), souls_ui.make_souls_list, elements.souls_list_column_names, elements.souls_list_sizes)
 elements.souls_list = souls_ui.souls_list
 
 

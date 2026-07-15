@@ -33,7 +33,7 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     print("click on item: ", id)
     print("Icon: ", icon)
     print("Type: ", type_text)
-    print("enchant_pts: ", tostring(enchant_pts))
+    print("enchant_pts: ", string.format("%.1f", enchant_pts))
     elements.item_input:set_image(icon)
     
 
@@ -41,7 +41,7 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     elements.cast_type_btn.content[2].props.text = enchanter.toggle_cast_type()
     -- ENd todo
 
-    elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..tostring(enchanter.item.enchantment_capacity))
+    elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..string.format("%.1f", enchant_pts))
     elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost) .. "/" .. tostring(enchanter.soul.charge))
 
     elements.enable_ui(elements.root)
@@ -62,7 +62,7 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
                 path = icon
             }),
             alpha = 1,
-            size = v2(50,50),
+            size = v2(elements.items_list_sizes[1],50),
         },
     }
 
@@ -77,26 +77,14 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
         type_text = "Book"
     end
 
-    local type_element = {
-        name = "type",
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = type_text,
-            textSize = 20,
-            size = v2(80,20),
-            autoSize = false
-        },
-    }
-
     local text_element = {
         name = "name",
         type = UI.TYPE.Text,
         template = I.MWUI.templates.textNormal,
         props = {
             text = name,
-            textSize = 20,
-            size = v2(200,20),
+            textSize = elements.text_size,
+            size = v2(elements.items_list_sizes[2],elements.text_size),
             autoSize = false
         },
     }
@@ -106,9 +94,21 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
         type = UI.TYPE.Text,
         template = I.MWUI.templates.textNormal,
         props = {
-            text = tostring(enchant_pts),
-            textSize = 20,
-            size = v2(50,20),
+            text = string.format("%.1f", enchant_pts),
+            textSize = elements.text_size,
+            size = v2(elements.items_list_sizes[3],elements.text_size),
+            autoSize = false
+        },
+    }
+
+    local type_element = {
+        name = "type",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = type_text,
+            textSize = elements.text_size,
+            size = v2(elements.items_list_sizes[4],elements.text_size),
             autoSize = false
         },
     }
@@ -119,8 +119,8 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
         template = I.MWUI.templates.textNormal,
         props = {
             text = tostring(object.count),
-            textSize = 20,
-            size = v2(50,20),
+            textSize = elements.text_size,
+            size = v2(elements.items_list_sizes[5],elements.text_size),
             autoSize = false
         },
     }
@@ -131,18 +131,18 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
         type = UI.TYPE.Flex,
         props = {
             horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
+            arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.Start,
         },
         content = UI.content {
             icon_element,
-            templates.padding(20, 20),
+            templates.padding(elements.padding_size, elements.padding_size),
             text_element,
-            templates.padding(20, 20),
-            type_element,
-            templates.padding(20, 20),
+            templates.padding(elements.padding_size, elements.padding_size),
             enchant_points_element,
-            templates.padding(20, 20),
+            templates.padding(elements.padding_size, elements.padding_size),
+            type_element,
+            templates.padding(elements.padding_size, elements.padding_size),
             count_element
         },
         events = {
@@ -183,7 +183,7 @@ function items_ui.show_item_list()
     elements.items_root:update()
 end
 
-elements.items_list = templates.list.new("Items", v2(600, 500), items_ui.make_enchantable_items_list)
+elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.make_enchantable_items_list, elements.items_list_column_names, elements.items_list_sizes)
 
 elements.item_input = templates.text_image.new("Item", v2(75,75), 10, items_ui.show_item_list)
 
