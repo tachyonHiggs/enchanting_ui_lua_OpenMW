@@ -71,7 +71,7 @@ local function create_soul(id, object, value, icon, name, soul_name)
             size = v2(elements.souls_list_sizes[1],50),
         },
     }
-    local name = {
+    local name_element = {
         name = "name",
         type = UI.TYPE.Text,
         template = I.MWUI.templates.textNormal,
@@ -95,7 +95,7 @@ local function create_soul(id, object, value, icon, name, soul_name)
         },
     }
 
-    local soul_name = {
+    local soul_name_element = {
         name = "soul_name",
         type = UI.TYPE.Text,
         template = I.MWUI.templates.textNormal,
@@ -128,14 +128,18 @@ local function create_soul(id, object, value, icon, name, soul_name)
             align = UI.ALIGNMENT.Start,
             size = v2(600, elements.text_size)
         },
+        userData = {
+            -- Used for list sorting!
+            icon, name, value, soul_name, object.count
+        },
         content = UI.content {
             icon_element,
             templates.padding(elements.padding_size, elements.padding_size),
-            name,
+            name_element,
             templates.padding(elements.padding_size, elements.padding_size),
             soul_value,
             templates.padding(elements.padding_size, elements.padding_size),
-            soul_name,
+            soul_name_element,
             templates.padding(elements.padding_size, elements.padding_size),
             count_element,
         },
@@ -159,9 +163,14 @@ function souls_ui.make_souls_list()
     return valid_items or {}
 end
 
-souls_ui.souls_list = templates.list.new("Souls", v2(elements.root_size[1], elements.root_size[2]), souls_ui.make_souls_list, elements.souls_list_column_names, elements.souls_list_sizes)
-elements.souls_list = souls_ui.souls_list
+function souls_ui.update()
+    if elements.souls_root.layout then
+        elements.souls_root:update()
+    end
+end
 
+souls_ui.souls_list = templates.list.new("Souls", v2(elements.root_size[1], elements.root_size[2]), souls_ui.update, souls_ui.make_souls_list, elements.souls_list_column_names, elements.souls_list_sizes, elements.souls_list_sorting)
+elements.souls_list = souls_ui.souls_list
 
 elements.soul_input = templates.text_image.new("Soul", v2(75,75), 10, souls_ui.show_soul_list)
 

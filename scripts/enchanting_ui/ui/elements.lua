@@ -55,9 +55,11 @@ elements.effect_icon_size = v2(20,20)
 elements.souls_root = {}
 elements.souls_list_column_names = {"Icon", "Name", "Charge", "Soul Name", "Count"}
 elements.souls_list_sizes = {50, 250, 80, 200, 80}
+elements.souls_list_sorting = {false, true, true, true, true}
 
 elements.items_root = {}
 elements.items_list_column_names = {"Icon", "Name", "Enchant Pts", "Type", "Count"}
-elements.items_list_sizes = {50, 250, 150, 80, 80}
+elements.items_list_sizes = {50, 250, 120, 100, 80}
+elements.items_list_sorting = {false, true, true, true, true}
 
 return elements

@@ -245,7 +245,6 @@ templates.text_output.new = function(name, text_length, padding_length, default_
     return text_output
 end
 
--- TODO: test and implement this
 templates.text_image = {}
 templates.text_image.new = function(name, image_size, padding_length, on_image_mouse_click)
 
@@ -322,7 +321,7 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
 end
 
 templates.list = {}
-templates.list.new = function(name, list_size, generate_items, column_names, colum_widths)
+templates.list.new = function(name, list_size, update_target, generate_items, column_names, column_widths, enable_column_sortings)
 
     -- TODO: add sorting 
 
@@ -331,34 +330,80 @@ templates.list.new = function(name, list_size, generate_items, column_names, col
     list.name = name
     print("Creating new list called: ", name)
     list.size = list_size
+    list.update_target = update_target
+    print("udpate target is: ", list.update_target)
     list.items = generate_items() or {}
 
+    list.sort_descending = 0
+    list.sort_ascending = 1
+    list.sort_descending_texture = UI.texture({
+        path = "Textures/menu_scroll_down.dds"
+    }) 
+    list.sort_ascending_texture = UI.texture({
+        path = "Textures/menu_scroll_up.dds"
+    }) 
 
     list.header = {}
+    list.has_header = false
+    list.default_sort_column = 2
+    list.default_sort_direction = list.sort_descending
+    list.sort_column = list.default_sort_column
+    list.sort_direction = list.default_sort_direction
+
+    list.column_elements = {}
     if column_names then
 
-        if #column_names ~= #colum_widths then
+        list.has_header = true
+
+        if #column_names ~= #column_widths and #column_names ~= #enable_column_sortings then
             print("Error: incorrectly sized column names and column sizes")
             return
         end
 
-        local column_elements = {}
         for index, column_name in ipairs(column_names) do
+
             print(column_name)
-            print(colum_widths[index])
+            local column_width = column_widths[index]
+            local column_sort = {}
+
+            if enable_column_sortings[index] then
+                print("allow column sorting: ", enable_column_sortings[index])
+                column_width = column_width - 20 -- Make room for sorting btn
+
+                column_sort = {
+                    name = "direction"..index,
+                    type = UI.TYPE.Image,
+                    template = I.MWUI.templates.borders,
+                    props = {
+                        resource = list.sort_descending_texture,
+                        alpha = 1,
+                        size = v2(20,20),
+                    },
+                    events = {
+                        mouseClick = async:callback(function ()
+                            list:on_sort_clicked(index)
+                        end),
+                    }
+                }
+                
+            end
 
             local column_element = {
-                name = name..index,
+                name = "name"..index,
                 type = UI.TYPE.Text,
                 template = I.MWUI.templates.textNormal,
                 props = {
                     text = column_name,
                     textSize = 20,
-                    size = v2(colum_widths[index],20),
+                    size = v2(column_width,20),
                     autoSize = false
                 },
             }
-            table.insert(column_elements, column_element)
+
+            -- TODO: add padding
+
+            table.insert(list.column_elements, column_element)
+            table.insert(list.column_elements, column_sort)
         end 
 
         list.header = {
@@ -370,11 +415,8 @@ templates.list.new = function(name, list_size, generate_items, column_names, col
                 align = UI.ALIGNMENT.Start,
             },
             content = UI.content (
-                column_elements
+                list.column_elements
             ),
-            events = {
-                -- mouseClick = async:callback(function()end)
-            }
         }
         
     end
@@ -425,12 +467,80 @@ templates.list.new = function(name, list_size, generate_items, column_names, col
         return true
     end
 
+    function list:reset_sort()
+        if not list.has_header then
+            return
+        end
+        -- Reset UI elements
+        list.column_elements[list.sort_column*2].template = I.MWUI.templates.borders
+        list.column_elements[list.sort_column*2].props.resource = list.sort_descending_texture
+
+        list.sort_column = list.default_sort_column
+        list.sort_direction = list.default_sort_direction
+    end
+
     function list:regenerate_items()
         self.items = generate_items() or {}
-        
+
         self.items_container.content = UI.content({
             table.unpack(list.items)
         })
+
+        list:reset_sort()
+    end
+
+    function list:sort_items()
+        print("list:sort_items")
+
+        local function sort_function(a, b)
+            local result
+            if list.sort_direction == list.sort_ascending then
+                result = a.userData[list.sort_column] < b.userData[list.sort_column]
+            else
+                result = a.userData[list.sort_column] > b.userData[list.sort_column]
+            end
+
+            return result
+        end
+        
+        table.sort(self.items, sort_function)
+
+        self.items_container.content = UI.content({
+            table.unpack(list.items)
+        })
+
+    end
+
+    function list:on_sort_clicked(index)
+
+        print("list:on_sort_clicked for index: ", index)
+        
+        -- If clicked current active column sort, 
+        if list.sort_column == index then
+            list.column_elements[index*2].template = I.MWUI.templates.bordersThick
+            list.sort_direction =( list.sort_direction + 1) % 2 -- toggle direction
+
+            -- Update sort UI
+            if list.sort_direction == list.sort_ascending then
+                list.column_elements[index*2].props.resource = list.sort_ascending_texture
+            else
+                list.column_elements[index*2].props.resource = list.sort_descending_texture
+            end
+
+        else
+            list.column_elements[index*2].template = I.MWUI.templates.bordersThick
+            list.column_elements[list.sort_column*2].template = I.MWUI.templates.borders
+            list.sort_column = index
+            -- Don't toggle direction
+        end
+
+        --Now sort list items by column and direction
+        list:sort_items()
+
+        if list.update_target then
+            list.update_target()
+        end
+        
     end
 
     function list:clear()

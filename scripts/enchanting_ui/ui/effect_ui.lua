@@ -426,7 +426,7 @@ effect_ui.new = function(modify, effect_to_add)
                                 
                             }
                         },
-                        templates.padding(30, 0),
+                        templates.padding(elements.padding_size, 4*elements.padding_size),
                         {
                             name = "range",
                             type = UI.TYPE.Flex,
@@ -453,19 +453,19 @@ effect_ui.new = function(modify, effect_to_add)
                                 instance.cost:create(),
                             }
                         },
-                        templates.padding(30, 0),
+                        templates.padding(elements.padding_size, 2*elements.padding_size),
                         instance.magnitude:create(),
-                        templates.padding(10, 0),
+                        templates.padding(elements.padding_size, elements.padding_size),
                         instance.magnitude_max:create(),
-                        templates.padding(10, 0),
+                        templates.padding(elements.padding_size, elements.padding_size),
                         instance.duration:create(),
-                        templates.padding(10, 0),
+                        templates.padding(elements.padding_size, elements.padding_size),
                         instance.area:create(),
-                        templates.padding(30, 0),
+                        templates.padding(elements.padding_size, elements.padding_size),
                         templates.button("Cancel", cancel_magic_effect, 100, 30),
-                        templates.padding(10, 0),
+                        templates.padding(elements.padding_size, elements.padding_size),
                         templates.button("OK", ok_magic_effect, 100, 30),
-                        templates.padding(10, 0),
+                        templates.padding(elements.padding_size, elements.padding_size),
                         instance.delete_btn,
                     }
                 }
@@ -483,7 +483,7 @@ effect_ui.new = function(modify, effect_to_add)
 end
 
 
-elements.magic_effects = templates.list.new("Magic Effects", v2(350,300), effect_ui.make_magic_effects_list)
-elements.effects = templates.list.new("Effects", v2(350,300), function() end)
+elements.magic_effects = templates.list.new("Magic Effects", v2(350,300), nil, effect_ui.make_magic_effects_list)
+elements.effects = templates.list.new("Effects", v2(350,300), nil, function() end)
 
 return effect_ui

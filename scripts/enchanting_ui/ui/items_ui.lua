@@ -134,6 +134,10 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
             arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.Start,
         },
+        userData = {
+            -- Used for list sorting!
+            icon, name, enchant_pts, type_text, object.count
+        },
         content = UI.content {
             icon_element,
             templates.padding(elements.padding_size, elements.padding_size),
@@ -183,7 +187,13 @@ function items_ui.show_item_list()
     elements.items_root:update()
 end
 
-elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.make_enchantable_items_list, elements.items_list_column_names, elements.items_list_sizes)
+function items_ui.update()
+    if elements.items_root.layout then
+        elements.items_root:update()
+    end
+end
+
+elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, elements.items_list_column_names, elements.items_list_sizes, elements.items_list_sorting)
 
 elements.item_input = templates.text_image.new("Item", v2(75,75), 10, items_ui.show_item_list)
 
