@@ -60,7 +60,7 @@ enchanting_ui.create_ui = function(is_vendor_enchant_bool)
             anchor = v2(0.5, 0.5),
         },
         content = UI.content{ 
-            templates.make_border(v2_size),
+            templates.make_border(v2_size, 0.75),
             {
                 name = "root_padding",
                 type = UI.TYPE.Container, -- Here for disabling the UI, since works with this template
@@ -217,7 +217,7 @@ main_content = {
 
 -- footer
 
-elements.cast_type_btn = templates.button("Cast Once", toggle_cast_type, 140, 30)
+elements.cast_type_btn = templates.button.new("Cast Once", toggle_cast_type, 140, 30)
 
 footer = {
     name = "footer",
@@ -232,23 +232,23 @@ footer = {
         },
         content = UI.content {
             templates.padding(10, 0),
-            elements.cast_type_btn,
+            elements.cast_type_btn:create(),
             templates.padding(50, 0),
             elements.chance:create(),
             templates.padding(10, 0),
             elements.price:create(),
             templates.padding(200, 0),
-            templates.button("Create", (function()
+            templates.button.new("Create", (function()
                 print("Clicked Create")
                 enchanting_ui.enchant_item()
                 return true
-            end), 80, 30),
+            end), 80, 30):create(),
             templates.padding(10, 0),
-            templates.button("Cancel", (function()
+            templates.button.new("Cancel", (function()
                 print("Clicked Cancel")
                 ambient.playSound('menu click')
                 enchanting_ui.hide()
-            end), 80, 30),
+            end), 80, 30):create(),
             templates.padding(10, 0),
         }
     } }

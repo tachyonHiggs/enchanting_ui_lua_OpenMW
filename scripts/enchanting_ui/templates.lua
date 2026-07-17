@@ -10,7 +10,7 @@ local templates = {}
 -- TODO: replace text size with a passed in parameter
 
 -- Helper fncs
-templates.make_border = function(size)
+templates.make_border = function(size, alpha)
     return {
         template = I.MWUI.templates.bordersThick,
         type = UI.TYPE.Image,
@@ -18,7 +18,7 @@ templates.make_border = function(size)
             resource = UI.texture({
             path = "black"
             }),
-            alpha = 0.75,
+            alpha = alpha,
             size = size,
             anchor = v2(0.5, 0.5),
             relativePosition = v2(0.5, 0.5),
@@ -37,39 +37,68 @@ templates.padding = function(x, y)
 end
 
 -- Templates
-templates.button = function(name, on_click_fnc, size_x, size_y)
-    return {
-        name = name .. "_btn_border",
-        type = UI.TYPE.Container,
-        template = I.MWUI.templates.bordersThick,
+templates.button = {}
+templates.button.new = function(name, on_click_fnc, size_x, size_y)
+
+    local button = {}
+
+    button.name = name
+    button.size_x = size_x
+    button.size_y = size_y
+
+    button.name_element = {
+        name = button.name .. "_btn",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
         props = {
-            size = v2(size_x, size_y),
+            text = button.name,
+            textSize = 20,
+            size = v2(button.size_x, button.size_y),
+            autoSize = false,
         },
-        content = UI.content {
-            templates.padding(size_x, size_y),
-            {
-                name = name  .. "_btn",
-                type = UI.TYPE.Text,
-                template = I.MWUI.templates.textNormal,
-                props = {
-                    text = name,
-                    textSize = 20,
-                    size = v2(size_x, size_y),
-                    autoSize = false
-                },
-                events = {
-                    mouseClick = async:callback(
-                    function()
-                        ambient.playSound('menu click')
-                        if on_click_fnc then
-                            on_click_fnc()
-                        end
-                    end
-                    )
-                }
-            }
+        events = {
+            mouseClick = async:callback(function(...)
+                ambient.playSound("menu click")
+
+                if on_click_fnc then
+                    return on_click_fnc(...)
+                end
+            end)
         }
     }
+
+    function button:show()
+        self.ui.props.visible = true
+    end
+
+    function button:hide()
+        self.ui.props.visible = false
+    end
+
+    function button:set_text(text)
+        button.name_element.props.text = text
+    end
+
+    function button:create()
+
+        self.ui = {
+            name = self.name .. "_btn_border",
+            type = UI.TYPE.Container,
+            template = I.MWUI.templates.bordersThick,
+            props = {
+                size = v2(self.size_x, self.size_y),
+                visible = true,
+            },
+            content = UI.content {
+                templates.padding(self.size_x, self.size_y),
+                button.name_element,
+            }
+        }
+
+        return self.ui
+    end
+
+    return button
 end
 
 templates.text_input = {}
@@ -321,9 +350,12 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
 end
 
 templates.list = {}
-templates.list.new = function(name, list_size, update_target, generate_items, column_names, column_widths, enable_column_sortings)
+templates.list.new = function(name, list_size, update_target, generate_items, header_info, alignment)
 
     -- TODO: add sorting 
+    if not alignment then
+        alignment = UI.ALIGNMENT.Start
+    end
 
     local list = {}
 
@@ -351,23 +383,23 @@ templates.list.new = function(name, list_size, update_target, generate_items, co
     list.sort_direction = list.default_sort_direction
 
     list.column_elements = {}
-    if column_names then
+    if header_info then
 
         list.has_header = true
 
-        if #column_names ~= #column_widths and #column_names ~= #enable_column_sortings then
+        if #header_info.column_names ~= #header_info.column_widths and #header_info.column_names ~= #header_info.enable_column_sortings then
             print("Error: incorrectly sized column names and column sizes")
             return
         end
 
-        for index, column_name in ipairs(column_names) do
+        for index, column_name in ipairs(header_info.column_names) do
 
             print(column_name)
-            local column_width = column_widths[index]
+            local column_width = header_info.column_widths[index]
             local column_sort = {}
 
-            if enable_column_sortings[index] then
-                print("allow column sorting: ", enable_column_sortings[index])
+            if header_info.enable_column_sortings[index] then
+                print("allow column sorting: ", header_info.enable_column_sortings[index])
                 column_width = column_width - 20 -- Make room for sorting btn
 
                 column_sort = {
@@ -552,14 +584,16 @@ templates.list.new = function(name, list_size, update_target, generate_items, co
         self.ui = {
             name = self.name .. "_list",
             template = I.MWUI.templates.padding,
+            props = {
+            },
             content = UI.content {
                 {
                     name = "flex",
                     type = UI.TYPE.Flex,
                     props = {
                         horizontal = false,
-                        arrange = UI.ALIGNMENT.Start,
-                        align = UI.ALIGNMENT.Start,
+                        arrange = alignment,
+                        align = alignment,
                         size = v2(0,20) + self.size,
                     },
                     content = UI.content {
@@ -593,6 +627,37 @@ templates.list.new = function(name, list_size, update_target, generate_items, co
     return list
 end
 
+templates.simple_list = function (name, list_texts, update_target, size_x, size_y, on_click_fnc)
+    local simple_list
+
+    local function generate_list_elements() 
+        local list_elements = {}
+        for _, item in pairs(list_texts) do
+            local element = {
+                name = item,
+                type = UI.TYPE.Text,
+                template = I.MWUI.templates.textNormal,
+                props = {
+                    text = item,
+                    textSize = 20
+                },
+                events = {
+                    mouseClick = async:callback(function()
+                        on_click_fnc(item)
+                    end)
+                }
+            }
+            table.insert(list_elements, element)
+        end 
+        return list_elements
+    end
+
+    simple_list = templates.list.new(name, v2(size_x,size_y), update_target, generate_list_elements, nil, UI.ALIGNMENT.Center):create()
+
+    return simple_list
+end
+
+-- TODO: take size input
 templates.slider = {}
 templates.slider.new = function(text, max, min, start, interval, update_target)
     local slider = {}
@@ -813,6 +878,10 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
     end
 
     return slider
+end
+
+-- TODO: this
+templates.ui_window = function(name, size_x, size_y, caller_visibility) 
 end
 
 return templates

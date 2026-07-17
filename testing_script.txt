@@ -1,6 +1,9 @@
 
 player->addspell "summon golden saint"
 player->addspell "Fleabite"
+player->addspell "Drain Block"
+player->addspell "Fleabite"
+player->addspell "Restore Agility"
 
 Player->addsoulgem"golden saint""misc_soulgem_grand" 
 Player->addsoulgem"golden saint""misc_soulgem_grand" 

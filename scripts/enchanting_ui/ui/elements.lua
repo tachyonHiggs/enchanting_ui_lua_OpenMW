@@ -40,17 +40,29 @@ elements.effects = {}
 elements.root = {}
 elements.root_size = {800, 600}
 elements.enable_ui = function(element)
+    if element.layout.type == UI.TYPE.Widget then
+        element.layout.props.visible = true
+        return
+    end
     element.layout.content[2].template = I.MWUI.templates.padding
     element:update()
 end
 elements.disable_ui = function(element)
+    if element.layout.type == UI.TYPE.Widget then
+        element.layout.props.visible = false
+        return
+    end
     element.layout.content[2].template = I.MWUI.templates.disabled
     element:update()
 end
 
 elements.effects_root = {}
 elements.effects_size = {500, 300}
+elements.attribute_button_size = {120, 30}
+elements.effects_sliders_size = {300, 30}
 elements.effect_icon_size = v2(20,20)
+elements.attribute_names = {"Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality", "Luck"}
+elements.skill_names = {}
 
 elements.souls_root = {}
 elements.souls_list_column_names = {"Icon", "Name", "Charge", "Soul Name", "Count"}

@@ -169,7 +169,7 @@ function souls_ui.update()
     end
 end
 
-souls_ui.souls_list = templates.list.new("Souls", v2(elements.root_size[1], elements.root_size[2]), souls_ui.update, souls_ui.make_souls_list, elements.souls_list_column_names, elements.souls_list_sizes, elements.souls_list_sorting)
+souls_ui.souls_list = templates.list.new("Souls", v2(elements.root_size[1], elements.root_size[2]), souls_ui.update, souls_ui.make_souls_list, {column_names=elements.souls_list_column_names, column_widths=elements.souls_list_sizes, enable_column_sortings=elements.souls_list_sorting})
 elements.souls_list = souls_ui.souls_list
 
 elements.soul_input = templates.text_image.new("Soul", v2(75,75), 10, souls_ui.show_soul_list)

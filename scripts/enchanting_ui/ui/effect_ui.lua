@@ -176,6 +176,35 @@ effect_ui.create_effect_item = function(effect)
     }
 end
 
+local function create_attribute_element(name, element)
+    return {
+        name = name.."_element",
+        type = UI.TYPE.Flex,
+        props = {
+            horizontal = true,
+            arrange = UI.ALIGNMENT.Start,
+            align = UI.ALIGNMENT.Start,
+
+            size = v2(elements.effects_sliders_size[1], elements.effects_sliders_size[2]),
+            autoSize = false,
+            visible = true
+        },
+        content = UI.content{
+            {
+                name = "text",
+                type = UI.TYPE.Text,
+                template = I.MWUI.templates.textNormal,
+                props = {
+                    text = name,
+                    textSize = elements.text_size,
+                    size = v2(200, elements.text_size),
+                    autoSize = false,
+                },
+            },
+            element:create(),
+        }
+    }
+end
 
 effect_ui.new = function(modify, effect_to_add) 
 
@@ -207,14 +236,17 @@ effect_ui.new = function(modify, effect_to_add)
             force_no_area = true
         end
 
-        -- set_visible(effect_ui.magnitude, core.magic.effects.records[enchanter.effect_to_add.id].hasSkill)
-        -- set_visible(effect_ui.magnitude_max, core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute)
+        -- if core.magic.effects.records[enchanter.effect_to_add.id].hasSkill then
 
-        -- enchanter.effect_to_add.duration = 0
+        -- end
+        if core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute then
+            instance.attribute_element.props.visible = true
+        else
+            instance.attribute_element.props.visible = false
+        end
+
         set_visible(instance.duration, (core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and force_no_duration==false))
-        
-        -- enchanter.effect_to_add.magnitudeMax = 1
-        -- enchanter.effect_to_add.magnitudeMin = 1
+
         set_visible(instance.magnitude, core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude)
         set_visible(instance.magnitude_max, core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude)
 
@@ -272,10 +304,10 @@ effect_ui.new = function(modify, effect_to_add)
         end
 
         enchanter.effect_to_add.range = range
-        instance.range.content[2].props.text = text
+        instance.range:set_text(text)
         print("New range: ", text)
 
-        show_valid_effect_sliders()
+        show_valid_effect_sliders(false)
         update_effect_to_add_cost(false)
         elements.effects_root:update()
     end
@@ -346,26 +378,71 @@ effect_ui.new = function(modify, effect_to_add)
         elements.enable_ui(elements.root)
     end
 
-    instance.range = templates.button("Self", toggle_range_type, 100, 30)
-    instance.cost = templates.text_output.new("Cost:", 100, 10, "0", UI.ALIGNMENT.End)
-    instance.delete_btn = nil
+    local function on_attribute_select_click()
+        print("on_attribute_select_click")
+
+        -- Disable previous UI
+        elements.disable_ui(elements.effects_root)
+        elements.effects_root:update()
+
+        local attribute_list = templates.simple_list("Choose an Attribute", elements.attribute_names, nil, 80, 80, function(name) print("CLICKED: ", name) end)
+        attribute_list.props.anchor = v2(0.5, 0.5)
+        attribute_list.props.relativePosition = v2(0.5, 0.5)
+
+        -- New UI popup
+        instance.attribute_root = UI.create{
+            name = "attribute_root",
+            layer = "Windows",
+            type = UI.TYPE.Widget,
+            template = I.MWUI.templates.borders,
+            props = {
+                relativePosition = v2(0.5, 0.5),
+                anchor = v2(0.5, 0.5),
+                visible = true,
+                size = v2(elements.effects_size[1],elements.effects_size[2])
+            },
+            content = UI.content {
+                templates.make_border(v2(elements.effects_size[1], elements.effects_size[2]), 1),
+                attribute_list,
+            }
+        }
+        instance.attribute_root:update()
+        
+        -- List of options
+        -- On click, sets active and delets UI
+        
+    end
 
     if modify then
-        instance.delete_btn = templates.button("Delete", delete_effect, 100, 30)
+        instance.delete_btn = templates.button.new("Delete", delete_effect, elements.effects_size[1], elements.effects_size[2])
 
+        -- instance.skill = skill_element()
+        instance.attribute = templates.button.new(enchanter.effect_to_add.attribute, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, effect_to_add.magnitudeMin, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost(true) end)
         instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, effect_to_add.magnitudeMax, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost(true) end)
         instance.duration = templates.slider.new("Duration", 1440, 1, effect_to_add.duration, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost(true) end)
         instance.area = templates.slider.new("Area", 50, 0, effect_to_add.area, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost(true) end)
     else
+        -- instance.skill = skill_element(enchanter.effect_to_add.skill)
+        instance.attribute = templates.button.new(elements.attribute_names[1], on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost(true) end)
         instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost(true) end)
         instance.duration = templates.slider.new("Duration", 1440, 1, 1, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost(true) end)
         instance.area = templates.slider.new("Area", 50, 0, 0, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost(true) end)
-    
     end
 
+    instance.range = templates.button.new("Self", toggle_range_type, 100, 30)
+    instance.cost = templates.text_output.new("Cost:", 100, 10, "0", UI.ALIGNMENT.End)
+    instance.delete_btn = nil
+    instance.attribute_element = create_attribute_element("Attribute", instance.attribute)
+    -- instance.skill_element = create_attribute_element("Skill", instance.attribute)
+
     function instance:create()
+
+        local delete_btn
+        if instance.delete_btn then
+            delete_btn = instance.delete_btn:create()
+        end
 
         instance.ui = {
             name = "effect_add",
@@ -376,6 +453,7 @@ effect_ui.new = function(modify, effect_to_add)
                 relativeSize = v2(1, 1),
                 relativePosition = v2(0.5, 0.5),
                 anchor = v2(0.5, 0.5),
+                visible = true,
             },
             content = UI.content {
                 templates.make_border(v2(elements.effects_size[1], elements.effects_size[2])),
@@ -447,12 +525,13 @@ effect_ui.new = function(modify, effect_to_add)
                                     }
                                 },
                                 templates.padding(100, 0),
-                                instance.range,
+                                instance.range:create(),
                                 -- TODO: add cost
                                 templates.padding(100, 0),
                                 instance.cost:create(),
                             }
                         },
+                        instance.attribute_element,
                         templates.padding(elements.padding_size, 2*elements.padding_size),
                         instance.magnitude:create(),
                         templates.padding(elements.padding_size, elements.padding_size),
@@ -462,11 +541,11 @@ effect_ui.new = function(modify, effect_to_add)
                         templates.padding(elements.padding_size, elements.padding_size),
                         instance.area:create(),
                         templates.padding(elements.padding_size, elements.padding_size),
-                        templates.button("Cancel", cancel_magic_effect, 100, 30),
+                        templates.button.new("Cancel", cancel_magic_effect, 100, 30):create(),
                         templates.padding(elements.padding_size, elements.padding_size),
-                        templates.button("OK", ok_magic_effect, 100, 30),
+                        templates.button.new("OK", ok_magic_effect, 100, 30):create(),
                         templates.padding(elements.padding_size, elements.padding_size),
-                        instance.delete_btn,
+                        delete_btn,
                     }
                 }
             }

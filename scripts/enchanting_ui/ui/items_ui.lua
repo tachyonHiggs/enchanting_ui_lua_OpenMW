@@ -36,15 +36,13 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     print("enchant_pts: ", string.format("%.1f", enchant_pts))
     elements.item_input:set_image(icon)
     
-
-    -- TODO: this is just toggle cast type function
-    elements.cast_type_btn.content[2].props.text = enchanter.toggle_cast_type()
-    -- ENd todo
+    elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
 
     elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..string.format("%.1f", enchant_pts))
     elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost) .. "/" .. tostring(enchanter.soul.charge))
 
     elements.enable_ui(elements.root)
+    elements.root:update()
 
     auxUi.deepDestroy(elements.items_root)
     elements.items_root:update()
@@ -193,7 +191,7 @@ function items_ui.update()
     end
 end
 
-elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, elements.items_list_column_names, elements.items_list_sizes, elements.items_list_sorting)
+elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, {column_names=elements.items_list_column_names, column_widths=elements.items_list_sizes, enable_column_sortings=elements.items_list_sorting})
 
 elements.item_input = templates.text_image.new("Item", v2(75,75), 10, items_ui.show_item_list)
 
