@@ -42,17 +42,19 @@ elements.root_size = {800, 600}
 elements.enable_ui = function(element)
     if element.layout.type == UI.TYPE.Widget then
         element.layout.props.visible = true
-        return
+    elseif element.layout.type == UI.TYPE.Container then
+        element.layout.content[2].template = I.MWUI.templates.padding
     end
-    element.layout.content[2].template = I.MWUI.templates.padding
+    
     element:update()
 end
+
 elements.disable_ui = function(element)
     if element.layout.type == UI.TYPE.Widget then
         element.layout.props.visible = false
-        return
+    elseif element.layout.type == UI.TYPE.Container then
+        element.layout.content[2].template = I.MWUI.templates.disabled
     end
-    element.layout.content[2].template = I.MWUI.templates.disabled
     element:update()
 end
 

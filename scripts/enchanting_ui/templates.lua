@@ -350,16 +350,26 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
 end
 
 templates.list = {}
-templates.list.new = function(name, list_size, update_target, generate_items, header_info, alignment)
-
-    -- TODO: add sorting 
-    if not alignment then
-        alignment = UI.ALIGNMENT.Start
-    end
+templates.list.new = function(name, list_size, update_target, generate_items, header_info, basic_props, enable_search_bar, enable_divider)
 
     local list = {}
 
+    -- Assign default basic props if not assigned
+    list.basic_props = basic_props
+    if list.basic_props == nil or list.basic_props == {} then
+        list.basic_props = {}
+        list.basic_props.alignment = UI.ALIGNMENT.Start
+        list.basic_props.relativePosition = v2(0.5, 0.5)
+        list.basic_props.border = I.MWUI.templates.boxSolid
+    end
+
+    list.enable_search_bar = enable_search_bar
+    if list.enable_search_bar then
+        -- TODO: create search bar
+    end
+
     list.name = name
+
     print("Creating new list called: ", name)
     list.size = list_size
     list.update_target = update_target
@@ -369,10 +379,12 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     list.sort_descending = 0
     list.sort_ascending = 1
     list.sort_descending_texture = UI.texture({
-        path = "Textures/menu_scroll_down.dds"
+        path = "Textures/menu_scroll_down.dds",
+        offset = v2(-5, -5), -- TODO: what to set this as to avoid magic nums?
     }) 
     list.sort_ascending_texture = UI.texture({
-        path = "Textures/menu_scroll_up.dds"
+        path = "Textures/menu_scroll_up.dds",
+        offset = v2(-5, -5), -- TODO: what to set this as to avoid magic nums
     }) 
 
     list.header = {}
@@ -381,6 +393,22 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     list.default_sort_direction = list.sort_descending
     list.sort_column = list.default_sort_column
     list.sort_direction = list.default_sort_direction
+
+    list.name_element = {
+        name = "name",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textHeader,
+        props = {
+            text = list.name,
+            textSize = 22,
+            textAlignH = alignment,
+            textAlignV = alignment,
+        }
+    }
+    if list.name == "" then
+        list.name_element = {}
+    end
+    
 
     list.column_elements = {}
     if header_info then
@@ -405,7 +433,6 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                 column_sort = {
                     name = "direction"..index,
                     type = UI.TYPE.Image,
-                    template = I.MWUI.templates.borders,
                     props = {
                         resource = list.sort_descending_texture,
                         alpha = 1,
@@ -443,8 +470,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             type = UI.TYPE.Flex,
             props = {
                 horizontal = true,
-                arrange = UI.ALIGNMENT.Start,
-                align = UI.ALIGNMENT.Start,
+                arrange = alignment,
+                align = alignment,
             },
             content = UI.content (
                 list.column_elements
@@ -453,13 +480,32 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         
     end
 
+    list.divider = {{},{},{}}
+    -- TODO: make this work
+    if enable_divider then
+        -- list.divider = {
+        --     templates.padding(list_size.x, 8),
+        --     {
+        --         name = "divider",
+        --         type = UI.TYPE.Image,
+        --         template = I.MWUI.templates.verticalLine,
+        --         props = {
+        --             size = v2(list_size.x, 4),
+        --         }
+        --     },
+        --     templates.padding(list_size.x, 8),
+        -- }
+    end
+
+    print("generating items container")
+
     list.items_container = {
         name = "items",
         type = UI.TYPE.Flex,
         props = {
             horizontal = false,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
+            arrange = alignment,
+            align = alignment,
             size = list_size,
         },
         content = UI.content{
@@ -581,6 +627,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     end
 
     function list:create()
+        print("list:create")
+
         self.ui = {
             name = self.name .. "_list",
             template = I.MWUI.templates.padding,
@@ -595,21 +643,14 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                         arrange = alignment,
                         align = alignment,
                         size = v2(0,20) + self.size,
+                        relativePosition = list.basic_props.relativePosition
                     },
                     content = UI.content {
-                        {
-                            name = "name",
-                            type = UI.TYPE.Text,
-                            template = I.MWUI.templates.textHeader,
-                            props = {
-                                text = self.name,
-                                textSize = 22,
-                            }
-                        },
+                        list.name_element,
                         list.header,
                         {
                             name = "border",
-                            template = I.MWUI.templates.boxSolid,
+                            template = list.basic_props.border,
                             props = {
                                 size = self.size,
                             },
@@ -624,37 +665,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         return self.ui
     end
 
+    print("returning list")
     return list
-end
-
-templates.simple_list = function (name, list_texts, update_target, size_x, size_y, on_click_fnc)
-    local simple_list
-
-    local function generate_list_elements() 
-        local list_elements = {}
-        for _, item in pairs(list_texts) do
-            local element = {
-                name = item,
-                type = UI.TYPE.Text,
-                template = I.MWUI.templates.textNormal,
-                props = {
-                    text = item,
-                    textSize = 20
-                },
-                events = {
-                    mouseClick = async:callback(function()
-                        on_click_fnc(item)
-                    end)
-                }
-            }
-            table.insert(list_elements, element)
-        end 
-        return list_elements
-    end
-
-    simple_list = templates.list.new(name, v2(size_x,size_y), update_target, generate_list_elements, nil, UI.ALIGNMENT.Center):create()
-
-    return simple_list
 end
 
 -- TODO: take size input
@@ -878,10 +890,6 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
     end
 
     return slider
-end
-
--- TODO: this
-templates.ui_window = function(name, size_x, size_y, caller_visibility) 
 end
 
 return templates

@@ -176,34 +176,104 @@ effect_ui.create_effect_item = function(effect)
     }
 end
 
-local function create_attribute_element(name, element)
-    return {
-        name = name.."_element",
-        type = UI.TYPE.Flex,
-        props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
+local attribute_ui = {}
+attribute_ui.new = function(name, list, on_click_fnc)
+    local instance = {}
+    instance.list = list
+    instance.on_click_fnc = on_click_fnc
 
-            size = v2(elements.effects_sliders_size[1], elements.effects_sliders_size[2]),
-            autoSize = false,
-            visible = true
-        },
-        content = UI.content{
-            {
-                name = "text",
+    local function on_item_clicked() 
+        print("on_item_clicked")
+    end
+
+    local function generate_list_elements() 
+        print("attribute_ui.generate_list_elements")
+        local list_elements = {}
+
+        for _, item in pairs(instance.list) do
+            local element = {
+                name = item,
                 type = UI.TYPE.Text,
                 template = I.MWUI.templates.textNormal,
                 props = {
-                    text = name,
-                    textSize = elements.text_size,
-                    size = v2(200, elements.text_size),
+                    text = tostring(item),
+                    textSize = 20,
+                    textAlignV = UI.ALIGNMENT.Center,
+                    textAlignH = UI.ALIGNMENT.Center,
                     autoSize = false,
+                    size = v2(elements.effects_size[1], 20)
                 },
-            },
-            element:create(),
-        }
+                events = {
+                    mouseClick = async:callback(function()
+                        instance.on_click_fnc(item)
+                    end)
+                }
+            }
+            table.insert(list_elements, element)
+        end
+        print("generate list elements")
+        return list_elements
+    end
+
+    local name_element = {
+        name = "text",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = name,
+            textSize = elements.text_size,
+            size = v2(elements.effects_size[1], elements.text_size),
+            autoSize = false,
+            textAlignH = UI.ALIGNMENT.Center,
+            textAlignV = UI.ALIGNMENT.Center,
+        },
     }
+
+    local list_basic_props = {
+        alignment = UI.ALIGNMENT.Center,
+        relativePosition = v2(0.5, 0.5),
+        border = "",
+    }
+    local list_element = templates.list.new("", v2(elements.effects_size[1], elements.effects_size[2]), update_target, generate_list_elements, nil, list_basic_props, false, true)
+
+    
+    function instance:create()
+        print("attribute_ui.create")
+        self.ui = {
+            name = name.."_element",
+            layer = "Windows",
+            type = UI.TYPE.Widget,
+            props = {
+                relativePosition = v2(0.5, 0.5),
+                relativeSize = v2(1,1),
+                anchor = v2(0.5, 0.5),
+                visible = true,
+            },
+            content = UI.content {
+                templates.make_border(v2(elements.effects_size[1], elements.effects_size[2]), 1),
+                {
+                    type = UI.TYPE.Flex,
+                    props = {
+                        horizontal = false,
+                        arrange = UI.ALIGNMENT.Center,
+                        align = UI.ALIGNMENT.Center,
+                        anchor = v2(0.5, 0.5),
+                        relativePosition = v2(0.5, 0.5),
+
+                        autoSize = true,
+                        visible = true
+                    },
+                    content = UI.content{
+                        name_element,
+                        list_element:create(),
+                    }
+                }
+            }
+        }
+        return self.ui
+    end
+
+    return instance
 end
 
 effect_ui.new = function(modify, effect_to_add) 
@@ -240,9 +310,9 @@ effect_ui.new = function(modify, effect_to_add)
 
         -- end
         if core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute then
-            instance.attribute_element.props.visible = true
+            -- instance.attribute_element.props.visible = true
         else
-            instance.attribute_element.props.visible = false
+            -- instance.attribute_element.props.visible = false
         end
 
         set_visible(instance.duration, (core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and force_no_duration==false))
@@ -385,27 +455,13 @@ effect_ui.new = function(modify, effect_to_add)
         elements.disable_ui(elements.effects_root)
         elements.effects_root:update()
 
-        local attribute_list = templates.simple_list("Choose an Attribute", elements.attribute_names, nil, 80, 80, function(name) print("CLICKED: ", name) end)
-        attribute_list.props.anchor = v2(0.5, 0.5)
-        attribute_list.props.relativePosition = v2(0.5, 0.5)
+        function instance.set_attribute(attribute) 
+            print("effect_ui.set_attribute: ", attribute)
+        end
 
         -- New UI popup
-        instance.attribute_root = UI.create{
-            name = "attribute_root",
-            layer = "Windows",
-            type = UI.TYPE.Widget,
-            template = I.MWUI.templates.borders,
-            props = {
-                relativePosition = v2(0.5, 0.5),
-                anchor = v2(0.5, 0.5),
-                visible = true,
-                size = v2(elements.effects_size[1],elements.effects_size[2])
-            },
-            content = UI.content {
-                templates.make_border(v2(elements.effects_size[1], elements.effects_size[2]), 1),
-                attribute_list,
-            }
-        }
+        print(elements.attribute_names[1])
+        instance.attribute_root = UI.create(attribute_ui.new("Choose an Attribute", elements.attribute_names, instance.set_attribute):create())
         instance.attribute_root:update()
         
         -- List of options
@@ -434,8 +490,6 @@ effect_ui.new = function(modify, effect_to_add)
     instance.range = templates.button.new("Self", toggle_range_type, 100, 30)
     instance.cost = templates.text_output.new("Cost:", 100, 10, "0", UI.ALIGNMENT.End)
     instance.delete_btn = nil
-    instance.attribute_element = create_attribute_element("Attribute", instance.attribute)
-    -- instance.skill_element = create_attribute_element("Skill", instance.attribute)
 
     function instance:create()
 
@@ -531,7 +585,7 @@ effect_ui.new = function(modify, effect_to_add)
                                 instance.cost:create(),
                             }
                         },
-                        instance.attribute_element,
+                        instance.attribute:create(),
                         templates.padding(elements.padding_size, 2*elements.padding_size),
                         instance.magnitude:create(),
                         templates.padding(elements.padding_size, elements.padding_size),
