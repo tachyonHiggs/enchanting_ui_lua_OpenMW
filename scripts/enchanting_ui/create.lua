@@ -17,7 +17,9 @@ local function create_enchantment_and_item(data)
 
     -- for each effect in effects
     for _, effect in ipairs(effects) do
-        effect.effect = core.magic.effects.records[effect.id]
+        print("AffectedAttribute: ", effect.affectedAttribute)
+        effect.affectedAttribute = string.lower(effect.affectedAttribute)
+        -- effect.affectedSkill = string.lower(effect.affectedSkill)
     end
 
     -- Create enchantment

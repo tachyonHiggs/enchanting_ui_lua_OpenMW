@@ -119,6 +119,10 @@ effect_ui.create_effect_item = function(effect)
 
     local parts = { name }
 
+    if core.magic.effects.records[effect.id].hasAttribute then
+        table.insert(parts, effect.attribute)
+    end
+
     if core.magic.effects.records[effect.id].hasMagnitude then
         table.insert(parts, ("%d to %d"):format(effect.magnitudeMin, effect.magnitudeMax))
     end
@@ -176,8 +180,9 @@ effect_ui.create_effect_item = function(effect)
     }
 end
 
-local attribute_ui = {}
-attribute_ui.new = function(name, list, on_click_fnc)
+local select_list_ui = {}
+select_list_ui.new = function(name, list, on_click_fnc)
+
     local instance = {}
     instance.list = list
     instance.on_click_fnc = on_click_fnc
@@ -187,7 +192,7 @@ attribute_ui.new = function(name, list, on_click_fnc)
     end
 
     local function generate_list_elements() 
-        print("attribute_ui.generate_list_elements")
+        print("select_list_ui.generate_list_elements")
         local list_elements = {}
 
         for _, item in pairs(instance.list) do
@@ -234,11 +239,10 @@ attribute_ui.new = function(name, list, on_click_fnc)
         relativePosition = v2(0.5, 0.5),
         border = "",
     }
-    local list_element = templates.list.new("", v2(elements.effects_size[1], elements.effects_size[2]), update_target, generate_list_elements, nil, list_basic_props, false, true)
-
+    local list_element = templates.list.new("", v2(elements.effects_size[1], elements.effects_size[2]), nil, generate_list_elements, nil, list_basic_props)
     
     function instance:create()
-        print("attribute_ui.create")
+        print("select_list_ui.create")
         self.ui = {
             name = name.."_element",
             layer = "Windows",
@@ -310,9 +314,11 @@ effect_ui.new = function(modify, effect_to_add)
 
         -- end
         if core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute then
-            -- instance.attribute_element.props.visible = true
+            enchanter.effect_to_add.affectedAttribute = elements.attribute_names[1]
+            instance.attribute:show()
         else
-            -- instance.attribute_element.props.visible = false
+            enchanter.effect_to_add.affectedAttribute = ""
+            instance.attribute:hide()
         end
 
         set_visible(instance.duration, (core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and force_no_duration==false))
@@ -396,7 +402,6 @@ effect_ui.new = function(modify, effect_to_add)
             end
         end
 
-        print("Effect to modify duration: ", enchanter.effect_to_add.duration)
         local effect_to_add_ui = effect_ui.create_effect_item(enchanter.effect_to_add)
 
         if enchanter.effect_to_modify then 
@@ -457,29 +462,41 @@ effect_ui.new = function(modify, effect_to_add)
 
         function instance.set_attribute(attribute) 
             print("effect_ui.set_attribute: ", attribute)
+
+            -- Close UI
+            auxUi.deepDestroy(instance.attribute_root)
+            instance.attribute_root:update()
+
+            -- Update current enchantment with new value
+            enchanter.effect_to_add.affectedAttribute = attribute
+            print("enchanter.effect_to_add.affectedAttribute: ", enchanter.effect_to_add.affectedAttribute)
+
+            -- Update UI
+            instance.attribute:set_text(attribute)
+
+            -- enable effect UI
+            elements.enable_ui(elements.effects_root)
+            elements.effects_root:update()
         end
 
         -- New UI popup
         print(elements.attribute_names[1])
-        instance.attribute_root = UI.create(attribute_ui.new("Choose an Attribute", elements.attribute_names, instance.set_attribute):create())
+        instance.attribute_root = UI.create(select_list_ui.new("Choose an Attribute", elements.attribute_names, instance.set_attribute):create())
         instance.attribute_root:update()
-        
-        -- List of options
-        -- On click, sets active and delets UI
         
     end
 
     if modify then
         instance.delete_btn = templates.button.new("Delete", delete_effect, elements.effects_size[1], elements.effects_size[2])
 
-        -- instance.skill = skill_element()
-        instance.attribute = templates.button.new(enchanter.effect_to_add.attribute, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
+        -- instance.skill =  templates.button.new(enchanter.effect_to_add.affectedSkill, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
+        instance.attribute = templates.button.new(enchanter.effect_to_add.affectedAttribute, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, effect_to_add.magnitudeMin, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost(true) end)
         instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, effect_to_add.magnitudeMax, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost(true) end)
         instance.duration = templates.slider.new("Duration", 1440, 1, effect_to_add.duration, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost(true) end)
         instance.area = templates.slider.new("Area", 50, 0, effect_to_add.area, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost(true) end)
     else
-        -- instance.skill = skill_element(enchanter.effect_to_add.skill)
+        -- instance.skill =  templates.button.new(enchanter.effect_to_add.affectedSkill, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.attribute = templates.button.new(elements.attribute_names[1], on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost(true) end)
         instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost(true) end)
