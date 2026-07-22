@@ -26,8 +26,6 @@ local main_content = {element = {}}
 
 local is_vendor_enchant = false
 
-local function on_effect_clicked() end
-
 local title = {
     name = "title",
     type = UI.TYPE.Text,
@@ -45,6 +43,14 @@ local title = {
 enchanting_ui.create_ui = function() 
 
     print("create_ui")
+    
+    if not is_vendor_enchant then
+        elements.price:hide()
+        elements.chance:show()
+    else
+        elements.chance:hide()
+        elements.price:show()
+    end
 
     local v2_size = v2(elements.root_size[1], elements.root_size[2])
 
@@ -333,12 +339,6 @@ end
 
 enchanting_ui.reset = function()
     print("enchanting_ui.reset")
-
-    if not is_vendor_enchant then
-        elements.price:hide()
-    else
-        elements.chance:hide()
-    end
     
     enchanter.reset()
 

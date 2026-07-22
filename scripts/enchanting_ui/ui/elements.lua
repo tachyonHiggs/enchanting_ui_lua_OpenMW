@@ -29,7 +29,7 @@ elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.
 
 elements.cast_type_btn = {}
 elements.price = templates.text_output.new("Price:", 100, 10, "0", UI.ALIGNMENT.End)
-elements.chance = templates.text_output.new("Chance:", 200, 10, "0", UI.ALIGNMENT.End)
+elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMENT.End)
 
 -- lists
 elements.items_list = {}
