@@ -107,7 +107,7 @@ local function toggle_cast_type()
     elements.effects:clear()
     elements.root:update()
     
-    elements.cast_type_btn.content[2].props.text = enchanter.toggle_cast_type()
+    elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
 end
 
 -- header

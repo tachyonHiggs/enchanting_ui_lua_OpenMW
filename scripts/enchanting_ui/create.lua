@@ -19,7 +19,7 @@ local function create_enchantment_and_item(data)
     for _, effect in ipairs(effects) do
         print("AffectedAttribute: ", effect.affectedAttribute)
         effect.affectedAttribute = string.lower(effect.affectedAttribute)
-        -- effect.affectedSkill = string.lower(effect.affectedSkill)
+        effect.affectedSkill = string.lower(effect.affectedSkill)
     end
 
     -- Create enchantment

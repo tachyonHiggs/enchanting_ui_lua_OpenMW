@@ -119,8 +119,12 @@ effect_ui.create_effect_item = function(effect)
 
     local parts = { name }
 
+    if core.magic.effects.records[effect.id].hasSkill then
+        table.insert(parts, effect.affectedSkill)
+    end
+
     if core.magic.effects.records[effect.id].hasAttribute then
-        table.insert(parts, effect.attribute)
+        table.insert(parts, effect.affectedAttribute)
     end
 
     if core.magic.effects.records[effect.id].hasMagnitude then
@@ -181,15 +185,14 @@ effect_ui.create_effect_item = function(effect)
 end
 
 local select_list_ui = {}
-select_list_ui.new = function(name, list, on_click_fnc)
+select_list_ui.new = function(name, records, on_click_fnc)
 
     local instance = {}
-    instance.list = list
-    instance.on_click_fnc = on_click_fnc
-
-    local function on_item_clicked() 
-        print("on_item_clicked")
+    instance.list = {}
+    for _, record in ipairs(records) do
+        table.insert(instance.list, record.name)
     end
+    instance.on_click_fnc = on_click_fnc
 
     local function generate_list_elements() 
         print("select_list_ui.generate_list_elements")
@@ -265,7 +268,8 @@ select_list_ui.new = function(name, list, on_click_fnc)
                         relativePosition = v2(0.5, 0.5),
 
                         autoSize = true,
-                        visible = true
+                        visible = true,
+                        wrap = true
                     },
                     content = UI.content{
                         name_element,
@@ -310,16 +314,9 @@ effect_ui.new = function(modify, effect_to_add)
             force_no_area = true
         end
 
-        -- if core.magic.effects.records[enchanter.effect_to_add.id].hasSkill then
 
-        -- end
-        if core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute then
-            enchanter.effect_to_add.affectedAttribute = elements.attribute_names[1]
-            instance.attribute:show()
-        else
-            enchanter.effect_to_add.affectedAttribute = ""
-            instance.attribute:hide()
-        end
+        set_visible(instance.skill, core.magic.effects.records[enchanter.effect_to_add.id].hasSkill)
+        set_visible(instance.attribute, core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute)
 
         set_visible(instance.duration, (core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and force_no_duration==false))
 
@@ -453,9 +450,37 @@ effect_ui.new = function(modify, effect_to_add)
         elements.enable_ui(elements.root)
     end
 
-    local function on_attribute_select_click()
-        print("on_attribute_select_click")
+    local function on_skill_select_click()
+        print("on_skill_select_click")
 
+        -- Disable previous UI
+        elements.disable_ui(elements.effects_root)
+        elements.effects_root:update()
+
+        function instance.set_skill(skill) 
+
+            -- Close UI
+            auxUi.deepDestroy(instance.skill_root)
+            instance.skill_root:update()
+
+            -- Update current enchantment with new value
+            enchanter.effect_to_add.affectedSkill = skill
+            print("enchanter.effect_to_add.affectedSkill: ", enchanter.effect_to_add.affectedSkill)
+
+            -- Update UI
+            instance.skill:set_text(skill)
+
+            -- enable effect UI
+            elements.enable_ui(elements.effects_root)
+            elements.effects_root:update()
+        end
+
+        -- New UI popup
+        instance.skill_root = UI.create(select_list_ui.new("Choose Skill", core.stats.Skill.records, instance.set_skill):create())
+        instance.skill_root:update()
+        
+    end
+    local function on_attribute_select_click()
         -- Disable previous UI
         elements.disable_ui(elements.effects_root)
         elements.effects_root:update()
@@ -480,24 +505,25 @@ effect_ui.new = function(modify, effect_to_add)
         end
 
         -- New UI popup
-        print(elements.attribute_names[1])
-        instance.attribute_root = UI.create(select_list_ui.new("Choose an Attribute", elements.attribute_names, instance.set_attribute):create())
+        instance.attribute_root = UI.create(select_list_ui.new("Choose an Attribute", core.stats.Attribute.records, instance.set_attribute):create())
         instance.attribute_root:update()
         
     end
 
+    instance.delete_btn = nil
+    
     if modify then
-        instance.delete_btn = templates.button.new("Delete", delete_effect, elements.effects_size[1], elements.effects_size[2])
+        instance.delete_btn = templates.button.new("Delete", delete_effect, 100, 30)
 
-        -- instance.skill =  templates.button.new(enchanter.effect_to_add.affectedSkill, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
+        instance.skill =  templates.button.new(enchanter.effect_to_add.affectedSkill, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.attribute = templates.button.new(enchanter.effect_to_add.affectedAttribute, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, effect_to_add.magnitudeMin, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost(true) end)
         instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, effect_to_add.magnitudeMax, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost(true) end)
         instance.duration = templates.slider.new("Duration", 1440, 1, effect_to_add.duration, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost(true) end)
         instance.area = templates.slider.new("Area", 50, 0, effect_to_add.area, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost(true) end)
     else
-        -- instance.skill =  templates.button.new(enchanter.effect_to_add.affectedSkill, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
-        instance.attribute = templates.button.new(elements.attribute_names[1], on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
+        instance.skill =  templates.button.new(core.stats.Skill.records[1].name, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
+        instance.attribute = templates.button.new(core.stats.Attribute.records[1].name, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost(true) end)
         instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost(true) end)
         instance.duration = templates.slider.new("Duration", 1440, 1, 1, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost(true) end)
@@ -506,7 +532,6 @@ effect_ui.new = function(modify, effect_to_add)
 
     instance.range = templates.button.new("Self", toggle_range_type, 100, 30)
     instance.cost = templates.text_output.new("Cost:", 100, 10, "0", UI.ALIGNMENT.End)
-    instance.delete_btn = nil
 
     function instance:create()
 
@@ -602,6 +627,8 @@ effect_ui.new = function(modify, effect_to_add)
                                 instance.cost:create(),
                             }
                         },
+                        instance.skill:create(),
+                        templates.padding(elements.padding_size, 2*elements.padding_size),
                         instance.attribute:create(),
                         templates.padding(elements.padding_size, 2*elements.padding_size),
                         instance.magnitude:create(),

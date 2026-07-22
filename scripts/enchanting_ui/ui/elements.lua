@@ -63,8 +63,6 @@ elements.effects_size = {500, 300}
 elements.attribute_button_size = {120, 30}
 elements.effects_sliders_size = {300, 30}
 elements.effect_icon_size = v2(20,20)
-elements.attribute_names = {"Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality", "Luck"}
-elements.skill_names = {}
 
 elements.souls_root = {}
 elements.souls_list_column_names = {"Icon", "Name", "Charge", "Soul Name", "Count"}

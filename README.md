@@ -8,16 +8,18 @@
 - Add vendor enchanting UI, added some foundation for this 
 - Add tool tips
 - Add consistent sound effects
+- Add limits on max and min mag
 
 
 ### Expanded Features
 - Implement constant effect as always possible with any soul but reduces enchantment capacity
 - Implement cheat modes: disable enchantment capacity, disable cost, disable charge, etc
 - Potentially add the ability use vendor's soul gems while enchanting
+- Option to remove constant effect max and min magnitude
 
 
 ### Development
-- Add descriptions,params, fields etc to functions and files
+- Add descriptions, params, fields etc to functions and files
 - Make it so that changing item does not cause the enchanting menu to reset
 
 
