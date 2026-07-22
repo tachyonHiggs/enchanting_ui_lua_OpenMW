@@ -62,6 +62,7 @@ enchanter.reset = function()
     enchanter.reset_enchantment()
     enchanter.reset_soul()
     enchanter.reset_item()
+    enchanter.is_vendor_enchant = false
 end
 
 enchanter.get_effect_to_add_cost = function ()

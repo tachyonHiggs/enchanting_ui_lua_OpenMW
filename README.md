@@ -4,7 +4,7 @@
 
 ### Vanilla Features
 - Add openmw enchant multiple projectiles at once: https://openmw.readthedocs.io/en/latest/reference/modding/settings/game.html#projectiles-enchant-multiplier
-- Add vendor enchanting UI, added some foundation for this 
+- Add Enchanting Cost and if player has enough gold
 - Add tool tips
 - Add consistent sound effects
 - Add limits on max and min mag

@@ -24,8 +24,6 @@ local header = {element = {}}
 local footer = {element = {}}
 local main_content = {element = {}}
 
-local is_vendor_enchant = false
-
 local title = {
     name = "title",
     type = UI.TYPE.Text,
@@ -40,11 +38,13 @@ local title = {
     },
 }
 
+enchanting_ui.is_vendor_enchant = false
+
 enchanting_ui.create_ui = function() 
 
     print("create_ui")
     
-    if not is_vendor_enchant then
+    if not enchanting_ui.is_vendor_enchant then
         elements.price:hide()
         elements.chance:show()
     else
@@ -264,8 +264,8 @@ enchanting_ui.show = function(is_vendor)
     print("Menu Show")
     enchanting_ui.reset()
 
-    is_vendor_enchant = is_vendor
-    print("is_vendor_enchant", is_vendor_enchant)
+    enchanting_ui.is_vendor_enchant = is_vendor
+    print("is_vendor_enchant", enchanting_ui.is_vendor_enchant)
     enchanting_ui.create_ui()
     elements.root:update()
 end
@@ -275,8 +275,8 @@ enchanting_ui.hide = function()
     print("Menu Hide")
 
     I.UI.removeMode('EnchantingDialog')
-    print("is_vendor_enchant", is_vendor_enchant)
-    if not is_vendor_enchant then
+    print("is_vendor_enchant", enchanting_ui.is_vendor_enchant)
+    if not enchanting_ui.is_vendor_enchant then
         I.UI.setMode("Interface")
     else 
         -- TODO: this to dialog
