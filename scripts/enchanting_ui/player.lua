@@ -3,8 +3,6 @@ local auxUi = require("openmw_aux.ui")
 
 local enchanting_ui = require("scripts.enchanting_ui.enchanting_ui")
 
-local is_vendor_enchant = true
-
 -- For the menu settings tab
 I.Settings.registerPage ({
     key = 'enchanting_ui_page',
@@ -16,7 +14,6 @@ I.Settings.registerPage ({
 
 local function show()
     enchanting_ui.update_lists()
-    enchanting_ui.show()
 end
     
 local function hide()
@@ -36,7 +33,6 @@ local function onSave()
 end
 
 local function onLoad(data)
-
     -- Register Window and reset
     I.UI.registerWindow('EnchantingDialog', show, hide)
     enchanting_ui.reset()
@@ -54,11 +50,13 @@ return {
         UiModeChanged = function(data)
             print('UiModeChanged from', data.oldMode , 'to', data.newMode, '('..tostring(data.arg)..')')
             -- TODO: use arg here to make it the soul gem
-            if data.newMode == 'EnchantingDialog' then
-                -- TODO: change this to be talking to NPC
-                -- if data.oldMode == 'interface' then
-                    -- SEND event that is vendor
-                -- end
+            if data.newMode == 'Enchanting' then
+                -- This handles displaying the actual UI depending on which one is appropiate
+                if data.oldMode == 'Dialogue' then
+                    enchanting_ui.show(true)
+                else 
+                    enchanting_ui.show(false)
+                end
                 
             end
 

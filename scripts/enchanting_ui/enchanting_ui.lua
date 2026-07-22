@@ -42,10 +42,9 @@ local title = {
     },
 }
 
-enchanting_ui.create_ui = function(is_vendor_enchant_bool) 
+enchanting_ui.create_ui = function() 
 
     print("create_ui")
-    is_vendor_enchant = is_vendor_enchant_bool
 
     local v2_size = v2(elements.root_size[1], elements.root_size[2])
 
@@ -253,16 +252,14 @@ footer = {
         }
     } }
 }
-
-if not is_vendor_enchant then
-    elements.price:hide()
-else
-    elements.chance:hide()
-end
 -- End footer
 
-enchanting_ui.show = function()
+enchanting_ui.show = function(is_vendor)
     print("Menu Show")
+    enchanting_ui.reset()
+
+    is_vendor_enchant = is_vendor
+    print("is_vendor_enchant", is_vendor_enchant)
     enchanting_ui.create_ui()
     elements.root:update()
 end
@@ -272,11 +269,12 @@ enchanting_ui.hide = function()
     print("Menu Hide")
 
     I.UI.removeMode('EnchantingDialog')
+    print("is_vendor_enchant", is_vendor_enchant)
     if not is_vendor_enchant then
         I.UI.setMode("Interface")
     else 
         -- TODO: this to dialog
-        I.UI.setMode("Interface")
+        I.UI.setMode("Dialogue")
     end
     
     -- Reset
@@ -335,6 +333,12 @@ end
 
 enchanting_ui.reset = function()
     print("enchanting_ui.reset")
+
+    if not is_vendor_enchant then
+        elements.price:hide()
+    else
+        elements.chance:hide()
+    end
     
     enchanter.reset()
 

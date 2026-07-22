@@ -3,7 +3,6 @@
 ## TODO / Change Log
 
 ### Vanilla Features
-- Add attribute and skill magic effects
 - Add openmw enchant multiple projectiles at once: https://openmw.readthedocs.io/en/latest/reference/modding/settings/game.html#projectiles-enchant-multiplier
 - Add vendor enchanting UI, added some foundation for this 
 - Add tool tips
@@ -21,6 +20,8 @@
 ### Development
 - Add descriptions, params, fields etc to functions and files
 - Make it so that changing item does not cause the enchanting menu to reset
+- Have Flex UI wrap skills
+- Clean up Skill and attribute select menus
 
 
 ## Known Issues
