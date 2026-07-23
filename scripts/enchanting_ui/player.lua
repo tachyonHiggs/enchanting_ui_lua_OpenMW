@@ -13,7 +13,11 @@ I.Settings.registerPage ({
 
 
 local function show()
+    -- Reset and update lists
+    enchanting_ui.reset()
     enchanting_ui.update_lists()
+    -- Only create, dont render
+    enchanting_ui.create_ui()
 end
     
 local function hide()
@@ -53,9 +57,11 @@ return {
             if data.newMode == 'Enchanting' then
                 -- This handles displaying the actual UI depending on which one is appropiate
                 if data.oldMode == 'Dialogue' then
-                    enchanting_ui.show(true)
+                    local vendor = data.arg
+                    enchanting_ui.show(true, vendor)
                 else 
-                    enchanting_ui.show(false)
+                    local soul_gem = data.arg
+                    enchanting_ui.show(false, nil)
                 end
                 
             end

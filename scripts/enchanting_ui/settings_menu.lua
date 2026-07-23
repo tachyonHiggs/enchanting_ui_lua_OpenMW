@@ -83,6 +83,16 @@ I.Settings.registerGroup {
                 disabled = false,
             }
         },
+        {
+            key = 'free_enchantments_from_vendors',
+            renderer = 'checkbox',
+            name = 'Free Enchantments from Vendors',
+            description = 'When set to yes, enchantmented items created by Vendors are free and cost 0 gold',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
 
    	},
 }

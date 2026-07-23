@@ -45,6 +45,7 @@ end
 
 enchanter.reset_enchantment = function()
     enchanter.chance = 0
+    enchanter.price = 0
     enchanter.name = ""
 
     enchanter.effects_with_params = {}
@@ -63,6 +64,38 @@ enchanter.reset = function()
     enchanter.reset_soul()
     enchanter.reset_item()
     enchanter.is_vendor_enchant = false
+end
+
+enchanter.calculate_vanilla_price = function()
+    local price = 0
+
+    local fEnchantmentValueMult = core.getGMST('fEnchantmentValueMult')
+    price = enchanter.enchantment.base_cost * fEnchantmentValueMult
+    price = math.max(1, price) -- set to at least 1
+
+    return price
+end
+
+enchanter.check_price = function()
+    print("check_price")
+
+    -- Calculate item cost
+    local item_cost = enchanter.calculate_vanilla_price() -- TOOD: add support for multiple options
+    print("item costs: ", item_cost)
+
+    -- Compare with Player gold
+    local player_gold = types.Actor.getBarterGold(self)
+    print("Player has: ", player_gold)
+
+    if player_gold >= item_cost then
+        enchanter.price = item_cost
+        print("Success")
+        return true
+    end
+
+    UI.showMessage("You do not have enough gold for this transaction")
+    print("Failed to pay Vendor")
+    return false
 end
 
 enchanter.get_effect_to_add_cost = function ()
@@ -204,7 +237,7 @@ enchanter.get_inventory_souls = function ()
     return souls
 end
 
-enchanter.check_requirements = function()
+enchanter.check_requirements = function(is_vendor_enchant)
     print("check_requirements")
 
     -- Check item
@@ -253,10 +286,12 @@ enchanter.check_requirements = function()
         enchanter.enchantment.isAutocalc = false -- Override this to use the above "0" cost
     end
 
-    
-
-    -- Check price
-    -- if player has enough gold
+    enchanter.price = 0 -- reset this 
+    if not storage.globalSection("cheats_enchanting_ui"):get("free_enchantments_from_vendors") then
+        if is_vendor_enchant and enchanter.check_price() == false then
+            return false
+        end
+    end
 
     return true
 end
@@ -295,17 +330,17 @@ enchanter.create_item = function()
 
 end
 
--- TODO: make this return if item was created and message
-enchanter.enchant_item = function()
+local reset_nothing = 0
+local reset_soulgem_icon = 1
+local reset_soulgem_and_item_icon = 2
+enchanter.enchant_item = function(is_vendor_enchant, vendor)
     print("enchant_item")
-    
-    if enchanter.check_requirements() == false then
-        
-        return 0  -- Don't reset any icons
+
+    if enchanter.check_requirements(is_vendor_enchant) == false then
+        return reset_nothing
     end
 
     -- Remove Soul gem
-
     if not storage.globalSection("cheats_enchanting_ui"):get("dont_consume_item_and_soul") then
         core.sendGlobalEvent('remove_object', {object = enchanter.soul.object, count = 1, type = "soul"})
     end
@@ -314,9 +349,19 @@ enchanter.enchant_item = function()
         core.sendGlobalEvent('move_into_player', { id = "misc_soulgem_azura", count = 1 })
     end
 
-    if enchanter.get_enchant_success() == false then
-        enchanter.reset_soul()
-        return 1 -- reset soul gem icon
+    if not is_vendor_enchant then 
+        if enchanter.get_enchant_success() == false then
+            enchanter.reset_soul()
+            return reset_soulgem_icon
+        end
+    else 
+        -- Take money from player
+        local current_gold = types.Actor.getBarterGold(self)
+        types.Actor.setBarterGold(self, current_gold - enchanter.price)
+
+        -- Give money to vendor
+        local current_gold = types.Actor.getBarterGold(vendor)
+        types.Actor.setBarterGold(vendor, current_gold + enchanter.price)
     end
 
     enchanter.create_item()
@@ -329,7 +374,7 @@ enchanter.enchant_item = function()
     -- Clean up enchanter
     enchanter.reset() 
 
-    return 2 -- Reset both soul gem and item icon
+    return reset_soulgem_and_item_icon
 end
 
 -- This fnc is used to calculate the current success rate

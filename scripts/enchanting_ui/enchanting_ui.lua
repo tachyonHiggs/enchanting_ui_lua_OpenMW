@@ -23,6 +23,7 @@ local enchanting_ui = {}
 local header = {element = {}}
 local footer = {element = {}}
 local main_content = {element = {}}
+enchanting_ui.is_vendor_enchant = false
 
 local title = {
     name = "title",
@@ -37,8 +38,6 @@ local title = {
         textAlignV = UI.ALIGNMENT.Center,
     },
 }
-
-enchanting_ui.is_vendor_enchant = false
 
 enchanting_ui.create_ui = function() 
 
@@ -243,7 +242,7 @@ footer = {
             templates.padding(10, 0),
             elements.price:create(),
             templates.padding(200, 0),
-            templates.button.new("Create", (function()
+            templates.button.new("Create", (function()  -- TODO: make this its own item so that Create can be updated with Buy
                 print("Clicked Create")
                 enchanting_ui.enchant_item()
                 return true
@@ -260,13 +259,16 @@ footer = {
 }
 -- End footer
 
-enchanting_ui.show = function(is_vendor)
+enchanting_ui.show = function(is_vendor, vendor)
     print("Menu Show")
-    enchanting_ui.reset()
 
     enchanting_ui.is_vendor_enchant = is_vendor
     print("is_vendor_enchant", enchanting_ui.is_vendor_enchant)
-    enchanting_ui.create_ui()
+    if is_vendor then
+        print("Vendor is: ", vendor)
+        enchanting_ui.vendor = vendor
+    end
+    
     elements.root:update()
 end
 
@@ -293,7 +295,7 @@ enchanting_ui.enchant_item = function()
 
     ambient.playSound('menu click')
 
-    local icons_to_reset = enchanter.enchant_item()
+    local icons_to_reset = enchanter.enchant_item(enchanting_ui.is_vendor_enchant, enchanting_ui.vendor)
 
     -- Now handle updating UI elements depending on enchanting success
     if icons_to_reset >= 1 then
