@@ -91,10 +91,29 @@ local function move_into_player(data)
     world.createObject(id, count):moveInto(world.players[1])
 end
 
+local function set_actor_gold(data)
+    local actor = data.actor
+    local count = data.count
+    local is_player = data.is_player
+
+    print("Setting actor: ", actor)
+    print("To gold count: ", count)
+    if is_player then
+        local payment = types.Actor.inventory(actor):find("gold_001")
+        if payment then
+            payment:remove(count)
+        end
+    else
+        types.Actor.setBarterGold(actor, count)
+    end
+    
+end
+
 return {
     eventHandlers = {
         create_enchantment_and_item = create_enchantment_and_item,
         remove_object = remove_object,
         move_into_player = move_into_player,
+        set_actor_gold = set_actor_gold,
     }
 }

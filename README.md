@@ -4,16 +4,18 @@
 
 ### Vanilla Features
 - Add openmw enchant multiple projectiles at once: https://openmw.readthedocs.io/en/latest/reference/modding/settings/game.html#projectiles-enchant-multiplier
-- Add Enchanting Cost and if player has enough gold
+- Add soul gem used to start player enchanting to fil the soul gem spot
 - Add tool tips
 - Add consistent sound effects
 - Add limits on max and min mag
+- Allow multiple affect skill/attribute effects 
 
 
 ### Expanded Features
 - Implement constant effect as always possible with any soul but reduces enchantment capacity
 - Implement cheat modes: disable enchantment capacity, disable cost, disable charge, etc
 - Potentially add the ability use vendor's soul gems while enchanting
+- Allow bartering for vendor enchanted items services
 - Option to remove constant effect max and min magnitude
 
 

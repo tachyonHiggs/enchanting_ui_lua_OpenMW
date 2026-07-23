@@ -28,8 +28,9 @@ elements.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, 
 elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End)
 
 elements.cast_type_btn = {}
-elements.price = templates.text_output.new("Price:", 100, 10, "0", UI.ALIGNMENT.End)
+elements.price = templates.text_output.new("Price:", 100, 10, "1", UI.ALIGNMENT.End)
 elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMENT.End)
+elements.is_vendor = false
 
 -- lists
 elements.items_list = {}

@@ -135,7 +135,10 @@ effect_ui.create_effect_item = function(effect)
         table.insert(parts, ("for %d sec"):format(effect.duration))
     end
 
-    if core.magic.effects.records[effect.id].hasArea then
+    local has_area
+    
+    print("Has area: ", enchanter.enchantment.has_area)
+    if enchanter.enchantment.has_area then
         table.insert(parts, ("in %d ft"):format(effect.area))
     end
 
@@ -323,8 +326,8 @@ effect_ui.new = function(modify, effect_to_add)
         set_visible(instance.magnitude, core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude)
         set_visible(instance.magnitude_max, core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude)
 
-        -- enchanter.effect_to_add.area = 0
-        set_visible(instance.area, (enchanter.effect_to_add.range ~= core.magic.RANGE.Self and force_no_area==false))
+        enchanter.enchantment.has_area = enchanter.effect_to_add.range ~= core.magic.RANGE.Self and force_no_area==false
+        set_visible(instance.area, (enchanter.enchantment.has_area))
 
         if update_ui then
             elements.effects_root:update()
@@ -409,11 +412,19 @@ effect_ui.new = function(modify, effect_to_add)
             elements.effects:add_item(effect_to_add_ui)
         end
         
+        -- Update base cost
         enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
-        enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
-        
         elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..tostring(enchanter.item.enchantment_capacity))
+
+        -- Update effective cost
+        enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
         elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost) .. "/" .. tostring(enchanter.soul.charge))
+        
+        -- Update price
+        if elements.is_vendor then
+            enchanter.calculate_price()
+            elements.price:set_text(tostring(enchanter.price))
+        end
 
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()

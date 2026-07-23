@@ -45,8 +45,9 @@ end
 
 enchanter.reset_enchantment = function()
     enchanter.chance = 0
-    enchanter.price = 0
+    enchanter.price = 1
     enchanter.name = ""
+    enchanter.vendor = {}
 
     enchanter.effects_with_params = {}
     enchanter.reset_effect_to_add()
@@ -57,6 +58,7 @@ enchanter.reset_enchantment = function()
     enchanter.enchantment.type = 0
     enchanter.enchantment.base_cost = 0
     enchanter.enchantment.effective_cost = 0
+    enchanter.enchantment.has_area = false -- Added for ease
 end
 
 enchanter.reset = function()
@@ -67,7 +69,7 @@ enchanter.reset = function()
 end
 
 enchanter.calculate_vanilla_price = function()
-    local price = 0
+    local price = 1
 
     local fEnchantmentValueMult = core.getGMST('fEnchantmentValueMult')
     price = enchanter.enchantment.base_cost * fEnchantmentValueMult
@@ -76,19 +78,80 @@ enchanter.calculate_vanilla_price = function()
     return price
 end
 
-enchanter.check_price = function()
+
+-- FROM: https://gitlab.com/OpenMW/openmw/-/merge_requests/5396/diffs#c09212161591c36efefeae4c9bfecd2764cc1fab
+local function getFatigueTerm(actor)
+    local fatigue = actor.type.stats.dynamic.fatigue(actor)
+    local max, current, normalized = fatigue.base, fatigue.current, nil
+
+    if math.floor(max) == 0 then normalized = 1 else normalized = math.max(0., current / max) end
+
+    local fFatigueBase = core.getGMST('fFatigueBase')
+    local fFatigueMult = core.getGMST('fFatigueMult')
+
+    return fFatigueBase - fFatigueMult * (1 - normalized)
+end
+local function getBarterOffer(merchant, basePrice, buying)
+    print("vendor is: ", merchant)
+    if merchant == {} then
+        print("ERROR")
+        return 0
+    end
+    if basePrice == 0 or types.Creature.objectIsInstance(merchant) then
+        return basePrice
+    end
+    print("cow")
+
+    local playerMerc = self.type.stats.skills.mercantile(self).modified
+    local playerLuck  = self.type.stats.attributes.luck(self).modified
+    local playerPers  = self.type.stats.attributes.personality(self).modified
+
+    local merchantMerc = merchant.type.stats.skills.mercantile(merchant).modified
+    local merchantLuck  = merchant.type.stats.attributes.luck(merchant).modified
+    local merchantPers  = merchant.type.stats.attributes.personality(merchant).modified
+
+    -- :todo look into getDerivedDisposition details
+    local disposition = merchant.type.getDisposition(merchant, self)
+    local a = math.min(playerMerc, 100.)
+    local b = math.min(playerLuck * .1, 10.)
+    local c = math.min(playerPers * .2, 10.)
+    local d = math.min(merchantMerc, 100.)
+    local e = math.min(merchantLuck * .1, 10.)
+    local f = math.min(merchantPers * .2, 10.)
+
+    local pcTerm = (disposition - 50 + a + b + c) * getFatigueTerm(self)
+    local npcTerm = (d + e + f) * getFatigueTerm(merchant)
+    local buyTerm = 0.01 * (100 - 0.5 * (pcTerm - npcTerm))
+    local sellTerm = 0.01 * (50 - 0.5 * (npcTerm - pcTerm))
+    -- util.round may be more correct
+    local offerPrice = math.floor(basePrice * (buying and buyTerm or sellTerm))
+    return math.max(1, offerPrice)
+end
+
+
+enchanter.calculate_price = function()
     print("check_price")
 
     -- Calculate item cost
-    local item_cost = enchanter.calculate_vanilla_price() -- TOOD: add support for multiple options
+    -- TOOD: add support for multiple options
+    local item_cost = enchanter.calculate_vanilla_price() 
     print("item costs: ", item_cost)
 
+    enchanter.price = getBarterOffer(enchanter.vendor, item_cost, true)
+    print("With bartering: ", enchanter.price)
+end
+
+enchanter.check_price = function()
+    print("check_price")
+
+    enchanter.calculate_price()
+
     -- Compare with Player gold
-    local player_gold = types.Actor.getBarterGold(self)
+    local player_gold = types.Actor.inventory(self):countOf('Gold_001')
     print("Player has: ", player_gold)
 
-    if player_gold >= item_cost then
-        enchanter.price = item_cost
+    if player_gold >= enchanter.price then
+        enchanter.price = enchanter.price
         print("Success")
         return true
     end
@@ -286,7 +349,7 @@ enchanter.check_requirements = function(is_vendor_enchant)
         enchanter.enchantment.isAutocalc = false -- Override this to use the above "0" cost
     end
 
-    enchanter.price = 0 -- reset this 
+    enchanter.price = 1 -- reset this 
     if not storage.globalSection("cheats_enchanting_ui"):get("free_enchantments_from_vendors") then
         if is_vendor_enchant and enchanter.check_price() == false then
             return false
@@ -333,7 +396,7 @@ end
 local reset_nothing = 0
 local reset_soulgem_icon = 1
 local reset_soulgem_and_item_icon = 2
-enchanter.enchant_item = function(is_vendor_enchant, vendor)
+enchanter.enchant_item = function(is_vendor_enchant)
     print("enchant_item")
 
     if enchanter.check_requirements(is_vendor_enchant) == false then
@@ -356,12 +419,12 @@ enchanter.enchant_item = function(is_vendor_enchant, vendor)
         end
     else 
         -- Take money from player
-        local current_gold = types.Actor.getBarterGold(self)
-        types.Actor.setBarterGold(self, current_gold - enchanter.price)
+        local current_gold = types.Actor.inventory(self):countOf('Gold_001')
+        core.sendGlobalEvent('set_actor_gold', {actor = self, count = enchanter.price, is_player = true})
 
         -- Give money to vendor
-        local current_gold = types.Actor.getBarterGold(vendor)
-        types.Actor.setBarterGold(vendor, current_gold + enchanter.price)
+        local current_gold = types.Actor.getBarterGold(enchanter.vendor)
+        core.sendGlobalEvent('set_actor_gold', {actor = enchanter.vendor, count = current_gold + enchanter.price,  is_player = false})
     end
 
     enchanter.create_item()

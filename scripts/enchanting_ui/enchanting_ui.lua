@@ -23,7 +23,6 @@ local enchanting_ui = {}
 local header = {element = {}}
 local footer = {element = {}}
 local main_content = {element = {}}
-enchanting_ui.is_vendor_enchant = false
 
 local title = {
     name = "title",
@@ -42,14 +41,6 @@ local title = {
 enchanting_ui.create_ui = function() 
 
     print("create_ui")
-    
-    if not enchanting_ui.is_vendor_enchant then
-        elements.price:hide()
-        elements.chance:show()
-    else
-        elements.chance:hide()
-        elements.price:show()
-    end
 
     local v2_size = v2(elements.root_size[1], elements.root_size[2])
 
@@ -262,13 +253,21 @@ footer = {
 enchanting_ui.show = function(is_vendor, vendor)
     print("Menu Show")
 
-    enchanting_ui.is_vendor_enchant = is_vendor
-    print("is_vendor_enchant", enchanting_ui.is_vendor_enchant)
+    elements.is_vendor = is_vendor
+    print("is_vendor_enchant", elements.is_vendor)
     if is_vendor then
         print("Vendor is: ", vendor)
-        enchanting_ui.vendor = vendor
+        enchanter.vendor = vendor
     end
-    
+
+    if not elements.is_vendor then
+        elements.price:hide()
+        elements.chance:show()
+    else
+        elements.chance:hide()
+        elements.price:show()
+    end
+
     elements.root:update()
 end
 
@@ -277,8 +276,8 @@ enchanting_ui.hide = function()
     print("Menu Hide")
 
     I.UI.removeMode('EnchantingDialog')
-    print("is_vendor_enchant", enchanting_ui.is_vendor_enchant)
-    if not enchanting_ui.is_vendor_enchant then
+    print("is_vendor_enchant", elements.is_vendor)
+    if not elements.is_vendor then
         I.UI.setMode("Interface")
     else 
         -- TODO: this to dialog
@@ -295,7 +294,7 @@ enchanting_ui.enchant_item = function()
 
     ambient.playSound('menu click')
 
-    local icons_to_reset = enchanter.enchant_item(enchanting_ui.is_vendor_enchant, enchanting_ui.vendor)
+    local icons_to_reset = enchanter.enchant_item(elements.is_vendor)
 
     -- Now handle updating UI elements depending on enchanting success
     if icons_to_reset >= 1 then
@@ -352,7 +351,7 @@ enchanting_ui.reset = function()
     elements.stats_charge:set_text("0/0")
 
     elements.chance:set_text("0")
-    elements.price:set_text("0")
+    elements.price:set_text("1")
 
     elements.effects:clear()
     elements.magic_effects:clear()
