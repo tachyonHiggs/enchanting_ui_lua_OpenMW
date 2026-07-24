@@ -91,6 +91,7 @@ local function move_into_player(data)
     world.createObject(id, count):moveInto(world.players[1])
 end
 
+-- NOTE: If player is passed in, will instead remove the count of gold. For NPC's, will set gold
 local function set_actor_gold(data)
     local actor = data.actor
     local count = data.count

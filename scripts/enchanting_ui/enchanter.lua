@@ -349,7 +349,6 @@ enchanter.check_requirements = function(is_vendor_enchant)
         enchanter.enchantment.isAutocalc = false -- Override this to use the above "0" cost
     end
 
-    enchanter.price = 1 -- reset this 
     if not storage.globalSection("cheats_enchanting_ui"):get("free_enchantments_from_vendors") then
         if is_vendor_enchant and enchanter.check_price() == false then
             return false

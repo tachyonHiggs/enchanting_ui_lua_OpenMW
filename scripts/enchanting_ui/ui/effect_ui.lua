@@ -393,12 +393,14 @@ effect_ui.new = function(modify, effect_to_add)
         local effect_index
         
         for index, effect in ipairs(enchanter.effects_with_params) do
-            if effect.id == enchanter.effect_to_add.id then
+            -- Attribute and skill effects allow multiple/duplicates on one enchantment
+            local allow_duplicate_effects = core.magic.effects.records[effect.id].hasAttribute or core.magic.effects.records[effect.id].hasSkill
+            if effect.id == enchanter.effect_to_add.id and not allow_duplicate_effects then
                 if enchanter.effect_to_modify==false then
                     UI.showMessage("This magic effect has already been added")
                     return
                 end
-                effect_index = index
+                effect_index = index -- Otherwise edit existing effect at index
             end
         end
 

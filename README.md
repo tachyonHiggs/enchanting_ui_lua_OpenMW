@@ -8,7 +8,6 @@
 - Add tool tips
 - Add consistent sound effects
 - Add limits on max and min mag
-- Allow multiple affect skill/attribute effects 
 
 
 ### Expanded Features
@@ -24,6 +23,7 @@
 - Make it so that changing item does not cause the enchanting menu to reset
 - Have Flex UI wrap skills
 - Clean up Skill and attribute select menus
+- Clean up effects list (not wrapping/cutting off text)
 
 
 ## Known Issues
