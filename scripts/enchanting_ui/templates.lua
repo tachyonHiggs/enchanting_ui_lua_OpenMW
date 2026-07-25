@@ -401,8 +401,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         props = {
             text = list.name,
             textSize = 22,
-            textAlignH = alignment,
-            textAlignV = alignment,
+            textAlignH = list.basic_props.alignment,
+            textAlignV = list.basic_props.alignment,
         }
     }
     if list.name == "" then
@@ -433,6 +433,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                 column_sort = {
                     name = "direction"..index,
                     type = UI.TYPE.Image,
+                    template = I.MWUI.templates.borders,
                     props = {
                         resource = list.sort_descending_texture,
                         alpha = 1,
@@ -470,8 +471,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             type = UI.TYPE.Flex,
             props = {
                 horizontal = true,
-                arrange = alignment,
-                align = alignment,
+                arrange = list.basic_props.alignment,
+                align = list.basic_props.alignment,
             },
             content = UI.content (
                 list.column_elements
@@ -504,8 +505,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         type = UI.TYPE.Flex,
         props = {
             horizontal = false,
-            arrange = alignment,
-            align = alignment,
+            arrange = list.basic_props.alignment,
+            align = list.basic_props.alignment,
             size = list_size,
         },
         content = UI.content{
@@ -640,8 +641,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                     type = UI.TYPE.Flex,
                     props = {
                         horizontal = false,
-                        arrange = alignment,
-                        align = alignment,
+                        arrange = list.basic_props.alignment,
+                        align = list.basic_props.alignment,
                         size = v2(0,20) + self.size,
                         relativePosition = list.basic_props.relativePosition
                     },
@@ -669,9 +670,19 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     return list
 end
 
+
 -- TODO: take size input
 templates.slider = {}
-templates.slider.new = function(text, max, min, start, interval, update_target)
+
+---@param text string
+---@param max number
+---@param min number
+---@param start number
+---@param update_target function?
+---@param value_to_set_fnc function?
+---@param on_slider_moved function?
+---@return table
+templates.slider.new = function(text, max, min, start, update_target, value_to_set_fnc, on_slider_moved)
     local slider = {}
 
     slider.ui = {}
@@ -679,12 +690,29 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
 
     slider.value = start
     slider.value_text = tostring(slider.value)
-    
+
     slider.min = min
     slider.max = max
-    slider.interval = interval
+    slider.interval = 1 -- hard coded
+
+    local backgroundWidth = 220
+    local thumbWidth = 20
+    slider.bar_padding = (thumbWidth / 2) / backgroundWidth
+
+    slider.value_to_set_fnc = value_to_set_fnc
+    slider.on_slider_moved = on_slider_moved
 
     slider.update_target = update_target
+
+    function slider:value_to_position(value)
+        print("Slider value_to_position")
+        local t = (value - self.min) / (self.max - self.min)
+
+        local x = self.bar_padding +
+                t * (1 - 2 * self.bar_padding)
+
+        return v2(x, 0)
+    end
 
     slider.bar = {
         name = "bar",
@@ -696,7 +724,8 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
             }),
             alpha = 1,
             size = v2(20,20),
-            relativePosition = v2((start+min)/(max-min), 0)
+            anchor = v2(0.5,0),
+            relativePosition = slider:value_to_position(start)
         }
     }
 
@@ -712,93 +741,95 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
         }
     }
 
-    function slider:set_initial_value(value)
-        print("set_value")
-
-        self.value = value
-        
-        if self.value < self.min then
-            self.value = self.min
-            self.bar.props.relativePosition = v2(0,0)
-        end
-
-        if self.value > self.max then
-            self.value = self.max
-            self.bar.props.relativePosition = v2(1,0)
-        end
-
-        self.value_text = tostring(self.value)
-        self.value_element.props.text = self.value_text
-
+    function slider:get_value()
+        print("Slider get_value")
+        return slider.value
     end
 
     function slider:set_value(value)
         print("set_value")
 
         self.value = value
+
+        print("Setting slider to: ", value)
         
         if self.value < self.min then
             self.value = self.min
-            self.bar.props.relativePosition = v2(0,0)
-        end
-
-        if self.value > self.max then
+        elseif self.value > self.max then
             self.value = self.max
-            self.bar.props.relativePosition = v2(1,0)
         end
+        self.bar.props.relativePosition = slider:value_to_position(self.value)
 
         self.value_text = tostring(self.value)
         self.value_element.props.text = self.value_text
 
+        if self.value_to_set_fnc then
+            self.value_to_set_fnc(self.value)
+        end
+
         if self.update_target then
-            self.update_target(self.value)
+            self.update_target()
         end
     end
 
     function slider:move_left()
-        print("Moving slider left")
 
-        local relativeInterval = self.interval / (self.max - self.min)
-
-        self.bar.props.relativePosition =
-            self.bar.props.relativePosition - v2(relativeInterval, 0)
+        local relativeInterval = self.interval / (self.max - self.min + 1)
+        print("Moving slider left by: ", relativeInterval)
 
         self.value = self.value - self.interval
-        
         if self.value < self.min then
             self.value = self.min
-            self.bar.props.relativePosition = v2(0,0)
         end
+        self.bar.props.relativePosition = slider:value_to_position(self.value)
 
         self.value_text = tostring(self.value)
         self.value_element.props.text = self.value_text
 
+        if self.value_to_set then
+            self.value_to_set = self.value
+        end
+
+        if self.value_to_set_fnc then
+            self.value_to_set_fnc(self.value)
+        end
+
+        if self.on_slider_moved then
+            self.on_slider_moved(self.text, self.value)
+        end
+
         if self.update_target then
-            self.update_target(self.value)
+            self.update_target()
         end
     end
 
     function slider:move_right()
-        print("Moving slider right")
-
-        local relativeInterval = self.interval / (self.max - self.min)
-
-        self.bar.props.relativePosition =
-            self.bar.props.relativePosition + v2(relativeInterval, 0)
+        local relativeInterval = self.interval / (self.max - self.min + 1)
+        print("Moving slider right by: ", relativeInterval)
 
         self.value = self.value + self.interval
-
-        if self.value > self.max  then
+        if self.value > self.max then
             self.value = self.max
-            self.bar.props.relativePosition = v2(1,0)
         end
+        self.bar.props.relativePosition = slider:value_to_position(self.value)
 
         self.value_text = tostring(self.value)
         self.value_element.props.text = self.value_text
 
-        if self.update_target then
-            self.update_target(self.value)
+        if self.value_to_set_fnc then
+            self.value_to_set_fnc(self.value)
         end
+
+        if self.on_slider_moved then
+            self.on_slider_moved(self.text, self.value)
+        end
+
+        if self.update_target then
+            self.update_target()
+        end
+    end
+
+    function slider:on_background_bar_clicked(position)
     end
 
     function slider:create()
@@ -832,10 +863,12 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
                     type = UI.TYPE.Image,
                     props = {
                         resource = UI.texture({
-                            path = "Textures/menu_scroll_left.dds"
+                            path = "Textures/menu_scroll_left.dds",
+                            offset = v2(-5, -5), -- TODO: what to set this as to avoid magic nums
                         }),
                         alpha = 1,
                         size = v2(20, 20),
+                        
                     },
                     events = {
                         mouseClick = async:callback(function() self:move_left() end)
@@ -850,10 +883,13 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
                             path = "black"
                         }),
                         alpha = 1,
-                        size = v2(200, 20),
+                        size = v2(220, 20),
                     },
                     content = UI.content {
                         self.bar
+                    },
+                    events = {
+                        mouseClick = async:callback(function() self:on_background_bar_clicked() end)
                     }
                 },
                 {
@@ -862,7 +898,8 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
                     type = UI.TYPE.Image,
                     props = {
                         resource = UI.texture({
-                            path = "Textures/menu_scroll_right.dds"
+                            path = "Textures/menu_scroll_right.dds",
+                            offset = v2(-5, -5), -- TODO: what to set this as to avoid magic nums
                         }),
                         alpha = 1,
                         size = v2(20, 20),
@@ -884,9 +921,10 @@ templates.slider.new = function(text, max, min, start, interval, update_target)
     function slider:show() 
         print("show: ", self.text)
         self.ui.props.visible = true
-        -- if self.update_target then
-        --     self.update_target(self.value)
-        -- end
+
+        if self.update_target then
+            self.update_target()
+        end
     end
 
     return slider

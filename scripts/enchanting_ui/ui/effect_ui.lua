@@ -3,11 +3,9 @@ local I = require('openmw.interfaces')
 local Util = require('openmw.util')
 local v2 = Util.vector2
 local auxUi = require("openmw_aux.ui")
-local ambient = require('openmw.ambient')
-local self = require('openmw.self')
 local async = require('openmw.async')
 local core = require('openmw.core')
-local types = require('openmw.types')
+local storage = require('openmw.storage')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
@@ -294,6 +292,11 @@ effect_ui.new = function(modify, effect_to_add)
     local id = effect_to_add.id
     enchanter.effect_to_add.cost = 0
 
+    instance.constant_mag_max_min = false
+
+    if storage.globalSection("options_enchanting_ui"):get("constant_effect_constant_magnitude") then
+        instance.constant_effect_constant_magnitude = true
+    end
 
     local function show_valid_effect_sliders(update_ui)
 
@@ -334,7 +337,7 @@ effect_ui.new = function(modify, effect_to_add)
         end
     end
 
-    local function update_effect_to_add_cost(update_ui)
+    local function update_effect_to_add_cost()
         print("update_effect_to_add_cost")
 
         local cost = enchanter.get_effect_to_add_cost()
@@ -343,7 +346,8 @@ effect_ui.new = function(modify, effect_to_add)
         instance.cost:set_text(tostring(cost))
         print("effect cost: ", cost)
 
-        if update_ui then
+        -- Only udpate if valid UI
+        if elements.effects_root.layout then
             elements.effects_root:update()
         end
     end
@@ -383,8 +387,8 @@ effect_ui.new = function(modify, effect_to_add)
         instance.range:set_text(text)
         print("New range: ", text)
 
-        show_valid_effect_sliders(false)
-        update_effect_to_add_cost(false)
+        show_valid_effect_sliders()
+        update_effect_to_add_cost()
         elements.effects_root:update()
     end
 
@@ -523,28 +527,49 @@ effect_ui.new = function(modify, effect_to_add)
         
     end
 
+    local function on_effect_mag_slider_clicked(name, value)
+
+        print("Setting slider mag values: ", name, value)
+
+        if instance.constant_effect_constant_magnitude and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+            print("constant_effect_constant_magnitude is true")
+            instance.magnitude_max:set_value(value)
+            instance.magnitude:set_value(value)
+        else 
+            if instance.magnitude_max:get_value() < instance.magnitude:get_value() then
+                print("Min is larger than max")
+                if name == "Magnitude Min" then
+                    instance.magnitude_max:set_value(value)
+                else 
+                    instance.magnitude:set_value(value)
+                end
+            end
+        end
+    end
+
     instance.delete_btn = nil
+    instance.range = templates.button.new("Self", toggle_range_type, 100, 30)
+    instance.cost = templates.text_output.new("Cost:", 100, 10, "0", UI.ALIGNMENT.End)
     
     if modify then
         instance.delete_btn = templates.button.new("Delete", delete_effect, 100, 30)
 
-        instance.skill =  templates.button.new(enchanter.effect_to_add.affectedSkill, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
-        instance.attribute = templates.button.new(enchanter.effect_to_add.affectedAttribute, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
-        instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, effect_to_add.magnitudeMin, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost(true) end)
-        instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, effect_to_add.magnitudeMax, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost(true) end)
-        instance.duration = templates.slider.new("Duration", 1440, 1, effect_to_add.duration, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost(true) end)
-        instance.area = templates.slider.new("Area", 50, 0, effect_to_add.area, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost(true) end)
+        -- instance.skill =  templates.button.new(enchanter.effect_to_add.affectedSkill, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
+        -- instance.attribute = templates.button.new(enchanter.effect_to_add.affectedAttribute, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
+        -- instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, effect_to_add.magnitudeMin, 1, function(value) enchanter.effect_to_add.magnitudeMin = value on_effect_mag_slider_clicked("Magnitude", value) end)
+        -- instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, effect_to_add.magnitudeMax, 1, function(value) enchanter.effect_to_add.magnitudeMax = value on_effect_mag_slider_clicked("Magnitude Max", value) end)
+        -- instance.duration = templates.slider.new("Duration", 1440, 1, effect_to_add.duration, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost(true) end)
+        -- instance.area = templates.slider.new("Area", 50, 0, effect_to_add.area, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost(true) end)
     else
         instance.skill =  templates.button.new(core.stats.Skill.records[1].name, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.attribute = templates.button.new(core.stats.Attribute.records[1].name, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
-        instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMin = value update_effect_to_add_cost(true) end)
-        instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, 1, 1, function(value) enchanter.effect_to_add.magnitudeMax = value update_effect_to_add_cost(true) end)
-        instance.duration = templates.slider.new("Duration", 1440, 1, 1, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost(true) end)
-        instance.area = templates.slider.new("Area", 50, 0, 0, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost(true) end)
-    end
 
-    instance.range = templates.button.new("Self", toggle_range_type, 100, 30)
-    instance.cost = templates.text_output.new("Cost:", 100, 10, "0", UI.ALIGNMENT.End)
+        instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, 1, update_effect_to_add_cost, function(value) enchanter.effect_to_add.magnitudeMin = value end, on_effect_mag_slider_clicked)
+        
+        instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, 1, update_effect_to_add_cost, function(value) enchanter.effect_to_add.magnitudeMax = value end, on_effect_mag_slider_clicked)
+        instance.duration = templates.slider.new("Duration", 1440, 1, 1, update_effect_to_add_cost, function(value) enchanter.effect_to_add.duration = value end)
+        instance.area = templates.slider.new("Area", 50, 0, 0, update_effect_to_add_cost, function(value) enchanter.effect_to_add.area = value end)
+    end
 
     function instance:create()
 
@@ -662,8 +687,8 @@ effect_ui.new = function(modify, effect_to_add)
             }
         }
 
-        update_effect_to_add_cost(false)
-        show_valid_effect_sliders(false)
+        update_effect_to_add_cost()
+        show_valid_effect_sliders()
 
         return instance.ui
     end

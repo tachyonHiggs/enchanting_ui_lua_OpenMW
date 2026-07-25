@@ -22,10 +22,20 @@ I.Settings.registerGroup {
             }
         },
         {
+            key = 'constant_effect_constant_magnitude',
+            renderer = 'checkbox',
+            name = 'Constant Effect Constant Magnitude',
+            description = 'When enabled, new Constant Effect enchantments have a constant magnitude. Max and min become equal. This is to discourage enchanting items with wide ranges and re-equiping them until the max is reached.',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
             key = 'remove_compound_effect_cost',
             renderer = 'checkbox',
             name = 'Remove compounding cost of multiple effects',
-            description = 'When set to yes, makes added effects past the first one have the same cost instead of the Vanilla implementation (Vanilla uses compounding effects costs after the first effect)',
+            description = 'When enabled, makes added effects past the first one have the same cost instead of the Vanilla implementation (Vanilla uses compounding effects costs after the first effect)',
             default = false,
 			argument = {
                 disabled = false,
@@ -47,7 +57,7 @@ I.Settings.registerGroup {
             key = 'remove_enchant_cap_limit',
             renderer = 'checkbox',
             name = 'Remove Enchantment Capacitiy limit',
-            description = 'When set to yes, allows enchantments to ignore an items enchantment capacity.',
+            description = 'When enabled, allows enchantments to ignore an items enchantment capacity.',
             default = false,
 			argument = {
                 disabled = false,
@@ -57,7 +67,7 @@ I.Settings.registerGroup {
             key = 'remove_soul_charge_limit',
             renderer = 'checkbox',
             name = 'Remove Soul Charge limit',
-            description = 'When set to yes, allows enchantments to ignore a Souls charge.',
+            description = 'When enabled, allows enchantments to ignore a Souls charge.',
             default = false,
 			argument = {
                 disabled = false,
@@ -67,7 +77,7 @@ I.Settings.registerGroup {
             key = 'always_success',
             renderer = 'checkbox',
             name = 'Sets enchantment creation chance to 100%',
-            description = 'When set to yes, all player created enchantments will succeed if requirements are meet',
+            description = 'When enabled, all player created enchantments will succeed if requirements are meet',
             default = false,
 			argument = {
                 disabled = false,
@@ -77,7 +87,7 @@ I.Settings.registerGroup {
             key = 'dont_consume_item_and_soul',
             renderer = 'checkbox',
             name = 'Do not consume Soul Gem and Item on Enchant',
-            description = 'When set to yes, attempts and successfull enchantments no longer consume soul gems and items',
+            description = 'When enabled, attempts and successfull enchantments no longer consume soul gems and items',
             default = false,
 			argument = {
                 disabled = false,
@@ -87,7 +97,7 @@ I.Settings.registerGroup {
             key = 'free_enchantments_from_vendors',
             renderer = 'checkbox',
             name = 'Free Enchantments from Vendors',
-            description = 'When set to yes, enchantmented items created by Vendors are free and cost 0 gold',
+            description = 'When enabled, enchantmented items created by Vendors are free and cost 0 gold',
             default = false,
 			argument = {
                 disabled = false,
