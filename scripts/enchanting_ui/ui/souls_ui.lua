@@ -4,10 +4,7 @@ local Util = require('openmw.util')
 local v2 = Util.vector2
 local auxUi = require("openmw_aux.ui")
 local ambient = require('openmw.ambient')
-local self = require('openmw.self')
 local async = require('openmw.async')
-local core = require('openmw.core')
-local types = require('openmw.types')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
@@ -23,7 +20,10 @@ local function on_soul_clicked(id, object, value, icon)
     enchanter.soul.object = object
     enchanter.soul.icon = icon
     enchanter.soul.charge = value
-    elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost).. "/".. tostring(enchanter.soul.charge ))
+    elements.set_stats_charge()
+
+    enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
+    elements.set_stats_enchantment()
     
     print("click on soul: ", id)
     print("at icon: ", icon)

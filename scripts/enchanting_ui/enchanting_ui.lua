@@ -94,15 +94,15 @@ local function toggle_cast_type()
     print("toggle_cast_type")
 
     -- TODO: have this toggle update magic effects, for now just clear them
-    enchanter.soul.charge = 0
     enchanter.enchantment.base_cost = 0
     enchanter.enchantment.effective_cost = 0
     enchanter.effects_with_params = {}
     enchanter.enchantment.isAutocalc = true
     elements.effects:clear()
-    elements.root:update()
     
     elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
+    elements.set_stats_enchantment()
+    elements.root:update()
 end
 
 -- header
@@ -268,6 +268,8 @@ enchanting_ui.show = function(is_vendor, vendor)
         elements.price:show()
     end
 
+    elements.cast_type_btn:set_text(enchanter.toggle_cast_type()) -- Make sure to set this to be valid type
+
     elements.root:update()
 end
 
@@ -299,7 +301,7 @@ enchanting_ui.enchant_item = function()
     -- Now handle updating UI elements depending on enchanting success
     if icons_to_reset >= 1 then
         elements.soul_input:reset_image()
-        elements.stats_charge:set_text("0")
+        elements.set_stats_charge()
     end
     if icons_to_reset >= 2 then
         enchanting_ui.reset()
@@ -347,8 +349,8 @@ enchanting_ui.reset = function()
     elements.soul_input:reset_image()
     elements.item_input:reset_image()
 
-    elements.stats_enchantment:set_text("0/0")
-    elements.stats_charge:set_text("0/0")
+    elements.set_stats_enchantment()
+    elements.set_stats_charge()
 
     elements.chance:set_text("0")
     elements.price:set_text("1")

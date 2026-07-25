@@ -420,11 +420,12 @@ effect_ui.new = function(modify, effect_to_add)
         
         -- Update base cost
         enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
-        elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..tostring(enchanter.item.enchantment_capacity))
+        elements.set_stats_enchantment()
+        elements.set_stats_enchantment()
 
         -- Update effective cost
         enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
-        elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost) .. "/" .. tostring(enchanter.soul.charge))
+        elements.set_stats_charge()
         
         -- Update price
         if elements.is_vendor then
@@ -459,8 +460,8 @@ effect_ui.new = function(modify, effect_to_add)
         enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
         enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
 
-        elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..tostring(enchanter.item.enchantment_capacity))
-        elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost) .. "/" .. tostring(enchanter.soul.charge))
+        elements.set_stats_enchantment()
+        elements.set_stats_charge()
 
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()
@@ -554,18 +555,18 @@ effect_ui.new = function(modify, effect_to_add)
     if modify then
         instance.delete_btn = templates.button.new("Delete", delete_effect, 100, 30)
 
-        -- instance.skill =  templates.button.new(enchanter.effect_to_add.affectedSkill, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
-        -- instance.attribute = templates.button.new(enchanter.effect_to_add.affectedAttribute, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
-        -- instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, effect_to_add.magnitudeMin, 1, function(value) enchanter.effect_to_add.magnitudeMin = value on_effect_mag_slider_clicked("Magnitude", value) end)
-        -- instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, effect_to_add.magnitudeMax, 1, function(value) enchanter.effect_to_add.magnitudeMax = value on_effect_mag_slider_clicked("Magnitude Max", value) end)
-        -- instance.duration = templates.slider.new("Duration", 1440, 1, effect_to_add.duration, 1, function(value) enchanter.effect_to_add.duration = value update_effect_to_add_cost(true) end)
-        -- instance.area = templates.slider.new("Area", 50, 0, effect_to_add.area, 1, function(value) enchanter.effect_to_add.area = value update_effect_to_add_cost(true) end)
+        instance.skill =  templates.button.new(enchanter.effect_to_add.affectedSkill, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
+        instance.attribute = templates.button.new(enchanter.effect_to_add.affectedAttribute, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
+
+        instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, effect_to_add.magnitudeMin, update_effect_to_add_cost, function(value) enchanter.effect_to_add.magnitudeMin = value end, on_effect_mag_slider_clicked)
+        instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, effect_to_add.magnitudeMax, update_effect_to_add_cost, function(value) enchanter.effect_to_add.magnitudeMax = value end, on_effect_mag_slider_clicked)
+        instance.duration = templates.slider.new("Duration", 1440, 1, effect_to_add.duration, update_effect_to_add_cost, function(value) enchanter.effect_to_add.duration = value end)
+        instance.area = templates.slider.new("Area", 50, 0, effect_to_add.area, update_effect_to_add_cost, function(value) enchanter.effect_to_add.area = value end)
     else
         instance.skill =  templates.button.new(core.stats.Skill.records[1].name, on_skill_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
         instance.attribute = templates.button.new(core.stats.Attribute.records[1].name, on_attribute_select_click, elements.attribute_button_size[1], elements.attribute_button_size[2])
 
         instance.magnitude = templates.slider.new("Magnitude Min", 100, 1, 1, update_effect_to_add_cost, function(value) enchanter.effect_to_add.magnitudeMin = value end, on_effect_mag_slider_clicked)
-        
         instance.magnitude_max = templates.slider.new("Magnitude Max", 100, 1, 1, update_effect_to_add_cost, function(value) enchanter.effect_to_add.magnitudeMax = value end, on_effect_mag_slider_clicked)
         instance.duration = templates.slider.new("Duration", 1440, 1, 1, update_effect_to_add_cost, function(value) enchanter.effect_to_add.duration = value end)
         instance.area = templates.slider.new("Area", 50, 0, 0, update_effect_to_add_cost, function(value) enchanter.effect_to_add.area = value end)

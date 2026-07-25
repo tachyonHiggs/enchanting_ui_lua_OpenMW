@@ -7,15 +7,11 @@
 - Add soul gem used to start player enchanting to fil the soul gem spot
 - Add tool tips
 - Add consistent sound effects
-- Add limits on max and min mag
-
+- Add search ability to list template
 
 ### Expanded Features
-- Implement constant effect as always possible with any soul but reduces enchantment capacity
-- Implement cheat modes: disable enchantment capacity, disable cost, disable charge, etc
 - Potentially add the ability use vendor's soul gems while enchanting
 - Allow bartering for vendor enchanted items services
-- Option to remove constant effect max and min magnitude
 
 
 ### Development

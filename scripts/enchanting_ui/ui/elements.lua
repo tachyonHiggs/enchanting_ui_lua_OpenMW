@@ -24,7 +24,16 @@ elements.soul_input = {}
 elements.item_input = {}
 
 -- Stats
+elements.set_stats_enchantment = function()
+    print("set_stats_enchantment")
+    
+    elements.stats_enchantment:set_text(string.format("%.1f", enchanter.enchantment.base_cost).."/"..string.format("%.1f", enchanter.item.enchantment_capacity))
+end
 elements.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End)
+elements.set_stats_charge = function()
+    print("set_stats_charge")
+    elements.stats_charge:set_text(string.format("%.1f", enchanter.enchantment.effective_cost) .. "/" .. string.format("%.1f", enchanter.soul.charge))
+end
 elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End)
 
 elements.cast_type_btn = {}

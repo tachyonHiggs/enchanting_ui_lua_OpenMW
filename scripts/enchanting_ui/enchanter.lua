@@ -30,7 +30,8 @@ enchanter.reset_item = function()
         object = {},
         icon = nil,
         type = 0,
-        enchantment_capacity = 0
+        enchantment_capacity = 0,
+        default_enchantment_capacity = 0, -- Used for enchantment capacity modification
     }
 end
 
@@ -66,6 +67,20 @@ enchanter.reset = function()
     enchanter.reset_soul()
     enchanter.reset_item()
     enchanter.is_vendor_enchant = false
+end
+
+enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
+    print("scale_enchantment_capacity_factor_from_soul_charge")
+    local scale_factor = 1
+    if storage.globalSection("options_enchanting_ui"):get("constant_effect_soul_charge_scales_item_enchant_cap") then
+        if enchanter.item.id ~= "" and enchanter.soul.id ~= "" and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+            local constant_effect_threshold = storage.globalSection("options_enchanting_ui"):get("constant_effect_threshold")
+            print(enchanter.soul.charge)
+            scale_factor = math.sqrt(enchanter.soul.charge / constant_effect_threshold)
+            print("Scaling item enchant cap by: ", scale_factor)
+        end
+    end
+    return scale_factor
 end
 
 enchanter.calculate_vanilla_price = function()
@@ -535,6 +550,8 @@ enchanter.toggle_cast_type = function()
         text = "Constant Effect"
         enchanter.enchantment.isAutocalc = false
     end
+
+    enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
     return text
 end

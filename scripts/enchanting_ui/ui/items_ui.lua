@@ -28,7 +28,8 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     enchanter.item.object = object
     enchanter.item.icon = icon
     enchanter.item.type = type_text
-    enchanter.item.enchantment_capacity = enchant_pts
+    enchanter.item.default_enchantment_capacity = enchant_pts
+    enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
     print("click on item: ", id)
     print("Icon: ", icon)
@@ -38,8 +39,8 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     
     elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
 
-    elements.stats_enchantment:set_text(tostring(enchanter.enchantment.base_cost).."/"..string.format("%.1f", enchant_pts))
-    elements.stats_charge:set_text(tostring(enchanter.enchantment.effective_cost) .. "/" .. tostring(enchanter.soul.charge))
+    elements.set_stats_charge()
+    elements.set_stats_enchantment()
 
     elements.enable_ui(elements.root)
     elements.root:update()

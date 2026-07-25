@@ -32,6 +32,16 @@ I.Settings.registerGroup {
             }
         },
         {
+            key = 'constant_effect_soul_charge_scales_item_enchant_cap',
+            renderer = 'checkbox',
+            name = 'Constant Effect Soul Charge Scales Item Enchantment Capacity',
+            description = 'When enabled, all new enchantments can create a constant effect from ANY Soul value. However, the value of the soul effects the items enchantment capacity. This uses the value defined by Constant Effect Threshold to represent a scale of 1, or no change in an objects capacity.',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
             key = 'remove_compound_effect_cost',
             renderer = 'checkbox',
             name = 'Remove compounding cost of multiple effects',
