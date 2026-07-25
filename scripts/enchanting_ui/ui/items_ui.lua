@@ -19,11 +19,10 @@ local items_ui = {}
 
 local function on_item_clicked(id, object, icon, enchant_pts, type_text)
 
+    -- Reset data
     enchanter.reset_enchantment()
     enchanter.reset_item()
-
-    elements.effects:clear()
-
+    
     enchanter.item.id = id
     enchanter.item.object = object
     enchanter.item.icon = icon
@@ -37,7 +36,7 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     print("enchant_pts: ", string.format("%.1f", enchant_pts))
     elements.item_input:set_image(icon)
     
-    elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
+    elements.set_cast_type()
 
     elements.set_stats_charge()
     elements.set_stats_enchantment()

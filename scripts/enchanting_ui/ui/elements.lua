@@ -36,8 +36,22 @@ elements.set_stats_charge = function()
 end
 elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End)
 
+elements.set_cast_type = function()
+    if elements.cast_type_btn.layout then -- if exists
+        elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
+    end
+end
 elements.cast_type_btn = {}
+
+elements.set_price = function()
+    print("set_price")
+    elements.price:set_text(tostring(enchanter.price))
+end
 elements.price = templates.text_output.new("Price:", 100, 10, "1", UI.ALIGNMENT.End)
+elements.set_chance = function()
+    print("set_chance")
+    elements.chance:set_text(string.format("%.1f", enchanter.chance))
+end
 elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMENT.End)
 elements.is_vendor = false
 

@@ -95,13 +95,15 @@ local function toggle_cast_type()
 
     -- TODO: have this toggle update magic effects, for now just clear them
     enchanter.enchantment.base_cost = 0
+    enchanter.chance = 0
     enchanter.enchantment.effective_cost = 0
     enchanter.effects_with_params = {}
     enchanter.enchantment.isAutocalc = true
     elements.effects:clear()
     
-    elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
+    elements.set_cast_type()
     elements.set_stats_enchantment()
+    elements.set_chance()
     elements.root:update()
 end
 
@@ -267,8 +269,8 @@ enchanting_ui.show = function(is_vendor, vendor)
         elements.chance:hide()
         elements.price:show()
     end
-
-    elements.cast_type_btn:set_text(enchanter.toggle_cast_type()) -- Make sure to set this to be valid type
+    
+    elements.set_cast_type() -- Make sure to set this to be valid type
 
     elements.root:update()
 end
@@ -352,8 +354,8 @@ enchanting_ui.reset = function()
     elements.set_stats_enchantment()
     elements.set_stats_charge()
 
-    elements.chance:set_text("0")
-    elements.price:set_text("1")
+    elements.set_chance()
+    elements.set_price()
 
     elements.effects:clear()
     elements.magic_effects:clear()

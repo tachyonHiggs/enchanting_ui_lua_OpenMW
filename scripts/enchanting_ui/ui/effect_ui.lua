@@ -421,7 +421,10 @@ effect_ui.new = function(modify, effect_to_add)
         -- Update base cost
         enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
         elements.set_stats_enchantment()
-        elements.set_stats_enchantment()
+        
+        -- Udpate chance since base_cost changed
+        enchanter.chance = enchanter.get_success_rate()
+        elements.set_chance()
 
         -- Update effective cost
         enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
@@ -430,7 +433,7 @@ effect_ui.new = function(modify, effect_to_add)
         -- Update price
         if elements.is_vendor then
             enchanter.calculate_price()
-            elements.price:set_text(tostring(enchanter.price))
+            elements.set_price()
         end
 
         auxUi.deepDestroy(elements.effects_root)
@@ -459,6 +462,8 @@ effect_ui.new = function(modify, effect_to_add)
 
         enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
         enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
+        enchanter.chance = enchanter.get_success_rate() -- Update chance since base cost changed
+        elements.set_chance()
 
         elements.set_stats_enchantment()
         elements.set_stats_charge()

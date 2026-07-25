@@ -373,18 +373,38 @@ enchanter.check_requirements = function(is_vendor_enchant)
     return true
 end
 
+--  TODO: might add more to this, for now just does vanilla calculation
+-- Calculate the success rate
+enchanter.get_success_rate = function()
+    local rate = 0
+
+    if true then 
+        rate = enchanter.calculate_vanilla_success_rate()
+    end
+
+    return rate
+end
+-- handles if the enchantment SUCCEEDED
+enchanter.get_success = function(success_percent)
+    local success = false
+
+    if true then 
+        success = enchanter.get_vanilla_success(success_percent)
+    end
+
+    return success
+end
+
 enchanter.get_enchant_success = function()
     print("get_enchant_success")
     
     if storage.globalSection("cheats_enchanting_ui"):get("always_success") == false then
 
         -- Vanilla success rate
-        local success_percent = enchanter.calculate_vanilla_success_rate()
+        local success_percent = enchanter.get_success_rate()
         print("calculated success is at: ", success_percent)
         
-        local dice_roll = math.random(0, 100)
-        print("random dice roll: ", dice_roll)
-        if success_percent < dice_roll then
+        if not enchanter.get_success(success_percent) then
             UI.showMessage("Failed to Create Enchanted Item")
             print("Failed: Failed to create enchanted item")
             ambient.playSound('enchant fail')
@@ -454,7 +474,7 @@ enchanter.enchant_item = function(is_vendor_enchant)
     return reset_soulgem_and_item_icon
 end
 
--- This fnc is used to calculate the current success rate
+-- This fnc is used to calculate the vanilla success rate
 enchanter.calculate_vanilla_success_rate = function()
     print("calculate_vanilla_success_rate")
 
@@ -481,8 +501,29 @@ enchanter.calculate_vanilla_success_rate = function()
 
     -- From: "Enchanting success rate" at https://en.uesp.net/wiki/Morrowind:Enchant
     local rate = (0.75 + (fatigue_percent/2)) * (1 - (enchantment_const_chance_mult * is_effect_constant)) * (enchant_skill + (intelligence/5) + (luck/10) - (enchantment_chance_mult * enchanter.enchantment.base_cost))
+    
+    -- If no effects currently, 0% of it succeeding
+    if enchanter.enchantment.base_cost == 0 then
+        rate = 0
+    end
+
+    -- If more than 100%, cap it for display
+    if rate > 100 then
+        rate = 100
+    end
 
     return rate
+end
+-- This fnc is used to check if a vanilla enchantment succeeded
+enchanter.get_vanilla_success = function(success_percent)
+    local success = true
+    local dice_roll = math.random(0, 100)
+    print("random dice roll: ", dice_roll)
+
+    if dice_roll > success_percent then
+        success = false
+    end 
+    return success
 end
 
 enchanter.toggle_cast_type = function()
