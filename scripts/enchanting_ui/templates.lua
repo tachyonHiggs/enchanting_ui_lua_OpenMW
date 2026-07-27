@@ -370,11 +370,20 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
     list.name = name
 
+    function list:update_item_indices()
+        print("update_item_indices")
+        for index, item in ipairs(self.items) do
+            print(item, " ", index)
+            item.userData.index = index
+        end
+    end
+
     print("Creating new list called: ", name)
     list.size = list_size
     list.update_target = update_target
     print("udpate target is: ", list.update_target)
     list.items = generate_items() or {}
+    list:update_item_indices()
 
     list.sort_descending = 0
     list.sort_ascending = 1
@@ -481,23 +490,6 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         
     end
 
-    list.divider = {{},{},{}}
-    -- TODO: make this work
-    if enable_divider then
-        -- list.divider = {
-        --     templates.padding(list_size.x, 8),
-        --     {
-        --         name = "divider",
-        --         type = UI.TYPE.Image,
-        --         template = I.MWUI.templates.verticalLine,
-        --         props = {
-        --             size = v2(list_size.x, 4),
-        --         }
-        --     },
-        --     templates.padding(list_size.x, 8),
-        -- }
-    end
-
     print("generating items container")
 
     list.items_container = {
@@ -522,6 +514,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         self.items_container.content = UI.content({
             table.unpack(list.items)
         })
+        list:update_item_indices()
     end
 
     function list:remove_item(index)
@@ -532,6 +525,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         self.items_container.content = UI.content({
             table.unpack(list.items)
         })
+        list:update_item_indices()
     end
 
     function list:update_item(index, new_item)
@@ -543,6 +537,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         self.items_container.content = UI.content({
             table.unpack(list.items)
         })
+        list:update_item_indices()
         return true
     end
 
@@ -556,6 +551,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
         list.sort_column = list.default_sort_column
         list.sort_direction = list.default_sort_direction
+        list:update_item_indices()
     end
 
     function list:regenerate_items()
@@ -566,6 +562,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         })
 
         list:reset_sort()
+        list:update_item_indices()
     end
 
     function list:sort_items()
@@ -574,9 +571,9 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         local function sort_function(a, b)
             local result
             if list.sort_direction == list.sort_ascending then
-                result = a.userData[list.sort_column] < b.userData[list.sort_column]
+                result = a.userData.info[list.sort_column] < b.userData.info[list.sort_column]
             else
-                result = a.userData[list.sort_column] > b.userData[list.sort_column]
+                result = a.userData.info[list.sort_column] > b.userData.info[list.sort_column]
             end
 
             return result
@@ -587,6 +584,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         self.items_container.content = UI.content({
             table.unpack(list.items)
         })
+        list:update_item_indices()
 
     end
 

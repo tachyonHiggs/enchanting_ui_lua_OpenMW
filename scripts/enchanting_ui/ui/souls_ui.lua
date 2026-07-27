@@ -129,8 +129,8 @@ local function create_soul(id, object, value, icon, name, soul_name)
             size = v2(600, elements.text_size)
         },
         userData = {
-            -- Used for list sorting!
-            icon, name, value, soul_name, object.count
+            index = 1,
+            info = {icon, name, value, soul_name, object.count},
         },
         content = UI.content {
             icon_element,

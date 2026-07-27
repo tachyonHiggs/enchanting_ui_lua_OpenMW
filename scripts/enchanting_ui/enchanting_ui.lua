@@ -287,6 +287,9 @@ enchanting_ui.hide = function()
         -- TODO: this to dialog
         I.UI.setMode("Dialogue")
     end
+
+    enchanter.is_vendor_enchant = false
+    enchanter.vendor = {}
     
     -- Reset
     enchanting_ui.reset()

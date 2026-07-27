@@ -46,6 +46,9 @@ local function create_magic_effect_item(id, name)
             text = name,
             textSize = elements.text_size,
         },
+        userData = {
+            index = 1
+        },
         events = {
             mouseClick = async:callback(function()
                 effect_ui.on_magic_effect_clicked(id)
@@ -69,27 +72,22 @@ function effect_ui.make_magic_effects_list()
     return items or {} -- return the list or just an empty one
 end
 
-effect_ui.on_effect_clicked = function(id)
+effect_ui.on_effect_clicked = function(index)
 
-    print("On effect clicked: ", id)
+    print("On effect clicked: ", index)
     enchanter.reset_effect_to_add()
 
-    local found = false
-
-    for i, effect in ipairs(enchanter.effects_with_params) do
-        if effect.id == id then
-            enchanter.effect_to_add = enchanter.effects_with_params[i]
-            found = true
-            break
-        end
-    end
-    if found == false then
-        print("ERROR: could not find matching effect id in existing effects")
+    if index > #enchanter.effects_with_params then
+        print("ERROR: magic effect selected out of valid bounds! ", index)
         return
     end
+    enchanter.effect_to_add = enchanter.effects_with_params[index]
+    enchanter.effect_to_add.index = index
     enchanter.effect_to_modify = true
 
     print("CREATING EFFECT ADD UI")
+    print(index)
+    print(enchanter.effect_to_add.id)
     effect_ui.effects_ui = effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add)
     elements.effects_root = UI.create(effect_ui.effects_ui:create())
     elements.effects_root:update()
@@ -161,6 +159,10 @@ effect_ui.create_effect_item = function(effect)
         },
     }
 
+    local userData = {
+        index = 1
+    }
+
     return 
     {
         name = name.."_effect_item",
@@ -174,11 +176,12 @@ effect_ui.create_effect_item = function(effect)
             icon_element,
             text_element,
         },
+        userData = userData,
         events = {
             mouseClick = async:callback(function()
                 if effect_ui.on_effect_clicked then
                     print("EFFECT CLICKED")
-                    effect_ui.on_effect_clicked(effect.id)
+                    effect_ui.on_effect_clicked(userData.index)
                 end
             end)
         }
@@ -394,25 +397,29 @@ effect_ui.new = function(modify, effect_to_add)
 
     local function ok_magic_effect()
         print("ok_magic_effect")
-        local effect_index
-        
+
+        -- Check if effect has duplicate
         for index, effect in ipairs(enchanter.effects_with_params) do
             -- Attribute and skill effects allow multiple/duplicates on one enchantment
             local allow_duplicate_effects = core.magic.effects.records[effect.id].hasAttribute or core.magic.effects.records[effect.id].hasSkill
-            if effect.id == enchanter.effect_to_add.id and not allow_duplicate_effects then
-                if enchanter.effect_to_modify==false then
+            if effect.id == enchanter.effect_to_add.id then
+                if enchanter.effect_to_modify==false and not allow_duplicate_effects then
                     UI.showMessage("This magic effect has already been added")
                     return
                 end
-                effect_index = index -- Otherwise edit existing effect at index
             end
         end
 
-        local effect_to_add_ui = effect_ui.create_effect_item(enchanter.effect_to_add)
+        -- Then update effects list
+        if enchanter.effect_to_add.index > #enchanter.effects_with_params then
+            print("ERROR: tried to delete effect outside of effects_with_params")
+            return
+        end
 
+        local effect_to_add_ui = effect_ui.create_effect_item(enchanter.effect_to_add)
         if enchanter.effect_to_modify then 
-            enchanter.effects_with_params[effect_index] = enchanter.effect_to_add -- replace existing entry
-            elements.effects:update_item(effect_index, effect_to_add_ui)
+            enchanter.effects_with_params[enchanter.effect_to_add.index] = enchanter.effect_to_add -- replace existing entry
+            elements.effects:update_item(enchanter.effect_to_add.index, effect_to_add_ui)
         else
             table.insert(enchanter.effects_with_params, enchanter.effect_to_add)
             elements.effects:add_item(effect_to_add_ui)
@@ -443,6 +450,8 @@ effect_ui.new = function(modify, effect_to_add)
 
     local function cancel_magic_effect()
         print("cancel_magic_effect")
+
+        enchanter.reset_effect_to_add()
         
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()
@@ -451,13 +460,14 @@ effect_ui.new = function(modify, effect_to_add)
 
     local function delete_effect()
         print("delete_effect")
-        for i, effect in ipairs(enchanter.effects_with_params) do
-            if effect.id == enchanter.effect_to_add.id then
-                elements.effects:remove_item(i)
-                table.remove(enchanter.effects_with_params, i)
-                break
-            end
+        if enchanter.effect_to_add.index > #enchanter.effects_with_params then
+            print("ERROR: tried to delete effect outside of effects_with_params")
+            return
         end
+
+        print("removing effect at index: ", enchanter.effect_to_add.index)
+        elements.effects:remove_item(enchanter.effect_to_add.index)
+        table.remove(enchanter.effects_with_params, enchanter.effect_to_add.index)
         enchanter.reset_effect_to_add()
 
         enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()

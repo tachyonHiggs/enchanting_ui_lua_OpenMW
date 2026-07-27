@@ -26,3 +26,5 @@
  - Opening the enchantment menu immediately upon starting causes the menus to not load all items, souls, and magic effects
  - Minimum sized magic effects cause the item to have 0 charge
  - Menus layering issue
+ - Issue with canceling editing an effect
+ - Sorting lists can get directions flipped

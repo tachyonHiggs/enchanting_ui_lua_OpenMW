@@ -133,8 +133,8 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
             align = UI.ALIGNMENT.Start,
         },
         userData = {
-            -- Used for list sorting!
-            icon, name, enchant_pts, type_text, object.count
+            index = 1,
+            info = {icon, name, enchant_pts, type_text, object.count}
         },
         content = UI.content {
             icon_element,

@@ -48,7 +48,6 @@ enchanter.reset_enchantment = function()
     enchanter.chance = 0
     enchanter.price = 1
     enchanter.name = ""
-    enchanter.vendor = {}
 
     enchanter.effects_with_params = {}
     enchanter.reset_effect_to_add()
@@ -66,7 +65,6 @@ enchanter.reset = function()
     enchanter.reset_enchantment()
     enchanter.reset_soul()
     enchanter.reset_item()
-    enchanter.is_vendor_enchant = false
 end
 
 enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
@@ -115,7 +113,6 @@ local function getBarterOffer(merchant, basePrice, buying)
     if basePrice == 0 or types.Creature.objectIsInstance(merchant) then
         return basePrice
     end
-    print("cow")
 
     local playerMerc = self.type.stats.skills.mercantile(self).modified
     local playerLuck  = self.type.stats.attributes.luck(self).modified
