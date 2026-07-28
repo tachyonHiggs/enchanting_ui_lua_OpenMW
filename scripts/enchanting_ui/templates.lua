@@ -28,10 +28,60 @@ end
 
 templates.padding = function(x, y)
     return {
-        template = I.MWUI.templates.padding,
-        type = UI.TYPE.Container,
+        type = UI.TYPE.Widget,
         props = {
             size = Util.vector2(x, y),
+        }
+    }
+end
+
+---@param items table
+---@param name string
+---@param horizontal boolean
+---@param arrange UI.ALIGNMENT
+---@param align UI.ALIGNMENT
+---@param gap_x number
+---@param gap_y number
+---@param size Util.vector2
+---@return table
+templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y, size, anchor, relativePosition)
+
+    arrange = arrange or UI.ALIGNMENT.Start
+    align = align or UI.ALIGNMENT.Start
+
+    local autoSize = true
+    if size then
+        autoSize = false
+    end
+
+    print("templates.flex")
+
+    local content = {}
+    table.insert(content, templates.padding(gap_x, gap_y))
+    for index, item in ipairs(items) do
+        if item == nil or item == {} then
+            print("Item at index: ", index, " is nil")
+        else 
+            table.insert(content, item)
+            table.insert(content, templates.padding(gap_x, gap_y))
+        end
+    end
+
+    return 
+    {
+        name = name,
+        type = UI.TYPE.Flex,
+        props = {
+            horizontal = horizontal,
+            arrange = arrange,
+            align = align,
+            autoSize = autoSize,
+            size = size,
+            anchor = anchor,
+            relativePosition = relativePosition,
+        },
+        content = UI.content {
+            table.unpack(content)
         }
     }
 end
@@ -373,7 +423,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     function list:update_item_indices()
         print("update_item_indices")
         for index, item in ipairs(self.items) do
-            print(item, " ", index)
+            -- print(item, " ", index)
+            item.userData = {index = 1}
             item.userData.index = index
         end
     end
@@ -854,7 +905,6 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
                     content = UI.content {}
                 }, 
                 self.value_element,
-                templates.padding(20, 20),
                 {
                     name = "left",
                     template = I.MWUI.templates.borders,
@@ -914,6 +964,10 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     function slider:hide() 
         print("hiding: ", self.text)
         self.ui.props.visible = false
+
+        if self.update_target then
+            self.update_target()
+        end
     end
 
     function slider:show() 

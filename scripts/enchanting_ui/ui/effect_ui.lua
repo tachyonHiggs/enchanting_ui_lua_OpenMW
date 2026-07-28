@@ -589,16 +589,78 @@ effect_ui.new = function(modify, effect_to_add)
 
     function instance:create()
 
+        local effect_icon_element = {
+            name = "effect_icon",
+            type = UI.TYPE.Flex,
+            props = {
+                horizontal = true,
+                arrange = UI.ALIGNMENT.Start,
+                align = UI.ALIGNMENT.Start,
+            },
+            content = UI.content {
+                {
+                    name = "icon",
+                    type = UI.TYPE.Image,
+                    template = I.MWUI.templates.borders,
+                    props = {
+                        resource = UI.texture({
+                            path = core.magic.effects.records[id].icon
+                        }),
+                        alpha = 1,
+                        size = elements.effect_icon_size,
+                    },
+                },
+                templates.padding(10, 0),
+                {
+                    name = "name",
+                    type = UI.TYPE.Text,
+                    template = I.MWUI.templates.textNormal,
+                    props = {
+                        text = tostring(core.magic.effects.records[id].name),
+                        textSize = elements.text_size,
+                    }
+                },
+                
+            }
+        }
+
+        local range_element = {
+            name = "range",
+            type = UI.TYPE.Flex,
+            props = {
+                horizontal = true,
+                arrange = UI.ALIGNMENT.Start,
+                align = UI.ALIGNMENT.Start,
+            },
+            content = UI.content {
+                {
+                    name = "range_text",
+                    type = UI.TYPE.Text,
+                    template = I.MWUI.templates.textNormal,
+                    props = {
+                        text = "Range",
+                        textSize = elements.text_size,
+                        size = v2(100, elements.text_size)
+                    }
+                },
+                templates.padding(100, 0),
+                instance.range:create(),
+                -- TODO: add cost
+                templates.padding(100, 0),
+                instance.cost:create(),
+            }
+        }
+
         local delete_btn
         if instance.delete_btn then
             delete_btn = instance.delete_btn:create()
         end
 
+        local magic_effect_to_add_elements = {effect_icon_element, range_element, instance.skill:create(), instance.attribute:create(), instance.magnitude:create(), instance.magnitude_max:create(), instance.duration:create(), instance.area:create(), templates.button.new("Cancel", cancel_magic_effect, 100, 30):create(), templates.button.new("OK", ok_magic_effect, 100, 30):create(), delete_btn}
         instance.ui = {
             name = "effect_add",
             layer = "Windows",
             type = UI.TYPE.Widget,
-            -- template = I.MWUI.templates.boxSolid,
             props = {
                 relativeSize = v2(1, 1),
                 relativePosition = v2(0.5, 0.5),
@@ -606,100 +668,8 @@ effect_ui.new = function(modify, effect_to_add)
                 visible = true,
             },
             content = UI.content {
-                templates.make_border(v2(elements.effects_size[1], elements.effects_size[2])),
-                {
-                    name = "magic_effect_add_flex",
-                    type = UI.TYPE.Flex,
-                    props = {
-                        horizontal = false,
-                        arrange = UI.ALIGNMENT.Start,
-                        align = UI.ALIGNMENT.Start,
-                        relativePosition = v2(0.5, 0.5),
-                        anchor = v2(0.5, 0.5),
-                        size = v2(elements.effects_size[1], elements.effects_size[2]),
-                        autoSize = false,
-                    },
-                    content = UI.content {
-                        {
-                            name = "effect_icon",
-                            type = UI.TYPE.Flex,
-                            props = {
-                                horizontal = true,
-                                arrange = UI.ALIGNMENT.Start,
-                                align = UI.ALIGNMENT.Start,
-                            },
-                            content = UI.content {
-                                {
-                                    name = "icon",
-                                    type = UI.TYPE.Image,
-                                    template = I.MWUI.templates.borders,
-                                    props = {
-                                        resource = UI.texture({
-                                            path = core.magic.effects.records[id].icon
-                                        }),
-                                        alpha = 1,
-                                        size = elements.effect_icon_size,
-                                    },
-                                },
-                                templates.padding(40, 0),
-                                {
-                                    name = "name",
-                                    type = UI.TYPE.Text,
-                                    template = I.MWUI.templates.textNormal,
-                                    props = {
-                                        text = tostring(core.magic.effects.records[id].name),
-                                        textSize = elements.text_size,
-                                    }
-                                },
-                                
-                            }
-                        },
-                        templates.padding(elements.padding_size, 4*elements.padding_size),
-                        {
-                            name = "range",
-                            type = UI.TYPE.Flex,
-                            props = {
-                                horizontal = true,
-                                arrange = UI.ALIGNMENT.Start,
-                                align = UI.ALIGNMENT.Start,
-                            },
-                            content = UI.content {
-                                {
-                                    name = "range_text",
-                                    type = UI.TYPE.Text,
-                                    template = I.MWUI.templates.textNormal,
-                                    props = {
-                                        text = "Range",
-                                        textSize = elements.text_size,
-                                        size = v2(100, elements.text_size)
-                                    }
-                                },
-                                templates.padding(100, 0),
-                                instance.range:create(),
-                                -- TODO: add cost
-                                templates.padding(100, 0),
-                                instance.cost:create(),
-                            }
-                        },
-                        instance.skill:create(),
-                        templates.padding(elements.padding_size, 2*elements.padding_size),
-                        instance.attribute:create(),
-                        templates.padding(elements.padding_size, 2*elements.padding_size),
-                        instance.magnitude:create(),
-                        templates.padding(elements.padding_size, elements.padding_size),
-                        instance.magnitude_max:create(),
-                        templates.padding(elements.padding_size, elements.padding_size),
-                        instance.duration:create(),
-                        templates.padding(elements.padding_size, elements.padding_size),
-                        instance.area:create(),
-                        templates.padding(elements.padding_size, elements.padding_size),
-                        templates.button.new("Cancel", cancel_magic_effect, 100, 30):create(),
-                        templates.padding(elements.padding_size, elements.padding_size),
-                        templates.button.new("OK", ok_magic_effect, 100, 30):create(),
-                        templates.padding(elements.padding_size, elements.padding_size),
-                        delete_btn,
-                    }
-                }
+                templates.make_border(v2(elements.effects_size[1]+20, elements.effects_size[2]+20)),
+                templates.flex(magic_effect_to_add_elements, "magic_effect_add_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 0, 5, v2(elements.effects_size[1], elements.effects_size[2]), v2(0.5, 0.5), v2(0.5, 0.5)),
             }
         }
 
@@ -712,9 +682,5 @@ effect_ui.new = function(modify, effect_to_add)
     return instance
     
 end
-
-
-elements.magic_effects = templates.list.new("Magic Effects", v2(350,300), nil, effect_ui.make_magic_effects_list)
-elements.effects = templates.list.new("Effects", v2(350,300), nil, function() end)
 
 return effect_ui

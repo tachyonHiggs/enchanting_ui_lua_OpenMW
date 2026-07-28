@@ -76,7 +76,7 @@ enchanting_ui.create_ui = function()
                         },
                         content = UI.content {
                             title,
-                            templates.padding(0, elements.text_size),
+                            templates.padding(0, 1),
                             header,
                             main_content,
                             footer,
@@ -110,146 +110,39 @@ end
 -- header
 
 local function inputs()
-    print("inputs")
-
-                    
-    return {
-        name = "inputs_flex",
-        type = UI.TYPE.Flex,
-        props = {
-            horizontal = false,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-            size = v2(300,50),
-        },
-        content = UI.content {
-            elements.name_input:create(),
-            templates.padding(10, 0),
-            {
-                name = "item_soul_flex",
-                type = UI.TYPE.Flex,
-                props = {
-                    horizontal = true,
-                    arrange = UI.ALIGNMENT.Start,
-                    align = UI.ALIGNMENT.Start,
-                },
-                content = UI.content {
-                    elements.item_input:create(),
-                    templates.padding(10, 0),
-                    elements.soul_input:create(),
-                }
-            },
-            templates.padding(10, 0),
-        }
-    }
+    print("inputs") 
+    local input_elements = templates.flex({elements.item_input:create(), elements.soul_input:create()}, "inputs_flex_2", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.header_elements_size[1], elements.header_elements_size[2]))
+    
+    return templates.flex({elements.name_input:create(), input_elements}, "inputs_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 0, 10, v2(elements.header_elements_size[1], elements.header_elements_size[2]))
 end
-
 
 local function stats()
-    return {
-        name = "stats_flex",
-        type = UI.TYPE.Flex,
-        props = {
-            horizontal = false,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-            -- gap = 10,
-        },
-        content = UI.content {
-            elements.stats_enchantment:create(),
-            elements.stats_charge:create(),
-        }
-    }
+    return templates.flex({elements.stats_enchantment:create(), elements.stats_charge:create()}, "stats_flex", false, UI.ALIGNMENT.End, UI.ALIGNMENT.Start, 0, 10, v2(elements.header_elements_size[1], elements.header_elements_size[2]))
 end
 
-header = {
-    name = "header",
-    template = I.MWUI.templates.padding,
-    content = UI.content { {
-        name = "header_flex",
-        type = UI.TYPE.Flex,
-        props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-        },
-        content = UI.content {
-            templates.padding(elements.padding_size, 0),
-            inputs(),
-            stats(),
-            templates.padding(elements.padding_size, 0),
-        }
-    } }
-}
+header = templates.flex({inputs(), stats()}, "header_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.header_size[1], elements.header_size[2]))
 
 -- End header
 
 
-
 -- main_content
 
-main_content = {
-    name = "content",
-    template = I.MWUI.templates.padding,
-    content = UI.content { {
-        name = "content_flex",
-        type = UI.TYPE.Flex,
-        props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-        },
-        content = UI.content {
-            templates.padding(10, 0),
-            elements.magic_effects:create(),
-            templates.padding(10, 0),
-            elements.effects:create(),
-            templates.padding(10, 0),
-        }
-    } }
-}
--- End main_content
+elements.magic_effects = templates.list.new("Magic Effects", v2(elements.mc_magic_effects_size[1],elements.mc_magic_effects_size[2]), nil, effect_ui.make_magic_effects_list)
+elements.effects = templates.list.new("Effects", v2(elements.mc_effects_size[1],elements.mc_effects_size[2]), nil, function() end)
+main_content = templates.flex({elements.magic_effects:create(), elements.effects:create()}, "content_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.mc_size[1], elements.mc_size[2]))
 
+-- End main_content
 
 
 -- footer
 
 elements.cast_type_btn = templates.button.new("Cast Once", toggle_cast_type, 140, 30)
 
-footer = {
-    name = "footer",
-    template = I.MWUI.templates.padding,
-    content = UI.content { {
-        name = "footer_flex",
-        type = UI.TYPE.Flex,
-        props = {
-            horizontal = true,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-        },
-        content = UI.content {
-            templates.padding(10, 0),
-            elements.cast_type_btn:create(),
-            templates.padding(50, 0),
-            elements.chance:create(),
-            templates.padding(10, 0),
-            elements.price:create(),
-            templates.padding(200, 0),
-            templates.button.new("Create", (function()  -- TODO: make this its own item so that Create can be updated with Buy
-                print("Clicked Create")
-                enchanting_ui.enchant_item()
-                return true
-            end), 80, 30):create(),
-            templates.padding(10, 0),
-            templates.button.new("Cancel", (function()
-                print("Clicked Cancel")
-                ambient.playSound('menu click')
-                enchanting_ui.hide()
-            end), 80, 30):create(),
-            templates.padding(10, 0),
-        }
-    } }
-}
+local create_btn = templates.button.new("Create", (function() print("Clicked Create") enchanting_ui.enchant_item() return true end), 80, 30)
+local cancel_btn = templates.button.new("Cancel", (function() print("Clicked Cancel") ambient.playSound('menu click') enchanting_ui.hide() end), 80, 30)
+
+footer = templates.flex({elements.cast_type_btn:create(), elements.chance:create(), elements.price:create(), templates.padding(20, elements.footer_size[2]), create_btn:create(), cancel_btn:create()}, "footer_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.footer_size[1], elements.footer_size[2]))
+
 -- End footer
 
 enchanting_ui.show = function(is_vendor, vendor)
@@ -362,6 +255,7 @@ enchanting_ui.reset = function()
 
     elements.effects:clear()
     elements.magic_effects:clear()
+    enchanting_ui.update_lists()
 end
 
 return enchanting_ui

@@ -37,9 +37,7 @@ end
 elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End)
 
 elements.set_cast_type = function()
-    if elements.cast_type_btn.layout then -- if exists
-        elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
-    end
+    elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
 end
 elements.cast_type_btn = {}
 
@@ -62,7 +60,6 @@ elements.magic_effects = {}
 elements.effects = {}
 
 elements.root = {}
-elements.root_size = {800, 600}
 elements.enable_ui = function(element)
     if element.layout.type == UI.TYPE.Widget then
         element.layout.props.visible = true
@@ -82,17 +79,35 @@ elements.disable_ui = function(element)
     element:update()
 end
 
+-- Root UI constants
+elements.root_size = {800, 600}
+
+-- Header UI constants
+elements.header_size = {800, 130}
+elements.header_elements_size = {380, 120}
+
+-- Main Content UI constants
+elements.mc_magic_effects_size = {250, 300}
+elements.mc_effects_size = {500, 300}
+elements.mc_size = {800, 400}
+
+-- Footer UI constants
+elements.footer_size = {800, 80}
+
+-- Effect UI constants
 elements.effects_root = {}
-elements.effects_size = {500, 300}
+elements.effects_size = {500, 350}
 elements.attribute_button_size = {120, 30}
 elements.effects_sliders_size = {300, 30}
 elements.effect_icon_size = v2(20,20)
 
+-- Souls UI constants
 elements.souls_root = {}
 elements.souls_list_column_names = {"Icon", "Name", "Charge", "Soul Name", "Count"}
 elements.souls_list_sizes = {50, 250, 80, 200, 80}
 elements.souls_list_sorting = {false, true, true, true, true}
 
+-- Items UI constants
 elements.items_root = {}
 elements.items_list_column_names = {"Icon", "Name", "Enchant Pts", "Type", "Count"}
 elements.items_list_sizes = {50, 250, 120, 100, 80}

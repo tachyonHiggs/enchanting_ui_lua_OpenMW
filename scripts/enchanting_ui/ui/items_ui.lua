@@ -41,6 +41,8 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     elements.set_stats_charge()
     elements.set_stats_enchantment()
 
+    elements.effects:clear()
+    
     elements.enable_ui(elements.root)
     elements.root:update()
 
