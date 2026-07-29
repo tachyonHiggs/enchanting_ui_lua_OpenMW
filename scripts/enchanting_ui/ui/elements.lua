@@ -19,7 +19,7 @@ elements.text_size = 20
 elements.padding_size = 20
 
 -- Inputs
-elements.name_input = templates.text_input.new("Name", 200, function(text) enchanter.name = text end, function() elements.root:update() end)
+elements.name_input = templates.text_input.new("Name:", 200, function(text) enchanter.name = text end, function() elements.root:update() end)
 elements.soul_input = {}
 elements.item_input = {}
 
@@ -85,6 +85,7 @@ elements.root_size = {800, 600}
 -- Header UI constants
 elements.header_size = {800, 130}
 elements.header_elements_size = {380, 120}
+elements.input_image_size = {75, 75}
 
 -- Main Content UI constants
 elements.mc_magic_effects_size = {250, 300}

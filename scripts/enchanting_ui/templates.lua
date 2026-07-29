@@ -386,6 +386,8 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
                     props = {
                         text = self.name,
                         textSize = 20,
+                        autoSize = false,
+                        size = v2(45, 20)
                     }
                 },
                 templates.padding(self.padding_length, 0),
@@ -424,7 +426,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         print("update_item_indices")
         for index, item in ipairs(self.items) do
             -- print(item, " ", index)
-            item.userData = {index = 1}
+            item.userData = item.userData or {}
             item.userData.index = index
         end
     end
@@ -621,7 +623,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
         local function sort_function(a, b)
             local result
-            if list.sort_direction == list.sort_ascending then
+            if list.sort_direction == list.sort_descending then
                 result = a.userData.info[list.sort_column] < b.userData.info[list.sort_column]
             else
                 result = a.userData.info[list.sort_column] > b.userData.info[list.sort_column]
@@ -643,24 +645,33 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
         print("list:on_sort_clicked for index: ", index)
         
-        -- If clicked current active column sort, 
-        if list.sort_column == index then
-            list.column_elements[index*2].template = I.MWUI.templates.bordersThick
-            list.sort_direction =( list.sort_direction + 1) % 2 -- toggle direction
+        --Normal arrow behavior
+        list.sort_column = index
+        list.column_elements[index*2].template = I.MWUI.templates.bordersThick
+        list.sort_direction =( list.sort_direction + 1) % 2 -- toggle direction
 
-            -- Update sort UI
-            if list.sort_direction == list.sort_ascending then
-                list.column_elements[index*2].props.resource = list.sort_ascending_texture
-            else
-                list.column_elements[index*2].props.resource = list.sort_descending_texture
-            end
-
+        -- Update sort UI
+        if list.sort_direction == list.sort_ascending then
+            list.column_elements[index*2].props.resource = list.sort_ascending_texture
         else
-            list.column_elements[index*2].template = I.MWUI.templates.bordersThick
-            list.column_elements[list.sort_column*2].template = I.MWUI.templates.borders
-            list.sort_column = index
-            -- Don't toggle direction
+            list.column_elements[index*2].props.resource = list.sort_descending_texture
         end
+
+        -- TBH my superior system where you first have to click on a arrow to make it active and then it sorts 
+        -- if list.sort_column == index then
+        --     list.column_elements[index*2].template = I.MWUI.templates.bordersThick
+        --     list.sort_direction =( list.sort_direction + 1) % 2 -- toggle direction
+        --     if list.sort_direction == list.sort_ascending then
+        --         list.column_elements[index*2].props.resource = list.sort_ascending_texture
+        --     else
+        --         list.column_elements[index*2].props.resource = list.sort_descending_texture
+        --     end
+        -- else
+        --     list.column_elements[index*2].template = I.MWUI.templates.bordersThick
+        --     list.column_elements[list.sort_column*2].template = I.MWUI.templates.borders
+        --     list.sort_column = index
+        --     -- Don't toggle direction
+        -- end
 
         --Now sort list items by column and direction
         list:sort_items()
