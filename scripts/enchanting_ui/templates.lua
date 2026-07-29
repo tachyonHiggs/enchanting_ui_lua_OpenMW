@@ -754,6 +754,7 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     slider.min = min
     slider.max = max
     slider.interval = 1 -- hard coded
+    slider.background_bar_length = 220
 
     local backgroundWidth = 220
     local thumbWidth = 20
@@ -834,6 +835,8 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
 
     function slider:move_left()
 
+        ambient.playSound('menu click')
+
         local relativeInterval = self.interval / (self.max - self.min + 1)
         print("Moving slider left by: ", relativeInterval)
 
@@ -864,6 +867,9 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     end
 
     function slider:move_right()
+
+        ambient.playSound('menu click')
+
         local relativeInterval = self.interval / (self.max - self.min + 1)
         print("Moving slider right by: ", relativeInterval)
 
@@ -890,6 +896,22 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     end
 
     function slider:on_background_bar_clicked(position)
+        print("slider:on_background_bar_clicked at position: ", position)
+
+        -- Convert position to value
+        local value = self.min + position*(self.max - self.min)/self.background_bar_length
+        print(value)
+
+        value = math.floor(value + 0.5)
+        value = math.max(value, self.max)
+
+        -- Update slider to new position
+        self:set_value(value)
+
+        -- if set, call callback function on slider moved
+        if self.on_slider_moved then
+            self.on_slider_moved(self.text, self.value)
+        end
     end
 
     function slider:create()
@@ -942,13 +964,13 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
                             path = "black"
                         }),
                         alpha = 1,
-                        size = v2(220, 20),
+                        size = v2(self.background_bar_length, 20),
                     },
                     content = UI.content {
                         self.bar
                     },
                     events = {
-                        mouseClick = async:callback(function() self:on_background_bar_clicked() end)
+                        mousePress = async:callback(function(mouseEvent) self:on_background_bar_clicked(mouseEvent.offset.x) end)
                     }
                 },
                 {

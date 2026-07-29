@@ -507,6 +507,8 @@ enchanter.calculate_vanilla_success_rate = function()
     -- If more than 100%, cap it for display
     if rate > 100 then
         rate = 100
+    elseif rate < 0 then
+        rate = 0
     end
 
     return rate

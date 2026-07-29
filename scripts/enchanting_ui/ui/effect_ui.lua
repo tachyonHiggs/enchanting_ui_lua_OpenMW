@@ -3,6 +3,7 @@ local I = require('openmw.interfaces')
 local Util = require('openmw.util')
 local v2 = Util.vector2
 local auxUi = require("openmw_aux.ui")
+local ambient = require('openmw.ambient')
 local async = require('openmw.async')
 local core = require('openmw.core')
 local storage = require('openmw.storage')
@@ -18,6 +19,7 @@ effect_ui.on_magic_effect_clicked = function(id)
 
     print("On magic effect clicked: ", id)
 
+    ambient.playSound('menu click')
     if #enchanter.effects_with_params >= 8 then
         print("Max effects added, returning!")
         UI.showMessage("Max number of effects reached")
@@ -75,6 +77,8 @@ end
 effect_ui.on_effect_clicked = function(index)
 
     print("On effect clicked: ", index)
+    
+    ambient.playSound('menu click')
     enchanter.reset_effect_to_add()
 
     if index > #enchanter.effects_with_params then

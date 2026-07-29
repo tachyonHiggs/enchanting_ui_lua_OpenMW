@@ -16,6 +16,9 @@ local souls_ui = {}
 
 local function on_soul_clicked(id, object, value, icon)
 
+    -- TODO: equipping sound effect
+    ambient.playSound('item')
+
     enchanter.soul.id = id
     enchanter.soul.object = object
     enchanter.soul.icon = icon
@@ -39,8 +42,9 @@ end
 function souls_ui.show_soul_list()
 
     print("CREATING SOUL UI")
+    
+    ambient.playSound('menu click')
     elements.disable_ui(elements.root)
-
     elements.souls_root = UI.create{
         name = "souls_list",
         layer = "Windows",

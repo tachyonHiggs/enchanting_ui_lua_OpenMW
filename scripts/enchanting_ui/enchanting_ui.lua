@@ -93,6 +93,8 @@ end
 local function toggle_cast_type()
     print("toggle_cast_type")
 
+    ambient.playSound('menu click')
+
     -- TODO: have this toggle update magic effects, for now just clear them
     enchanter.enchantment.base_cost = 0
     enchanter.chance = 0

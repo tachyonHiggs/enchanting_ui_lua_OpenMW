@@ -19,6 +19,9 @@ local items_ui = {}
 
 local function on_item_clicked(id, object, icon, enchant_pts, type_text)
 
+    -- TODO: fix this
+    ambient.playSound('item/item')
+
     -- Reset data
     enchanter.reset_enchantment()
     enchanter.reset_item()
@@ -170,6 +173,8 @@ function items_ui.make_enchantable_items_list()
 end
 
 function items_ui.show_item_list()
+    
+    ambient.playSound('menu click')
     elements.disable_ui(elements.root)
     elements.items_root = UI.create{
         name = "item_list",
