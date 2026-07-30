@@ -90,6 +90,7 @@ elements.input_image_size = {75, 75}
 -- Main Content UI constants
 elements.mc_magic_effects_size = {250, 300}
 elements.mc_effects_size = {500, 300}
+elements.mc_list_gap = 5
 elements.mc_size = {800, 400}
 
 -- Footer UI constants

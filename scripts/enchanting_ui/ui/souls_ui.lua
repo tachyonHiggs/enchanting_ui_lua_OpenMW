@@ -17,7 +17,7 @@ local souls_ui = {}
 local function on_soul_clicked(id, object, value, icon)
 
     -- TODO: equipping sound effect
-    ambient.playSound('item')
+    ambient.playSound('Item Misc Up')
 
     enchanter.soul.id = id
     enchanter.soul.object = object

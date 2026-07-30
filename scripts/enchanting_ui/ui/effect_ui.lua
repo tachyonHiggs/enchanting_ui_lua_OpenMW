@@ -47,6 +47,8 @@ local function create_magic_effect_item(id, name)
         props = {
             text = name,
             textSize = elements.text_size,
+            autoSize = false,
+            size = v2(elements.mc_magic_effects_size[1], elements.text_size + elements.mc_list_gap)
         },
         userData = {
             index = 1
@@ -175,6 +177,9 @@ effect_ui.create_effect_item = function(effect)
             horizontal = true,
             arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.Start,
+            
+            autoSize = false,
+            size = v2(elements.mc_effects_size[1], elements.text_size + elements.mc_list_gap)
         },
         content = UI.content {
             icon_element,

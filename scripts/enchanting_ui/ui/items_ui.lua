@@ -19,8 +19,8 @@ local items_ui = {}
 
 local function on_item_clicked(id, object, icon, enchant_pts, type_text)
 
-    -- TODO: fix this
-    ambient.playSound('item/item')
+    -- TODO: add appropiate sound to play depending on item type
+    ambient.playSound('Item Misc Up')
 
     -- Reset data
     enchanter.reset_enchantment()

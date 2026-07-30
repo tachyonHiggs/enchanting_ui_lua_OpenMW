@@ -38,20 +38,29 @@ end
 ---@param items table
 ---@param name string
 ---@param horizontal boolean
----@param arrange UI.ALIGNMENT
----@param align UI.ALIGNMENT
+---@param arrange number
+---@param align number
 ---@param gap_x number
 ---@param gap_y number
----@param size Util.vector2
+---@param size userdata?
+---@param anchor userdata?
+---@param relativePosition userdata?
 ---@return table
 templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y, size, anchor, relativePosition)
 
     arrange = arrange or UI.ALIGNMENT.Start
     align = align or UI.ALIGNMENT.Start
 
-    local autoSize = true
-    if size then
-        autoSize = false
+    local autoSize = false
+    if not size then
+        autoSize = true
+        size = v2(1,1)
+    end
+    if not anchor then
+        anchor = v2(0.5, 0.5)
+    end
+    if not relativePosition then
+        relativePosition = v2(0.5, 0.5)
     end
 
     print("templates.flex")
@@ -79,6 +88,7 @@ templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y,
             size = size,
             anchor = anchor,
             relativePosition = relativePosition,
+            visible = true,
         },
         content = UI.content {
             table.unpack(content)
@@ -103,8 +113,12 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y)
         props = {
             text = button.name,
             textSize = 20,
-            size = v2(button.size_x, button.size_y),
+            size = v2(button.size_x, 20),
             autoSize = false,
+            anchor = v2(0.05, 0), -- TODO: magic number here, for some reason the buttons won't be centered otherwise
+            relativePosition = v2(0.5, 0.5),
+            textAlignH = UI.ALIGNMENT.Center,
+            textAlignV = UI.ALIGNMENT.Center,
         },
         events = {
             mouseClick = async:callback(function(...)
@@ -156,6 +170,8 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
 
     local text_input = {}
 
+    print("text_input new: ", name)
+
     text_input.name = name
     text_input.text = ""
     text_input.text_length = text_length
@@ -181,6 +197,28 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
         }
     }
 
+    text_input.input_bar = templates.flex(
+        {templates.padding(text_length, 24), 
+        {
+            name = name .. "_input_bar",
+            type = UI.TYPE.Image,
+            template = I.MWUI.templates.horizontalLine,
+            props = {
+                size = v2(text_length, 1),
+            },
+        }},
+        "input_bar_flex", false, UI.ALIGNMENT.Center,UI.ALIGNMENT.End, 1, 1, v2(text_length, 25), v2(0,0), v2(0,0))
+
+    text_input.input_ui = {
+        name = name .. "_input_ui",
+        type = UI.TYPE.Container,
+        content = UI.content{
+            text_input.input_bar,
+            text_input.input,
+        }
+    }
+    
+
     function text_input:set_text(text)
         self.text = text
         self.input.props.text = text
@@ -203,54 +241,46 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
     end
 
     function text_input:create()
-        self.ui = {
-            name = self.name .. "_text_input",
-            type = UI.TYPE.Flex,
+
+        print("text_input create: ", self.name)
+
+        local name_element = {
+            name = self.name .. "_name",
+            type = UI.TYPE.Text,
+            template = I.MWUI.templates.textNormal,
             props = {
-                horizontal = true,
-                arrange = UI.ALIGNMENT.Start,
-                align = UI.ALIGNMENT.Start,
-                visible = true,
-            },
-            content = UI.content {
-                {
-                    name = self.name .. "_name",
-                    type = UI.TYPE.Text,
-                    template = I.MWUI.templates.textNormal,
-                    props = {
-                        text = self.name,
-                        textSize = 20,
-                    }
-                },
-                templates.padding(10, 0),
-                self.input,
-                {
-                    name = "refresh",
-                    type = UI.TYPE.Image,
-                    template = I.MWUI.templates.borders,
-                    props = {
-                        resource = UI.texture({
-                            -- TODO: this icon lol
-                            path = "Textures/menu_bar_yellow.dds"
-                        }),
-                        alpha = 1,
-                        size = v2(20,20),
-                    },
-                    events = {
-                        mouseClick = async:callback(function()
-                            text_input:clear()
-                            if update_ui then
-                                text_input.text = text_input.input.props.text
-                                if on_text_changed_fnc then
-                                    on_text_changed_fnc()
-                                end
-                                update_ui()
-                            end
-                        end),
-                    }
-                }
+                text = self.name,
+                textSize = 20,
             }
         }
+
+        local refresh_element = {
+            name = "refresh",
+            type = UI.TYPE.Image,
+            template = I.MWUI.templates.borders,
+            props = {
+                resource = UI.texture({
+                    -- TODO: this icon lol
+                    path = "Textures/menu_bar_yellow.dds"
+                }),
+                alpha = 1,
+                size = v2(20,20),
+            },
+            events = {
+                mouseClick = async:callback(function()
+                    text_input:clear()
+                    if update_ui then
+                        text_input.text = text_input.input.props.text
+                        if on_text_changed_fnc then
+                            on_text_changed_fnc()
+                        end
+                        update_ui()
+                    end
+                end),
+            }
+        }
+
+        self.ui = templates.flex({name_element, self.input_ui, refresh_element}, "text_input_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
 
         return self.ui
     end
@@ -644,6 +674,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     function list:on_sort_clicked(index)
 
         print("list:on_sort_clicked for index: ", index)
+        
+        ambient.playSound("menu click")
         
         --Normal arrow behavior
         list.sort_column = index
