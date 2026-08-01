@@ -13,9 +13,7 @@ I.Settings.registerPage ({
 
 
 local function show()
-    -- Reset and update lists
     enchanting_ui.reset()
-    enchanting_ui.update_lists()
     -- Only create, dont render
     enchanting_ui.create_ui()
 end
@@ -66,10 +64,6 @@ return {
                 
             end
 
-        end,
-        update_enchant_ui_after_object_removed = function(data)
-            print("update_enchant_ui_after_object_removed")
-            enchanting_ui.update_lists()
         end,
     }
 }

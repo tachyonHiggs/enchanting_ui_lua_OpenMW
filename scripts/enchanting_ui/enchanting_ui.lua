@@ -13,6 +13,7 @@ local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
 local effect_ui = require("scripts.enchanting_ui.ui.effect_ui")
+local add_effect_ui = require("scripts.enchanting_ui.ui.add_effect_ui")
 local souls_ui = require("scripts.enchanting_ui.ui.souls_ui")
 local items_ui = require("scripts.enchanting_ui.ui.items_ui")
 
@@ -128,10 +129,16 @@ header = templates.flex({inputs(), stats()}, "header_flex", true, UI.ALIGNMENT.S
 
 
 -- main_content
+local function add_effect()
+    print("Clicked Add Effect")
+    -- TODO: add column sorting
+    add_effect_ui.show_add_effect_list()
+end
+local add_effect_btn = templates.button.new("Add Effect", add_effect, 105, 30)
 
-elements.magic_effects = templates.list.new("Magic Effects", v2(elements.mc_magic_effects_size[1],elements.mc_magic_effects_size[2]), nil, effect_ui.make_magic_effects_list)
+-- elements.magic_effects = templates.list.new("Magic Effects", v2(elements.mc_magic_effects_size[1],elements.mc_magic_effects_size[2]), nil, effect_ui.make_magic_effects_list)
 elements.effects = templates.list.new("Effects", v2(elements.mc_effects_size[1],elements.mc_effects_size[2]), nil, function() end)
-main_content = templates.flex({elements.magic_effects:create(), elements.effects:create()}, "content_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.mc_size[1], elements.mc_size[2]))
+main_content = templates.flex({add_effect_btn:create(), elements.effects:create()}, "content_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.mc_size[1], elements.mc_size[2]))
 
 -- End main_content
 
@@ -210,20 +217,15 @@ enchanting_ui.enchant_item = function()
     elements.root:update()
 end
 
-enchanting_ui.update_lists = function()
-    print("update_lists")
-    elements.magic_effects:regenerate_items()
-
-    elements.souls_list:regenerate_items()
-    elements.items_list:regenerate_items()
-end
-
 enchanting_ui.destroy = function()
     print("enchanting_ui.destroy")
     
     enchanting_ui.hide()
 
     auxUi.deepDestroy(elements.root)
+    if elements.add_effects_root.created then
+        elements.add_effects_root:destroy()
+    end
     if elements.effects_root.layout then
         auxUi.deepDestroy(elements.effects_root)
         elements.effects_root:update()
@@ -256,8 +258,6 @@ enchanting_ui.reset = function()
     elements.set_price()
 
     elements.effects:clear()
-    elements.magic_effects:clear()
-    enchanting_ui.update_lists()
 end
 
 return enchanting_ui

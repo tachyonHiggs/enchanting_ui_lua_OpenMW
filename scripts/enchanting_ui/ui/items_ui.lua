@@ -22,6 +22,8 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     -- TODO: add appropiate sound to play depending on item type
     ambient.playSound('Item Misc Up')
 
+    -- if item == ammo/throwable
+
     -- Reset data
     enchanter.reset_enchantment()
     enchanter.reset_item()
@@ -174,6 +176,8 @@ end
 
 function items_ui.show_item_list()
     
+    elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, {column_names=elements.items_list_column_names, column_widths=elements.items_list_sizes, enable_column_sortings=elements.items_list_sorting})
+
     ambient.playSound('menu click')
     elements.disable_ui(elements.root)
     elements.items_root = UI.create{
@@ -197,8 +201,6 @@ function items_ui.update()
         elements.items_root:update()
     end
 end
-
-elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, {column_names=elements.items_list_column_names, column_widths=elements.items_list_sizes, enable_column_sortings=elements.items_list_sorting})
 
 elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, items_ui.show_item_list)
 

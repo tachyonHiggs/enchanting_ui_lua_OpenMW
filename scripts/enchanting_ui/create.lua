@@ -79,8 +79,6 @@ local function remove_object(data)
     local type = data.type
 
     object:remove(count)
-
-    world.players[1]:sendEvent("update_enchant_ui_after_object_removed", {})
 end
 
 local function move_into_player(data)

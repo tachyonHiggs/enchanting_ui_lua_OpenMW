@@ -39,29 +39,6 @@ local function on_soul_clicked(id, object, value, icon)
 
 end
 
-function souls_ui.show_soul_list()
-
-    print("CREATING SOUL UI")
-    
-    ambient.playSound('menu click')
-    elements.disable_ui(elements.root)
-    elements.souls_root = UI.create{
-        name = "souls_list",
-        layer = "Windows",
-        template = I.MWUI.templates.boxSolid,
-        props = {
-            relativeSize = v2(1, 1),
-            relativePosition = v2(0.5, 0.5),
-            anchor = v2(0.5, 0.5),
-        },
-        content = UI.content {
-            souls_ui.souls_list:create()
-        }
-    }
-
-    elements.souls_root:update()
-end
-
 local function create_soul(id, object, value, icon, name, soul_name)
     local icon_element = {
         name = "icon",
@@ -167,14 +144,36 @@ function souls_ui.make_souls_list()
     return valid_items or {}
 end
 
+function souls_ui.show_soul_list()
+
+    print("CREATING SOUL UI")
+    
+    elements.souls_list = templates.list.new("Souls", v2(elements.root_size[1], elements.root_size[2]), souls_ui.update, souls_ui.make_souls_list, {column_names=elements.souls_list_column_names, column_widths=elements.souls_list_sizes, enable_column_sortings=elements.souls_list_sorting})
+
+    ambient.playSound('menu click')
+    elements.disable_ui(elements.root)
+    elements.souls_root = UI.create{
+        name = "souls_list",
+        layer = "Windows",
+        template = I.MWUI.templates.boxSolid,
+        props = {
+            relativeSize = v2(1, 1),
+            relativePosition = v2(0.5, 0.5),
+            anchor = v2(0.5, 0.5),
+        },
+        content = UI.content {
+            elements.souls_list:create()
+        }
+    }
+
+    elements.souls_root:update()
+end
+
 function souls_ui.update()
     if elements.souls_root.layout then
         elements.souls_root:update()
     end
 end
-
-souls_ui.souls_list = templates.list.new("Souls", v2(elements.root_size[1], elements.root_size[2]), souls_ui.update, souls_ui.make_souls_list, {column_names=elements.souls_list_column_names, column_widths=elements.souls_list_sizes, enable_column_sortings=elements.souls_list_sorting})
-elements.souls_list = souls_ui.souls_list
 
 elements.soul_input = templates.text_image.new("Soul:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, souls_ui.show_soul_list)
 

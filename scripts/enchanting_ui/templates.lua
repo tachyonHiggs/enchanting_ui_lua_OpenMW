@@ -4,6 +4,7 @@ local Util = require('openmw.util')
 local v2 = Util.vector2
 local async = require('openmw.async')
 local ambient = require('openmw.ambient')
+local auxUi = require("openmw_aux.ui")
 
 local templates = {}
 
@@ -26,12 +27,21 @@ templates.make_border = function(size, alpha)
     }
 end
 
-templates.padding = function(x, y)
-    return {
-        type = UI.TYPE.Widget,
-        props = {
+templates.padding = function(x, y, x_r, y_r)
+
+    local prop
+    if x or y then
+        prop = {
             size = Util.vector2(x, y),
         }
+    else 
+        prop = {
+            relativeSize = Util.vector2(x_r, y_r),
+        }
+    end
+    return {
+        type = UI.TYPE.Widget,
+        props = prop
     }
 end
 
@@ -94,6 +104,87 @@ templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y,
             table.unpack(content)
         }
     }
+end
+
+templates.window = {}
+---@param name string
+---@param template number
+---@param properties table
+---@param content table?
+templates.window.new = function(name, type, template, properties, content) 
+    print("templates.window.new: ", name)
+
+    local window = {}
+    window.name = name or ""
+    window.type = type
+    window.template = template or I.MWUI.templates.boxSolid
+    window.properties = properties or {}
+    window.properties.visible = window.properties.visible or true
+    window.created = false
+    print(content[1])
+    window.content = content or {}
+
+    function window:show()
+        if self.ui.layout.type == UI.TYPE.Widget then
+            self.ui.layout.props.visible = true
+        elseif self.ui.layout.type == UI.TYPE.Container then
+            self.ui.template = self.template
+        end
+        self:update()
+    end
+
+    function window:hide()
+        if self.ui.layout.type == UI.TYPE.Widget then
+            self.ui.layout.props.visible = false
+        elseif self.ui.layout.type == UI.TYPE.Container then
+            self.ui.template = I.MWUI.templates.disabled
+        end
+        self:update()
+    end
+
+    function window:set_content(content)
+        self.ui.layout.content = content
+        self:update()
+    end
+
+    function window:create()
+        print("templates.window.create: ", self.name)
+        window.created = true
+
+        print(self.content[1])
+
+        self.ui = UI.create{
+            name = "souls_list",
+            layer = "Windows",
+            type = self.type,
+            template = self.template,
+            props = properties,
+            content = UI.content{
+                templates.padding(nil, nil, 1, 1),
+                table.unpack(self.content)
+            }
+        }
+        self:update()
+    end
+
+    function window:update()
+        print("window:update")
+        if self.ui.layout then
+            print("uDPATING")
+            self.ui:update()
+        end
+    end
+
+    function window:destroy()
+        window.created = false 
+
+        if self.ui.layout then
+            auxUi.deepDestroy(self.ui)
+            self.ui:update()
+        end
+    end
+
+    return window
 end
 
 -- Templates
@@ -678,6 +769,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         ambient.playSound("menu click")
         
         --Normal arrow behavior
+        list.column_elements[list.sort_column*2].template = I.MWUI.templates.borders
         list.sort_column = index
         list.column_elements[index*2].template = I.MWUI.templates.bordersThick
         list.sort_direction =( list.sort_direction + 1) % 2 -- toggle direction
@@ -724,37 +816,29 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
         self.ui = {
             name = self.name .. "_list",
-            template = I.MWUI.templates.padding,
+            type = UI.TYPE.Flex,
             props = {
+                horizontal = false,
+                arrange = list.basic_props.alignment,
+                align = list.basic_props.alignment,
+                size = v2(0,20) + self.size,
+                relativePosition = list.basic_props.relativePosition
             },
             content = UI.content {
+                list.name_element,
+                list.header,
                 {
-                    name = "flex",
-                    type = UI.TYPE.Flex,
+                    name = "border",
+                    template = list.basic_props.border,
                     props = {
-                        horizontal = false,
-                        arrange = list.basic_props.alignment,
-                        align = list.basic_props.alignment,
-                        size = v2(0,20) + self.size,
-                        relativePosition = list.basic_props.relativePosition
+                        size = self.size,
                     },
                     content = UI.content {
-                        list.name_element,
-                        list.header,
-                        {
-                            name = "border",
-                            template = list.basic_props.border,
-                            props = {
-                                size = self.size,
-                            },
-                            content = UI.content {
-                                self.items_container
-                            }
-                        }
+                        self.items_container
                     }
                 }
             }
-        }        
+        }
         return self.ui
     end
 

@@ -21,6 +21,7 @@
 - Clean up Skill and attribute select menus
 - Clean up effects list (not wrapping/cutting off text)
 
+## Removed/Useless GMST's
 
 ## Known Issues
  - Opening the enchantment menu immediately upon starting causes the menus to not load all items, souls, and magic effects
