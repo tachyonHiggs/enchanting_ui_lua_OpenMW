@@ -67,7 +67,7 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
                 path = icon
             }),
             alpha = 1,
-            size = v2(elements.items_list_sizes[1],50),
+            size = v2(elements.items_list_sizes[1],elements.items_list_sizes[1]),
         },
     }
 
@@ -175,10 +175,14 @@ function items_ui.make_enchantable_items_list()
 end
 
 function items_ui.show_item_list()
-    
-    elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, {column_names=elements.items_list_column_names, column_widths=elements.items_list_sizes, enable_column_sortings=elements.items_list_sorting})
 
     ambient.playSound('menu click')
+
+    -- Create list of items
+    local column_header = {column_names=elements.items_list_column_names, column_widths=elements.items_list_sizes, enable_column_sortings=elements.items_list_sorting}
+    elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, column_header)
+
+    -- Change and update UI
     elements.disable_ui(elements.root)
     elements.items_root = UI.create{
         name = "item_list",

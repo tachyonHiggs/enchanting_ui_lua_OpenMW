@@ -120,8 +120,7 @@ templates.window.new = function(name, type, template, properties, content)
     window.template = template or I.MWUI.templates.boxSolid
     window.properties = properties or {}
     window.properties.visible = window.properties.visible or true
-    window.created = false
-    print(content[1])
+    window.created = false -- Used to communicate to external scripts
     window.content = content or {}
 
     function window:show()
@@ -170,7 +169,6 @@ templates.window.new = function(name, type, template, properties, content)
     function window:update()
         print("window:update")
         if self.ui.layout then
-            print("uDPATING")
             self.ui:update()
         end
     end
@@ -224,10 +222,15 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y)
 
     function button:show()
         self.ui.props.visible = true
+        self.ui.content = UI.content {
+            templates.padding(self.size_x, self.size_y),
+            button.name_element,
+        }
     end
 
     function button:hide()
         self.ui.props.visible = false
+        self.ui.content = UI.content {}
     end
 
     function button:set_text(text)
@@ -241,7 +244,6 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y)
             type = UI.TYPE.Container,
             template = I.MWUI.templates.bordersThick,
             props = {
-                size = v2(self.size_x, self.size_y),
                 visible = true,
             },
             content = UI.content {
@@ -266,6 +268,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
     text_input.name = name
     text_input.text = ""
     text_input.text_length = text_length
+    text_input.update_ui = update_ui or nil
 
     text_input.input = {
         name = name .. "_input",
@@ -277,12 +280,12 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
             size = v2(text_length, 20),
         },
         events = {
-            textChanged = async:callback(function(...)
+            textChanged = async:callback(function(text)
                 -- Keep the stored text in sync
                 text_input.text = text_input.input.props.text
-
+                print("textChanged event: ", text)
                 if on_text_changed_fnc then
-                    return on_text_changed_fnc(...)
+                    on_text_changed_fnc(text)
                 end
             end)
         }
@@ -527,6 +530,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
     local list = {}
 
+    list.padding = 10
+
     -- Assign default basic props if not assigned
     list.basic_props = basic_props
     if list.basic_props == nil or list.basic_props == {} then
@@ -534,11 +539,6 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         list.basic_props.alignment = UI.ALIGNMENT.Start
         list.basic_props.relativePosition = v2(0.5, 0.5)
         list.basic_props.border = I.MWUI.templates.boxSolid
-    end
-
-    list.enable_search_bar = enable_search_bar
-    if list.enable_search_bar then
-        -- TODO: create search bar
     end
 
     list.name = name
@@ -549,6 +549,9 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             -- print(item, " ", index)
             item.userData = item.userData or {}
             item.userData.index = index
+        end
+        if list.update_target then
+            list.update_target()
         end
     end
 
@@ -572,10 +575,6 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
     list.header = {}
     list.has_header = false
-    list.default_sort_column = 2
-    list.default_sort_direction = list.sort_descending
-    list.sort_column = list.default_sort_column
-    list.sort_direction = list.default_sort_direction
 
     list.name_element = {
         name = "name",
@@ -592,44 +591,43 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         list.name_element = {}
     end
     
-
     list.column_elements = {}
+    list.search_text_input = {}
+    
     if header_info then
 
-        list.has_header = true
+        -- Header constants
+        list.sort_btn_size = 20
+        function list.get_sort_btn_index(column_index)
+            return column_index*3 - 1 -- Gets the 
+        end
 
+        -- Verify inputs are valid
         if #header_info.column_names ~= #header_info.column_widths and #header_info.column_names ~= #header_info.enable_column_sortings then
             print("Error: incorrectly sized column names and column sizes")
             return
         end
 
+        -- Setup default values
+        list.has_header = true
+        list.default_sort_column = 1
+        for i = 1, #header_info.enable_column_sortings do
+            if header_info.enable_column_sortings[i] then
+                print("setting the ", i, " as the default column to sort")
+                list.default_sort_column = i
+                break
+            end
+        end
+        list.default_sort_direction = list.sort_descending
+        list.sort_column = list.default_sort_column
+        list.sort_direction = list.default_sort_direction
+
+        -- Create each column header and sort button if applicable
         for index, column_name in ipairs(header_info.column_names) do
 
             print(column_name)
             local column_width = header_info.column_widths[index]
             local column_sort = {}
-
-            if header_info.enable_column_sortings[index] then
-                print("allow column sorting: ", header_info.enable_column_sortings[index])
-                column_width = column_width - 20 -- Make room for sorting btn
-
-                column_sort = {
-                    name = "direction"..index,
-                    type = UI.TYPE.Image,
-                    template = I.MWUI.templates.borders,
-                    props = {
-                        resource = list.sort_descending_texture,
-                        alpha = 1,
-                        size = v2(20,20),
-                    },
-                    events = {
-                        mouseClick = async:callback(function ()
-                            list:on_sort_clicked(index)
-                        end),
-                    }
-                }
-                
-            end
 
             local column_element = {
                 name = "name"..index,
@@ -638,16 +636,63 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                 props = {
                     text = column_name,
                     textSize = 20,
-                    size = v2(column_width,20),
+                    size = v2(column_width - list.sort_btn_size, 20),
                     autoSize = false
                 },
             }
-
-            -- TODO: add padding
-
             table.insert(list.column_elements, column_element)
+
+            if header_info.enable_column_sortings[index] then
+                print("allow column sorting: ", header_info.enable_column_sortings[index])
+                column_sort = {
+                    name = "direction"..index,
+                    type = UI.TYPE.Image,
+                    template = I.MWUI.templates.borders,
+                    props = {
+                        resource = list.sort_descending_texture,
+                        alpha = 1,
+                        size = v2(list.sort_btn_size,list.sort_btn_size),
+                    },
+                    events = {
+                        mouseClick = async:callback(function ()
+                            list:on_sort_clicked(index)
+                        end),
+                    }
+                }
+            else
+                column_sort = templates.padding(list.sort_btn_size,list.sort_btn_size)
+            end
+
             table.insert(list.column_elements, column_sort)
-        end 
+            table.insert(list.column_elements, templates.padding(list.padding, list.padding))
+        end
+        
+        if enable_search_bar then
+            print("Adding search bar")
+
+            local function on_search_text_changed(text)
+                print("Text changed on search: ", text)
+                list.text_to_search = text
+            
+                -- Search all strings in column 2 for now
+                for index, item in ipairs(list.items) do
+                    if text then
+                        if item.userData.info[2]:lower():find(text:lower(), 1, true) then
+                            print("found: ", text)
+                            list:show_item(index)
+                        else 
+                            list:hide_item(index)
+                        end
+                    else
+                        list:show_item(index)
+                    end
+                end
+            end
+
+            -- TODO: search icon or word?
+            list.search_text_input = templates.text_input.new("Search", header_info.column_widths[#header_info.column_widths], on_search_text_changed, list.update_target)
+            table.insert(list.column_elements, list.search_text_input:create())
+        end
 
         list.header = {
             name = "column_header",
@@ -720,8 +765,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             return
         end
         -- Reset UI elements
-        list.column_elements[list.sort_column*2].template = I.MWUI.templates.borders
-        list.column_elements[list.sort_column*2].props.resource = list.sort_descending_texture
+        list.column_elements[list.get_sort_btn_index(list.sort_column)].template = I.MWUI.templates.borders
+        list.column_elements[list.get_sort_btn_index(list.sort_column)].props.resource = list.sort_descending_texture
 
         list.sort_column = list.default_sort_column
         list.sort_direction = list.default_sort_direction
@@ -736,7 +781,6 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         })
 
         list:reset_sort()
-        list:update_item_indices()
     end
 
     function list:sort_items()
@@ -769,16 +813,16 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         ambient.playSound("menu click")
         
         --Normal arrow behavior
-        list.column_elements[list.sort_column*2].template = I.MWUI.templates.borders
+        list.column_elements[list.get_sort_btn_index(list.sort_column)].template = I.MWUI.templates.borders
         list.sort_column = index
-        list.column_elements[index*2].template = I.MWUI.templates.bordersThick
+        list.column_elements[list.get_sort_btn_index(list.sort_column)].template = I.MWUI.templates.bordersThick
         list.sort_direction =( list.sort_direction + 1) % 2 -- toggle direction
 
         -- Update sort UI
         if list.sort_direction == list.sort_ascending then
-            list.column_elements[index*2].props.resource = list.sort_ascending_texture
+            list.column_elements[list.get_sort_btn_index(list.sort_column)].props.resource = list.sort_ascending_texture
         else
-            list.column_elements[index*2].props.resource = list.sort_descending_texture
+            list.column_elements[list.get_sort_btn_index(list.sort_column)].props.resource = list.sort_descending_texture
         end
 
         -- TBH my superior system where you first have to click on a arrow to make it active and then it sorts 
@@ -804,6 +848,38 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             list.update_target()
         end
         
+    end
+
+    function list:hide_item(index)
+        print("list:hide_item at index: ", index)
+        
+        self.items[index].props.visible = false 
+        self.items[index].props.autoSize = false 
+        self.items[index].props.size = v2(0,0)
+
+        self.items_container.content = UI.content({
+            table.unpack(self.items)
+        })
+        if list.update_target then
+            list.update_target()
+        end
+    end
+
+    function list:show_item(index)
+        print("list:show_item at index: ", index)
+        self.items[index].props.visible = true 
+        self.items[index].props.autoSize = true 
+
+        self.items_container.content = UI.content({
+            table.unpack(self.items)
+        })
+        if list.update_target then
+            list.update_target()
+        end
+    end
+
+    function list:set_input_text() 
+        list.search_text_input:set_text(list.text_to_search or "")
     end
 
     function list:clear()
@@ -1018,8 +1094,13 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
         local value = self.min + position*(self.max - self.min)/self.background_bar_length
         print(value)
 
+        -- Check value is in bounds
         value = math.floor(value + 0.5)
-        value = math.max(value, self.max)
+        if value > self.max then
+            value = self.max
+        elseif value < self.min then
+            value = self.min
+        end
 
         -- Update slider to new position
         self:set_value(value)
@@ -1113,6 +1194,8 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     function slider:hide() 
         print("hiding: ", self.text)
         self.ui.props.visible = false
+        self.ui.props.autoSize = false
+        self.ui.props.size = v2(0,0)
 
         if self.update_target then
             self.update_target()
@@ -1122,6 +1205,7 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     function slider:show() 
         print("show: ", self.text)
         self.ui.props.visible = true
+        self.ui.props.autoSize = true
 
         if self.update_target then
             self.update_target()

@@ -16,7 +16,7 @@ local enchanter = require("scripts.enchanting_ui.enchanter")
 
 local elements = {}
 elements.text_size = 20
-elements.padding_size = 20
+elements.padding_size = 10
 
 -- Inputs
 elements.name_input = templates.text_input.new("Name:", 200, function(text) enchanter.name = text end, function() elements.root:update() end)
@@ -54,10 +54,6 @@ elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMEN
 elements.is_vendor = false
 
 -- lists
-elements.items_list = {}
-elements.souls_list = {}
-elements.magic_effects_list = {}
-elements.effects = {}
 
 elements.root = {}
 elements.enable_ui = function(element)
@@ -79,6 +75,11 @@ elements.disable_ui = function(element)
     element:update()
 end
 
+elements.items_list = {}
+elements.souls_list = {}
+elements.magic_effects_list = {}
+elements.effects = {}
+
 -- Root UI constants
 elements.root_size = {800, 600}
 
@@ -97,6 +98,9 @@ elements.footer_size = {800, 80}
 
 -- Add Effect UI
 elements.add_effects_root = {}
+elements.add_effects_list_column_names = {"", "Name", "School"}
+elements.add_effects_list_sizes = {25, 250, 100, 120}
+elements.add_effects_list_sorting = {false, true, true}
 
 -- Effect UI constants
 elements.effects_root = {}

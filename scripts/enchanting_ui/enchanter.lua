@@ -230,8 +230,10 @@ enchanter.get_known_magic_effects = function()
     for _, spell in ipairs(spells) do
         if spell.type == core.magic.SPELL_TYPE.Spell then
             for _, effect in ipairs(spell.effects) do
-                known_magic_effects[effect.effect.id] = effect.effect.name
-                print(effect.effect.name)
+                if effect.effect.allowsEnchanting then
+                    known_magic_effects[effect.effect.id] = effect.effect.name
+                    print(effect.effect.name)
+                end
             end
         end
     end

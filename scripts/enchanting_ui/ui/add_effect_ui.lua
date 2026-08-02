@@ -40,8 +40,24 @@ end
 
 local function create_magic_effect_item(id, name)
     -- TODO: add more like magic school info
-    return 
-    {
+    local record = core.magic.effects.records[id]
+    local icon = record.icon
+    local school = record.school
+
+    local icon_element = {
+        name = "icon",
+        type = UI.TYPE.Image,
+        template = I.MWUI.templates.borders,
+        props = {
+            resource = UI.texture({
+                path = icon
+            }),
+            alpha = 1,
+            size = v2(elements.add_effects_list_sizes[1],elements.add_effects_list_sizes[1]),
+        },
+    }
+
+    local name_element = {
         name = id,
         type = UI.TYPE.Text,
         template = I.MWUI.templates.textNormal,
@@ -49,17 +65,49 @@ local function create_magic_effect_item(id, name)
             text = name,
             textSize = elements.text_size,
             autoSize = false,
-            size = v2(elements.root_size[1], elements.text_size + elements.mc_list_gap)
+            size = v2(elements.add_effects_list_sizes[2], elements.text_size)
+        },
+    }
+
+    local school_element = {
+        name = "school",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = school:sub(1, 1):upper() .. school:sub(2),
+            textSize = elements.text_size,
+            autoSize = false,
+            size = v2(elements.add_effects_list_sizes[3], elements.text_size)
+        },
+    }
+
+    return 
+    {
+        name = id,
+        type = UI.TYPE.Flex,
+        props = {
+            horizontal = true,
+            arrange = UI.ALIGNMENT.Center,
+            align = UI.ALIGNMENT.Start,
         },
         userData = {
-            index = 1
+            index = 1,
+            info = {icon, name, school}
+        },
+        content = UI.content {
+            icon_element,
+            templates.padding(elements.padding_size, elements.padding_size),
+            name_element,
+            templates.padding(elements.padding_size, elements.padding_size),
+            school_element,
         },
         events = {
             mouseClick = async:callback(function()
                 add_effect_ui.on_magic_effect_clicked(id)
             end)
-        }
+        },
     }
+
 end
 
 function add_effect_ui.make_magic_effects_list()
@@ -82,8 +130,11 @@ function add_effect_ui.show_add_effect_list()
 
     ambient.playSound('menu click')
 
-    elements.magic_effects_list = templates.list.new("Magic Effects", v2(elements.root_size[1], elements.root_size[2]), add_effect_ui.update, add_effect_ui.make_magic_effects_list)
+    -- Create list
+    local column_sorting_names = {column_names=elements.add_effects_list_column_names, column_widths=elements.add_effects_list_sizes, enable_column_sortings=elements.add_effects_list_sorting}
+    elements.magic_effects_list = templates.list.new("Magic Effects", v2(elements.root_size[1], elements.root_size[2]), add_effect_ui.update, add_effect_ui.make_magic_effects_list, column_sorting_names, nil, true)
     
+    -- Change and update UI
     elements.disable_ui(elements.root)
     local props = {
         relativeSize = v2(1, 1),
@@ -98,6 +149,7 @@ end
 function add_effect_ui.update()
     if elements.add_effects_root.created then
         elements.add_effects_root:update()
+        elements.magic_effects_list:set_input_text()
     end
 end
 
