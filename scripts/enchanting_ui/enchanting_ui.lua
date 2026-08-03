@@ -12,14 +12,12 @@ local types = require('openmw.types')
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
-local effect_ui = require("scripts.enchanting_ui.ui.effect_ui")
 local add_effect_ui = require("scripts.enchanting_ui.ui.add_effect_ui")
-local souls_ui = require("scripts.enchanting_ui.ui.souls_ui")
 local items_ui = require("scripts.enchanting_ui.ui.items_ui")
+local souls_ui = require("scripts.enchanting_ui.ui.souls_ui")
 
 -- TODO: tooltips hovering
 
---
 local enchanting_ui = {}
 local header = {element = {}}
 local footer = {element = {}}
@@ -45,49 +43,48 @@ enchanting_ui.create_ui = function()
 
     local v2_size = v2(elements.root_size[1], elements.root_size[2])
 
-    elements.root = UI.create{
-        name = "root",
-        layer = "Windows",
-        type = UI.TYPE.Widget,
-        template = nil,
+    -- elements.root = UI.create{
+    --     name = "root",
+    --     layer = "Windows",
+    --     type = UI.TYPE.Widget,
+    --     template = nil,
+    --     props = {
+    --         size = v2_size,
+    --         relativePosition = v2(0.5, 0.5),
+    --         anchor = v2(0.5, 0.5),
+    --     },
+    --     content = UI.content{ 
+    --         -- templates.make_border(v2_size, 0.75),
+            
+    --     }
+    -- }
+    local props = {
+        size = v2_size,
+        relativePosition = v2(0.5, 0.5),
+        anchor = v2(0.5, 0.5),
+    }
+    local content = {
+        name = "root_flex",
+        type = UI.TYPE.Flex,
         props = {
+            horizontal = false,
+            arrange = UI.ALIGNMENT.Start,
+            align = UI.ALIGNMENT.Start,
+            autoSize = false,
             size = v2_size,
-            relativePosition = v2(0.5, 0.5),
-            anchor = v2(0.5, 0.5),
         },
-        content = UI.content{ 
-            templates.make_border(v2_size, 0.75),
-            {
-                name = "root_padding",
-                type = UI.TYPE.Container, -- Here for disabling the UI, since works with this template
-                template = I.MWUI.templates.padding,
-                props = {
-                    -- anchor = v2(0.5, 0.5),
-                    -- relativePosition = v2(0.5, 0.5),
-                    size = v2_size,
-                },
-                content = UI.content { 
-                    {
-                        name = "flex_V1",
-                        type = UI.TYPE.Flex,
-                        props = {
-                            horizontal = false,
-                            arrange = UI.ALIGNMENT.Start,
-                            align = UI.ALIGNMENT.Start,
-                        },
-                        content = UI.content {
-                            title,
-                            templates.padding(0, 1),
-                            header,
-                            main_content,
-                            footer,
-                        }
-                    }
-                }
-            }
+        content = UI.content {
+            title,
+            templates.padding(0, 1),
+            header,
+            main_content,
+            footer,
         }
     }
-    
+
+    elements.root = templates.window.new("root_window", UI.TYPE.Container, I.MWUI.templates.boxSolid, props, {content})
+    elements.root:create()
+
     print("Created UI")
 end
 
@@ -111,6 +108,8 @@ local function toggle_cast_type()
 end
 
 -- header
+elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, items_ui.show_item_list)
+elements.soul_input = templates.text_image.new("Soul:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, souls_ui.show_soul_list)
 
 local function inputs()
     print("inputs") 
@@ -136,7 +135,6 @@ local function add_effect()
 end
 local add_effect_btn = templates.button.new("Add Effect", add_effect, 105, 30)
 
--- elements.magic_effects = templates.list.new("Magic Effects", v2(elements.mc_magic_effects_size[1],elements.mc_magic_effects_size[2]), nil, effect_ui.make_magic_effects_list)
 elements.effects = templates.list.new("Effects", v2(elements.mc_effects_size[1],elements.mc_effects_size[2]), nil, function() end)
 main_content = templates.flex({add_effect_btn:create(), elements.effects:create()}, "content_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.mc_size[1], elements.mc_size[2]))
 
@@ -222,21 +220,18 @@ enchanting_ui.destroy = function()
     
     enchanting_ui.hide()
 
-    auxUi.deepDestroy(elements.root)
+    elements.root:destroy()
     if elements.add_effects_root.created then
         elements.add_effects_root:destroy()
     end
-    if elements.effects_root.layout then
-        auxUi.deepDestroy(elements.effects_root)
-        elements.effects_root:update()
+    if elements.effects_root.created then
+        elements.effects_root:destroy()
     end
-    if elements.items_root.layout then
-        auxUi.deepDestroy(elements.items_root)
-        elements.items_root:update()
+    if elements.items_root.created then
+        elements.items_root:destroy()
     end
-    if elements.souls_root.layout then
-        auxUi.deepDestroy(elements.souls_root)
-        elements.souls_root:update()
+    if elements.souls_root.created then
+        elements.souls_root:destroy()
     end
     
     elements.root:update()

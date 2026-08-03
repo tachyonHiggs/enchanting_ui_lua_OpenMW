@@ -32,11 +32,9 @@ local function on_soul_clicked(id, object, value, icon)
     print("at icon: ", icon)
     print("with a soul value of: ", value)
     elements.soul_input:set_image(icon)
-    elements.enable_ui(elements.root)
+    elements.root:show()
 
-    auxUi.deepDestroy(elements.souls_root)
-    elements.souls_root:update()
-
+    elements.souls_root:destroy()
 end
 
 local function create_soul(id, object, value, icon, name, soul_name)
@@ -151,30 +149,23 @@ function souls_ui.show_soul_list()
     elements.souls_list = templates.list.new("Souls", v2(elements.root_size[1], elements.root_size[2]), souls_ui.update, souls_ui.make_souls_list, {column_names=elements.souls_list_column_names, column_widths=elements.souls_list_sizes, enable_column_sortings=elements.souls_list_sorting})
 
     ambient.playSound('menu click')
-    elements.disable_ui(elements.root)
-    elements.souls_root = UI.create{
-        name = "souls_list",
-        layer = "Windows",
-        template = I.MWUI.templates.boxSolid,
-        props = {
-            relativeSize = v2(1, 1),
-            relativePosition = v2(0.5, 0.5),
-            anchor = v2(0.5, 0.5),
-        },
-        content = UI.content {
-            elements.souls_list:create()
-        }
-    }
+    elements.root:hide()
 
-    elements.souls_root:update()
+    local props = {
+        relativeSize = v2(1, 1),
+        relativePosition = v2(0.5, 0.5),
+        anchor = v2(0.5, 0.5),
+        visible = true,
+    }
+    elements.souls_root = templates.window.new("soul_window", UI.TYPE.Container, I.MWUI.templates.boxSolid, props, {elements.souls_list:create()})
+    elements.souls_root:create()
 end
 
 function souls_ui.update()
-    if elements.souls_root.layout then
+    if elements.souls_root.created then
         elements.souls_root:update()
     end
 end
 
-elements.soul_input = templates.text_image.new("Soul:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, souls_ui.show_soul_list)
 
 return souls_ui

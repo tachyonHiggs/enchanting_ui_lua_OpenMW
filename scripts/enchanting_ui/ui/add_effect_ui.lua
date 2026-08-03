@@ -32,9 +32,16 @@ add_effect_ui.on_magic_effect_clicked = function(id)
     enchanter.effect_to_modify = false
 
     print("CREATING MAGIC EFFECT ADD UI")
-    elements.effects_root = UI.create(effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add):create())
-    elements.effects_root:update()
 
+    local props = {
+        relativeSize = v2(1, 1),
+        relativePosition = v2(0.5, 0.5),
+        anchor = v2(0.5, 0.5),
+        visible = true,
+    }
+    local effect_ui_add = effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add)
+    elements.effects_root = templates.window.new("effects_window", UI.TYPE.Container, I.MWUI.templates.boxSolid, props, {effect_ui_add:create()})
+    elements.effects_root:create()
     elements.add_effects_root:destroy()
 end
 
@@ -132,10 +139,10 @@ function add_effect_ui.show_add_effect_list()
 
     -- Create list
     local column_sorting_names = {column_names=elements.add_effects_list_column_names, column_widths=elements.add_effects_list_sizes, enable_column_sortings=elements.add_effects_list_sorting}
-    elements.magic_effects_list = templates.list.new("Magic Effects", v2(elements.root_size[1], elements.root_size[2]), add_effect_ui.update, add_effect_ui.make_magic_effects_list, column_sorting_names, nil, true)
+    elements.magic_effects_list = templates.list.new("Magic Effects", v2(elements.add_effects_size[1], elements.add_effects_size[2]), add_effect_ui.update, add_effect_ui.make_magic_effects_list, column_sorting_names, nil, true)
     
     -- Change and update UI
-    elements.disable_ui(elements.root)
+    elements.root:hide()
     local props = {
         relativeSize = v2(1, 1),
         relativePosition = v2(0.5, 0.5),

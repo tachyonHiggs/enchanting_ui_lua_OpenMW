@@ -6,13 +6,10 @@
 - Add openmw enchant multiple projectiles at once: https://openmw.readthedocs.io/en/latest/reference/modding/settings/game.html#projectiles-enchant-multiplier
 - Add soul gem used to start player enchanting to fil the soul gem spot
 - Add tool tips
-- Add consistent sound effects
-- Add search ability to list template
 
 ### Expanded Features
 - Potentially add the ability use vendor's soul gems while enchanting
 - Allow bartering for vendor enchanted items services
-
 
 ### Development
 - Add descriptions, params, fields etc to functions and files

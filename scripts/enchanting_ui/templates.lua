@@ -124,19 +124,19 @@ templates.window.new = function(name, type, template, properties, content)
     window.content = content or {}
 
     function window:show()
-        if self.ui.layout.type == UI.TYPE.Widget then
+        if self.type == UI.TYPE.Widget then
             self.ui.layout.props.visible = true
-        elseif self.ui.layout.type == UI.TYPE.Container then
-            self.ui.template = self.template
+        elseif self.type == UI.TYPE.Container then
+            self.ui.layout.template = self.template
         end
         self:update()
     end
 
     function window:hide()
-        if self.ui.layout.type == UI.TYPE.Widget then
+        if self.type == UI.TYPE.Widget then
             self.ui.layout.props.visible = false
-        elseif self.ui.layout.type == UI.TYPE.Container then
-            self.ui.template = I.MWUI.templates.disabled
+        elseif self.type == UI.TYPE.Container then
+            self.ui.layout.template = I.MWUI.templates.disabled
         end
         self:update()
     end
@@ -150,16 +150,13 @@ templates.window.new = function(name, type, template, properties, content)
         print("templates.window.create: ", self.name)
         window.created = true
 
-        print(self.content[1])
-
         self.ui = UI.create{
-            name = "souls_list",
+            name = self.name .. "_window",
             layer = "Windows",
             type = self.type,
             template = self.template,
             props = properties,
             content = UI.content{
-                templates.padding(nil, nil, 1, 1),
                 table.unpack(self.content)
             }
         }

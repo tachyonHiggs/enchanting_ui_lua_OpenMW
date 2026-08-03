@@ -56,24 +56,6 @@ elements.is_vendor = false
 -- lists
 
 elements.root = {}
-elements.enable_ui = function(element)
-    if element.layout.type == UI.TYPE.Widget then
-        element.layout.props.visible = true
-    elseif element.layout.type == UI.TYPE.Container then
-        element.layout.content[2].template = I.MWUI.templates.padding
-    end
-    
-    element:update()
-end
-
-elements.disable_ui = function(element)
-    if element.layout.type == UI.TYPE.Widget then
-        element.layout.props.visible = false
-    elseif element.layout.type == UI.TYPE.Container then
-        element.layout.content[2].template = I.MWUI.templates.disabled
-    end
-    element:update()
-end
 
 elements.items_list = {}
 elements.souls_list = {}
@@ -98,6 +80,7 @@ elements.footer_size = {800, 80}
 
 -- Add Effect UI
 elements.add_effects_root = {}
+elements.add_effects_size = {620, 600}
 elements.add_effects_list_column_names = {"", "Name", "School"}
 elements.add_effects_list_sizes = {25, 250, 100, 120}
 elements.add_effects_list_sorting = {false, true, true}
@@ -111,13 +94,13 @@ elements.effect_icon_size = v2(20,20)
 
 -- Souls UI constants
 elements.souls_root = {}
-elements.souls_list_column_names = {"Icon", "Name", "Charge", "Soul Name", "Count"}
+elements.souls_list_column_names = {"", "Name", "Charge", "Soul Name", "Count"}
 elements.souls_list_sizes = {50, 250, 80, 200, 80}
 elements.souls_list_sorting = {false, true, true, true, true}
 
 -- Items UI constants
 elements.items_root = {}
-elements.items_list_column_names = {"Icon", "Name", "Enchant Pts", "Type", "Count"}
+elements.items_list_column_names = {"", "Name", "Enchant Pts", "Type", "Count"}
 elements.items_list_sizes = {50, 250, 120, 100, 80}
 elements.items_list_sorting = {false, true, true, true, true}
 

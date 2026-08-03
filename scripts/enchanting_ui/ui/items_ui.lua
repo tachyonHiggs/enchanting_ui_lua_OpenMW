@@ -48,11 +48,9 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
 
     elements.effects:clear()
     
-    elements.enable_ui(elements.root)
-    elements.root:update()
+    elements.root:show()
 
-    auxUi.deepDestroy(elements.items_root)
-    elements.items_root:update()
+    elements.items_root:destroy()
 end
 
 local function create_enchantable_item(id, object, icon, type, name, enchant_pts)
@@ -183,29 +181,21 @@ function items_ui.show_item_list()
     elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, column_header)
 
     -- Change and update UI
-    elements.disable_ui(elements.root)
-    elements.items_root = UI.create{
-        name = "item_list",
-        layer = "Windows",
-        template = I.MWUI.templates.boxSolid,
-        props = {
-            relativeSize = v2(1, 1),
-            relativePosition = v2(0.5, 0.5),
-            anchor = v2(0.5, 0.5),
-        },
-        content = UI.content {
-            elements.items_list:create()
-        }
+    elements.root:hide()
+    local props = {
+        relativeSize = v2(1, 1),
+        relativePosition = v2(0.5, 0.5),
+        anchor = v2(0.5, 0.5),
+        visible = true,
     }
-    elements.items_root:update()
+    elements.items_root = templates.window.new("item_list", UI.TYPE.Container, I.MWUI.templates.boxSolid, props, {elements.items_list:create()})
+    elements.items_root:create()
 end
 
 function items_ui.update()
-    if elements.items_root.layout then
+    if elements.items_root.created then
         elements.items_root:update()
     end
 end
-
-elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, items_ui.show_item_list)
 
 return items_ui

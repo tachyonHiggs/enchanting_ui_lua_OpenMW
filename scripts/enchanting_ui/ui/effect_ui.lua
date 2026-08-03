@@ -33,10 +33,16 @@ effect_ui.on_effect_clicked = function(index)
     print("CREATING EFFECT ADD UI")
     print(index)
     print(enchanter.effect_to_add.id)
-    effect_ui.effects_ui = effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add)
-    elements.effects_root = UI.create(effect_ui.effects_ui:create())
-    elements.effects_root:update()
-    elements.disable_ui(elements.root)
+    local props = {
+        relativeSize = v2(1, 1),
+        relativePosition = v2(0.5, 0.5),
+        anchor = v2(0.5, 0.5),
+        visible = true,
+    }
+    elements.effects_root = templates.window.new("effects_window", UI.TYPE.Container, I.MWUI.templates.boxSolid, props, {effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add):create()})
+    elements.effects_root:create()
+
+    elements.root:hide()
 
 end
 
@@ -197,6 +203,7 @@ select_list_ui.new = function(name, records, on_click_fnc)
     local list_element = templates.list.new("", v2(elements.effects_size[1], elements.effects_size[2]), nil, generate_list_elements, nil, list_basic_props)
     
     function instance:create()
+        -- TODO: replace this with template.window
         print("select_list_ui.create")
         self.ui = {
             name = name.."_element",
@@ -249,7 +256,7 @@ effect_ui.new = function(modify, effect_to_add)
         instance.constant_effect_constant_magnitude = true
     end
 
-    local function show_valid_effect_sliders(update_ui)
+    local function show_valid_effect_sliders()
 
         print("show_valid_effect_sliders")
 
@@ -283,9 +290,10 @@ effect_ui.new = function(modify, effect_to_add)
         enchanter.enchantment.has_area = enchanter.effect_to_add.range ~= core.magic.RANGE.Self and force_no_area==false
         set_visible(instance.area, (enchanter.enchantment.has_area))
 
-        if update_ui then
+        if elements.effects_root.created then
             elements.effects_root:update()
         end
+
     end
 
     local function update_effect_to_add_cost()
@@ -297,8 +305,7 @@ effect_ui.new = function(modify, effect_to_add)
         instance.cost:set_text(tostring(cost))
         print("effect cost: ", cost)
 
-        -- Only udpate if valid UI
-        if elements.effects_root.layout then
+        if elements.effects_root.created then
             elements.effects_root:update()
         end
     end
@@ -391,9 +398,9 @@ effect_ui.new = function(modify, effect_to_add)
             elements.set_price()
         end
 
-        auxUi.deepDestroy(elements.effects_root)
-        elements.effects_root:update()
-        elements.enable_ui(elements.root)
+        elements.effects_root:destroy()
+
+        elements.root:show()
     end
 
     local function cancel_magic_effect()
@@ -401,9 +408,9 @@ effect_ui.new = function(modify, effect_to_add)
 
         enchanter.reset_effect_to_add()
         
-        auxUi.deepDestroy(elements.effects_root)
-        elements.effects_root:update()
-        elements.enable_ui(elements.root)
+        elements.effects_root:destroy()
+        
+        elements.root:show()
     end
 
     local function delete_effect()
@@ -426,17 +433,16 @@ effect_ui.new = function(modify, effect_to_add)
         elements.set_stats_enchantment()
         elements.set_stats_charge()
 
-        auxUi.deepDestroy(elements.effects_root)
-        elements.effects_root:update()
-        elements.enable_ui(elements.root)
+        elements.effects_root:destroy()
+        
+        elements.root:show()
     end
 
     local function on_skill_select_click()
         print("on_skill_select_click")
 
         -- Disable previous UI
-        elements.disable_ui(elements.effects_root)
-        elements.effects_root:update()
+        elements.effects_root:destroy()
 
         function instance.set_skill(skill) 
 
@@ -452,8 +458,7 @@ effect_ui.new = function(modify, effect_to_add)
             instance.skill:set_text(skill)
 
             -- enable effect UI
-            elements.enable_ui(elements.effects_root)
-            elements.effects_root:update()
+            elements.effects_root:show()
         end
 
         -- New UI popup
@@ -463,8 +468,7 @@ effect_ui.new = function(modify, effect_to_add)
     end
     local function on_attribute_select_click()
         -- Disable previous UI
-        elements.disable_ui(elements.effects_root)
-        elements.effects_root:update()
+            elements.effects_root:hide()
 
         function instance.set_attribute(attribute) 
             print("effect_ui.set_attribute: ", attribute)
@@ -481,8 +485,7 @@ effect_ui.new = function(modify, effect_to_add)
             instance.attribute:set_text(attribute)
 
             -- enable effect UI
-            elements.enable_ui(elements.effects_root)
-            elements.effects_root:update()
+            elements.effects_root:show()
         end
 
         -- New UI popup
@@ -593,7 +596,6 @@ effect_ui.new = function(modify, effect_to_add)
                 },
                 templates.padding(100, 0),
                 instance.range:create(),
-                -- TODO: add cost
                 templates.padding(100, 0),
                 instance.cost:create(),
             }
@@ -605,21 +607,7 @@ effect_ui.new = function(modify, effect_to_add)
         end
 
         local magic_effect_to_add_elements = {effect_icon_element, range_element, instance.skill:create(), instance.attribute:create(), instance.magnitude:create(), instance.magnitude_max:create(), instance.duration:create(), instance.area:create(), templates.button.new("Cancel", cancel_magic_effect, 100, 30):create(), templates.button.new("OK", ok_magic_effect, 100, 30):create(), delete_btn}
-        instance.ui = {
-            name = "effect_add",
-            layer = "Windows",
-            type = UI.TYPE.Widget,
-            props = {
-                relativeSize = v2(1, 1),
-                relativePosition = v2(0.5, 0.5),
-                anchor = v2(0.5, 0.5),
-                visible = true,
-            },
-            content = UI.content {
-                templates.make_border(v2(elements.effects_size[1]+20, elements.effects_size[2]+20)),
-                templates.flex(magic_effect_to_add_elements, "magic_effect_add_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 0, 5, v2(elements.effects_size[1], elements.effects_size[2]), v2(0.5, 0.5), v2(0.5, 0.5)),
-            }
-        }
+        instance.ui = templates.flex(magic_effect_to_add_elements, "magic_effect_add_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 0, 5, v2(elements.effects_size[1], elements.effects_size[2]), v2(0,0), v2(0, 0))
 
         update_effect_to_add_cost()
         show_valid_effect_sliders()
