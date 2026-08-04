@@ -67,7 +67,7 @@ templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y,
         size = v2(1,1)
     end
     if not anchor then
-        anchor = v2(0.5, 0.5)
+        anchor = v2(0, 0)
     end
     if not relativePosition then
         relativePosition = v2(0.5, 0.5)
@@ -124,9 +124,9 @@ templates.window.new = function(name, type, template, properties, content)
     window.content = content or {}
 
     function window:show()
-        if self.type == UI.TYPE.Widget then
+        if self.type == UI.TYPE.Widget and self.created  then
             self.ui.layout.props.visible = true
-        elseif self.type == UI.TYPE.Container then
+        elseif self.type == UI.TYPE.Container and self.created then
             self.ui.layout.template = self.template
         end
         self:update()

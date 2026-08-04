@@ -146,6 +146,7 @@ local select_list_ui = {}
 select_list_ui.new = function(name, records, on_click_fnc)
 
     local instance = {}
+    instance.name = name
     instance.list = {}
     for _, record in ipairs(records) do
         table.insert(instance.list, record.name)
@@ -167,7 +168,7 @@ select_list_ui.new = function(name, records, on_click_fnc)
                     textAlignV = UI.ALIGNMENT.Center,
                     textAlignH = UI.ALIGNMENT.Center,
                     autoSize = false,
-                    size = v2(elements.effects_size[1], 20)
+                    size = v2(elements.select_list_size[1], 20)
                 },
                 events = {
                     mouseClick = async:callback(function()
@@ -181,14 +182,14 @@ select_list_ui.new = function(name, records, on_click_fnc)
         return list_elements
     end
 
-    local name_element = {
+    instance.name_element = {
         name = "text",
         type = UI.TYPE.Text,
         template = I.MWUI.templates.textNormal,
         props = {
-            text = name,
+            text = instance.name,
             textSize = elements.text_size,
-            size = v2(elements.effects_size[1], elements.text_size),
+            size = v2(elements.select_list_size[1], elements.text_size),
             autoSize = false,
             textAlignH = UI.ALIGNMENT.Center,
             textAlignV = UI.ALIGNMENT.Center,
@@ -200,47 +201,20 @@ select_list_ui.new = function(name, records, on_click_fnc)
         relativePosition = v2(0.5, 0.5),
         border = "",
     }
-    local list_element = templates.list.new("", v2(elements.effects_size[1], elements.effects_size[2]), nil, generate_list_elements, nil, list_basic_props)
+    instance.list_element = templates.list.new("", v2(elements.select_list_size[1], elements.select_list_size[2]), nil, generate_list_elements, nil, list_basic_props)
     
-    function instance:create()
-        -- TODO: replace this with template.window
-        print("select_list_ui.create")
-        self.ui = {
-            name = name.."_element",
-            layer = "Windows",
-            type = UI.TYPE.Widget,
-            props = {
-                relativePosition = v2(0.5, 0.5),
-                relativeSize = v2(1,1),
-                anchor = v2(0.5, 0.5),
-                visible = true,
-            },
-            content = UI.content {
-                templates.make_border(v2(elements.effects_size[1], elements.effects_size[2]), 1),
-                {
-                    type = UI.TYPE.Flex,
-                    props = {
-                        horizontal = false,
-                        arrange = UI.ALIGNMENT.Center,
-                        align = UI.ALIGNMENT.Center,
-                        anchor = v2(0.5, 0.5),
-                        relativePosition = v2(0.5, 0.5),
+    print("select_list_ui.create")
+    
+    local props = {
+        relativeSize = v2(1, 1),
+        relativePosition = v2(0.5, 0.5),
+        anchor = v2(0.5, 0.5),
+        visible = true,
+    }
+    local content = templates.flex({instance.name_element, instance.list_element:create()}, "flex", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 0, 10)
+    instance.ui = templates.window.new(instance.name, UI.TYPE.Container, I.MWUI.templates.boxSolid, props, {content})
 
-                        autoSize = true,
-                        visible = true,
-                        wrap = true
-                    },
-                    content = UI.content{
-                        name_element,
-                        list_element:create(),
-                    }
-                }
-            }
-        }
-        return self.ui
-    end
-
-    return instance
+    return instance.ui
 end
 
 effect_ui.new = function(modify, effect_to_add) 
@@ -442,13 +416,12 @@ effect_ui.new = function(modify, effect_to_add)
         print("on_skill_select_click")
 
         -- Disable previous UI
-        elements.effects_root:destroy()
+        elements.effects_root:hide()
 
         function instance.set_skill(skill) 
 
             -- Close UI
-            auxUi.deepDestroy(instance.skill_root)
-            instance.skill_root:update()
+            instance.skill_root:destroy()
 
             -- Update current enchantment with new value
             enchanter.effect_to_add.affectedSkill = skill
@@ -462,8 +435,8 @@ effect_ui.new = function(modify, effect_to_add)
         end
 
         -- New UI popup
-        instance.skill_root = UI.create(select_list_ui.new("Choose Skill", core.stats.Skill.records, instance.set_skill):create())
-        instance.skill_root:update()
+        instance.skill_root = select_list_ui.new("Choose Skill", core.stats.Skill.records, instance.set_skill)
+        instance.skill_root:create()
         
     end
     local function on_attribute_select_click()
@@ -474,8 +447,7 @@ effect_ui.new = function(modify, effect_to_add)
             print("effect_ui.set_attribute: ", attribute)
 
             -- Close UI
-            auxUi.deepDestroy(instance.attribute_root)
-            instance.attribute_root:update()
+            instance.attribute_root:destroy()
 
             -- Update current enchantment with new value
             enchanter.effect_to_add.affectedAttribute = attribute
@@ -489,9 +461,8 @@ effect_ui.new = function(modify, effect_to_add)
         end
 
         -- New UI popup
-        instance.attribute_root = UI.create(select_list_ui.new("Choose an Attribute", core.stats.Attribute.records, instance.set_attribute):create())
-        instance.attribute_root:update()
-        
+        instance.attribute_root = select_list_ui.new("Choose an Attribute", core.stats.Attribute.records, instance.set_attribute)
+        instance.attribute_root:create()
     end
 
     local function on_effect_mag_slider_clicked(name, value)

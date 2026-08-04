@@ -89,6 +89,7 @@ elements.add_effects_list_sorting = {false, true, true}
 elements.effects_root = {}
 elements.effects_size = {500, 350}
 elements.attribute_button_size = {120, 30}
+elements.select_list_size = {250, 250}
 elements.effects_sliders_size = {300, 30}
 elements.effect_icon_size = v2(20,20)
 
