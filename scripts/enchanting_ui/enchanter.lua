@@ -30,6 +30,7 @@ enchanter.reset_item = function()
         object = {},
         icon = nil,
         type = 0,
+        count = 1,
         enchantment_capacity = 0,
         default_enchantment_capacity = 0, -- Used for enchantment capacity modification
     }
@@ -66,6 +67,33 @@ enchanter.reset = function()
     enchanter.reset_soul()
     enchanter.reset_item()
 end
+
+enchanter.get_count_max = function()
+    local count_max = 1
+
+    -- If is valid item type
+    if enchanter.item.type == "Weapon" then
+        local weapon_type = types.Weapon.records[enchanter.item.id].type
+        local is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
+
+        -- if other items entered
+        if enchanter.soul and enchanter.enchantment and is_ammo then
+            if enchanter.soul.charge and enchanter.enchantment.base_cost > 0 then
+                local projectiles_enchant_multiplier = storage.globalSection("options_enchanting_ui"):get("projectiles_enchant_multiplier")
+                local max_per_enchantment = math.floor(enchanter.soul.charge * projectiles_enchant_multiplier / enchanter.enchantment.base_cost)
+                count_max = math.min(max_per_enchantment, enchanter.item.object.count)
+            end
+        end
+    end
+
+    -- Check max is in valid range
+    if count_max < 1 or count_max ~= count_max then
+        count_max = 1
+    end
+
+    print("get_count_max: ", count_max)
+    return count_max
+end 
 
 enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
     print("scale_enchantment_capacity_factor_from_soul_charge")
@@ -421,9 +449,7 @@ end
 -- This fnc assumes passed in values have already been verified as valid
 enchanter.create_item = function()
     print("create_item")
-
     core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item=enchanter.item, soul = enchanter.soul, enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
-
 end
 
 local reset_nothing = 0

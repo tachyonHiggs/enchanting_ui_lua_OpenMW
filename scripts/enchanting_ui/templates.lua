@@ -931,7 +931,7 @@ templates.slider = {}
 ---@param value_to_set_fnc function?
 ---@param on_slider_moved function?
 ---@return table
-templates.slider.new = function(text, max, min, start, update_target, value_to_set_fnc, on_slider_moved)
+templates.slider.new = function(text, max, min, start, update_target, value_to_set_fnc, on_slider_moved, text_length, value_length, background_bar_length)
     local slider = {}
 
     slider.ui = {}
@@ -939,31 +939,59 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
 
     slider.value = start
     slider.value_text = tostring(slider.value)
+    slider.text_size = 20
 
     slider.min = min
     slider.max = max
     slider.interval = 1 -- hard coded
-    slider.background_bar_length = 220
+    slider.background_bar_length = background_bar_length
+    if not slider.background_bar_length then
+        slider.background_bar_length = 220
+    end
 
-    local backgroundWidth = 220
+    slider.text_length = text_length
+    if not slider.text_length then
+        slider.text_length = 140
+    end
+    slider.value_length = value_length
+    if not slider.value_length then
+        slider.value_length = 60
+    end
+
     local thumbWidth = 20
-    slider.bar_padding = (thumbWidth / 2) / backgroundWidth
-
+    slider.bar_padding = (thumbWidth / 2) / slider.background_bar_length
+    
     slider.value_to_set_fnc = value_to_set_fnc
     slider.on_slider_moved = on_slider_moved
 
     slider.update_target = update_target
 
+    function slider:get_bar_width()
+        local bar_width = 0
+        if slider.max <= slider.min then
+            bar_width = slider.background_bar_length
+        else
+            bar_width = math.max( slider.background_bar_length / (100*(slider.max - slider.min)), 20)
+        end
+        print("Slider:get_bar_width: ", bar_width)
+        return bar_width
+    end
+    slider.bar_width = slider:get_bar_width()
+
     function slider:value_to_position(value)
         print("Slider value_to_position")
-        local t = (value - self.min) / (self.max - self.min)
-
+        local t = 0
+        if self.max <= self.min then
+            t = 0.5
+        else
+            t = (value - self.min) / (self.max - self.min)
+        end
         local x = self.bar_padding +
                 t * (1 - 2 * self.bar_padding)
 
         return v2(x, 0)
     end
-
+    
     slider.bar = {
         name = "bar",
         template = I.MWUI.templates.borders,
@@ -973,7 +1001,7 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
                 path = "Textures/menu_bar_yellow.dds"
             }),
             alpha = 1,
-            size = v2(20,20),
+            size = v2(slider.bar_width, slider.text_size),
             anchor = v2(0.5,0),
             relativePosition = slider:value_to_position(start)
         }
@@ -985,8 +1013,8 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
         template = I.MWUI.templates.textNormal,
         props = {
             text = slider.value_text,
-            textSize = 20,
-            size = v2(60,20),
+            textSize = slider.text_size,
+            size = v2(slider.value_length, slider.text_size),
             autoSize = false
         }
     }
@@ -1020,6 +1048,23 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
         if self.update_target then
             self.update_target()
         end
+    end
+
+    function slider:set_max_min(max, min)
+        print('slider:set_max_min')
+
+        if max then
+            print("New slider max is: ", max)
+            self.max = max
+        end
+        if min then
+            print("New slider min is: ", min)
+            self.min = min
+        end
+        self.bar_width = self:get_bar_width()
+        self.bar.props.size = v2(slider.bar_width, 20)
+        
+        self:set_value(self.min)
     end
 
     function slider:move_left()
@@ -1125,7 +1170,7 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
                     props = {
                         text = self.text .. ":   ",
                         textSize = 20,
-                        size = v2(140, 20),
+                        size = v2(slider.text_length, 20),
                         visible = true,
                         autoSize = false,
                     },

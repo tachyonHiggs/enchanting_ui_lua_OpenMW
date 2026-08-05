@@ -16,9 +16,22 @@ I.Settings.registerGroup {
             default = 400,
 			argument = {
                 disabled = false,
-                integer = false,
+                integer = true,
                 min = 1,
                 max = 1000,
+            }
+        },
+        {
+            key = 'projectiles_enchant_multiplier',
+            renderer = 'number',
+            name = 'Projectiles Enchant Multiplier',
+            description = 'Similar to Vanilla OpenMW, sets how many projectiles can be enchanted with one soul gem. When set to 0, only a maximum of one item can be enchanted. At 1, Soul Charge / Enchantment Points can be enchanted at once. Follows: Max Count of projectiles = Minimum of either ((Soul Charge / Enchantment Points) * Projectiles Enchant Multiplier) OR Projectile Count.',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
             }
         },
         {

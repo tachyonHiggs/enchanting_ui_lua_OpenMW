@@ -64,8 +64,10 @@ local function create_enchantment_and_item(data)
     else
         new_item_draft = types.Book.createRecordDraft(item_table)
     end
-    local new_item = world.createRecord(new_item_draft) 
-    local new_item_instance = world.createObject(new_item.id, 1)
+    local new_item = world.createRecord(new_item_draft)
+
+    print("creating x", item.count)
+    local new_item_instance = world.createObject(new_item.id, item.count)
 
     -- Move to player inventory
     new_item_instance:moveInto(world.players[1])

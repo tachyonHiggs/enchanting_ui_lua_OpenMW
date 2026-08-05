@@ -22,6 +22,7 @@ elements.padding_size = 10
 elements.name_input = templates.text_input.new("Name:", 200, function(text) enchanter.name = text end, function() elements.root:update() end)
 elements.soul_input = {}
 elements.item_input = {}
+elements.count_input = {}
 
 -- Stats
 elements.set_stats_enchantment = function()
@@ -66,14 +67,14 @@ elements.effects = {}
 elements.root_size = {800, 600}
 
 -- Header UI constants
-elements.header_size = {800, 130}
+elements.header_size = {800, 170}
 elements.header_elements_size = {380, 120}
 elements.input_image_size = {75, 75}
 
 -- Main Content UI constants
 elements.mc_effects_size = {500, 300}
 elements.mc_list_gap = 5
-elements.mc_size = {800, 400}
+elements.mc_size = {800, 350}
 
 -- Footer UI constants
 elements.footer_size = {800, 80}

@@ -15,12 +15,12 @@ Player->addsoulgem"scamp""Misc_SoulGem_Azura"
 Player->addsoulgem"golden saint""Misc_SoulGem_Azura" 
 Player->addsoulgem"vivec_god""Misc_SoulGem_Azura" 
 
-Player->additem "daedric_towershield" 1
+Player->additem "daedric_towershield" 2
 Player->additem "misc_soulgem_grand" 1
 
 Player->additem "bk_Warehouse_log" 1
 
-Player->additem "iron spear" 1
+Player->additem "iron spear" 8
 
 Player->additem "steel longbow" 1
 Player->additem "glass arrow" 25

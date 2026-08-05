@@ -43,21 +43,6 @@ enchanting_ui.create_ui = function()
 
     local v2_size = v2(elements.root_size[1], elements.root_size[2])
 
-    -- elements.root = UI.create{
-    --     name = "root",
-    --     layer = "Windows",
-    --     type = UI.TYPE.Widget,
-    --     template = nil,
-    --     props = {
-    --         size = v2_size,
-    --         relativePosition = v2(0.5, 0.5),
-    --         anchor = v2(0.5, 0.5),
-    --     },
-    --     content = UI.content{ 
-    --         -- templates.make_border(v2_size, 0.75),
-            
-    --     }
-    -- }
     local props = {
         size = v2_size,
         relativePosition = v2(0.5, 0.5),
@@ -111,11 +96,15 @@ end
 elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, items_ui.show_item_list)
 elements.soul_input = templates.text_image.new("Soul:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, souls_ui.show_soul_list)
 
+elements.count_input = templates.slider.new("Count", 1, 1, 1, function() if elements.root.created then elements.root:update() end end, function(value) print("setting item count to: ", value) enchanter.item.count = value end, function() end, 55, 30, 140)
+
 local function inputs()
     print("inputs") 
-    local input_elements = templates.flex({elements.item_input:create(), elements.soul_input:create()}, "inputs_flex_2", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.header_elements_size[1], elements.header_elements_size[2]))
+    local input_elements = templates.flex({elements.item_input:create(), elements.soul_input:create()}, "inputs_flex_2", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0)
     
-    return templates.flex({elements.name_input:create(), input_elements}, "inputs_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 0, 10, v2(elements.header_elements_size[1], elements.header_elements_size[2]))
+    local inputs = templates.flex({elements.name_input:create(), input_elements, elements.count_input:create()}, "inputs_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 0, 10)
+    
+    return inputs
 end
 
 local function stats()
@@ -241,6 +230,8 @@ enchanting_ui.reset = function()
     print("enchanting_ui.reset")
     
     enchanter.reset()
+
+    elements.count_input:hide()
 
     elements.name_input:clear()
     elements.soul_input:reset_image()

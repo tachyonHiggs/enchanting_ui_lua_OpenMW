@@ -22,12 +22,23 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     -- TODO: add appropiate sound to play depending on item type
     ambient.playSound('Item Misc Up')
 
-    -- if item == ammo/throwable
-
     -- Reset data
     enchanter.reset_enchantment()
     enchanter.reset_item()
-    
+
+    -- if item == ammo/throwable
+    enchanter.item.count = 1
+    elements.count_input:hide()
+    if object.type == types.Weapon then
+        local weapon_type = object.type.records[id].type
+        local is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
+        if is_ammo then
+            enchanter.item.count = object.count
+            print("Projectile item selected with a total of: ", enchanter.item.count)
+            elements.count_input:set_max_min(enchanter.get_count_max(), nil)
+            elements.count_input:show()
+        end
+    end
     enchanter.item.id = id
     enchanter.item.object = object
     enchanter.item.icon = icon

@@ -366,6 +366,9 @@ effect_ui.new = function(modify, effect_to_add)
         enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
         elements.set_stats_charge()
         
+        -- Update count max, but don't show it
+        elements.count_input:set_max_min(enchanter.get_count_max(), nil)
+        
         -- Update price
         if elements.is_vendor then
             enchanter.calculate_price()
@@ -406,6 +409,9 @@ effect_ui.new = function(modify, effect_to_add)
 
         elements.set_stats_enchantment()
         elements.set_stats_charge()
+
+        -- Update count max, but don't show it
+        elements.count_input:set_max_min(enchanter.get_count_max(), nil)
 
         elements.effects_root:destroy()
         
