@@ -189,7 +189,7 @@ function items_ui.show_item_list()
 
     -- Create list of items
     local column_header = {column_names=elements.items_list_column_names, column_widths=elements.items_list_sizes, enable_column_sortings=elements.items_list_sorting}
-    elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, column_header)
+    elements.items_list = templates.list.new("Items", v2(elements.root_size[1], elements.root_size[2]), items_ui.update, items_ui.make_enchantable_items_list, column_header, nil, true)
 
     -- Change and update UI
     elements.root:hide()
@@ -206,6 +206,7 @@ end
 function items_ui.update()
     if elements.items_root.created then
         elements.items_root:update()
+        elements.items_list:set_input_text()
     end
 end
 
