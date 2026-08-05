@@ -56,10 +56,10 @@ return {
                 -- This handles displaying the actual UI depending on which one is appropiate
                 if data.oldMode == 'Dialogue' then
                     local vendor = data.arg
-                    enchanting_ui.show(true, vendor)
+                    enchanting_ui.show(true, vendor, nil)
                 else 
                     local soul_gem = data.arg
-                    enchanting_ui.show(false, nil)
+                    enchanting_ui.show(false, nil, soul_gem)
                 end
                 
             end

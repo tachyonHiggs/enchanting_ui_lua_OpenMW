@@ -141,25 +141,30 @@ footer = templates.flex({elements.cast_type_btn:create(), elements.chance:create
 
 -- End footer
 
-enchanting_ui.show = function(is_vendor, vendor)
+enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     print("Menu Show")
 
     elements.is_vendor = is_vendor
     print("is_vendor_enchant", elements.is_vendor)
     if is_vendor then
-        print("Vendor is: ", vendor)
         enchanter.vendor = vendor
     end
+    
+    elements.set_cast_type() -- Make sure to set this to be valid type
 
     if not elements.is_vendor then
         elements.price:hide()
         elements.chance:show()
+
+        -- set player selected soul gem
+        local soul = types.Item.itemData(used_soul_gem).soul
+        local soul_charge = types.Creature.records[soul].soulValue
+        local icon = used_soul_gem.type.records[used_soul_gem.recordId].icon
+        souls_ui.on_soul_clicked(used_soul_gem.recordId, used_soul_gem, soul_charge, icon)
     else
         elements.chance:hide()
         elements.price:show()
     end
-    
-    elements.set_cast_type() -- Make sure to set this to be valid type
 
     elements.root:update()
 end

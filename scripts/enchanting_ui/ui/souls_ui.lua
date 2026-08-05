@@ -14,7 +14,7 @@ local elements = require("scripts.enchanting_ui.ui.elements")
 local souls_ui = {}
 
 
-local function on_soul_clicked(id, object, value, icon)
+function souls_ui.on_soul_clicked(id, object, value, icon)
 
     -- TODO: equipping sound effect
     ambient.playSound('Item Misc Up')
@@ -37,7 +37,9 @@ local function on_soul_clicked(id, object, value, icon)
     elements.soul_input:set_image(icon)
     elements.root:show()
 
-    elements.souls_root:destroy()
+    if elements.souls_root.created then -- for external function callers
+        elements.souls_root:destroy()
+    end
 end
 
 local function create_soul(id, object, value, icon, name, soul_name)
@@ -127,7 +129,7 @@ local function create_soul(id, object, value, icon, name, soul_name)
         },
         events = {
             mouseClick = async:callback(function()
-                on_soul_clicked(id, object, value, icon)
+                souls_ui.on_soul_clicked(id, object, value, icon)
             end)
         }
     }
