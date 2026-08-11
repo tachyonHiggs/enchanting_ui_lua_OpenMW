@@ -134,8 +134,8 @@ main_content = templates.flex({add_effect_btn:create(), elements.effects:create(
 
 elements.cast_type_btn = templates.button.new("Cast Once", toggle_cast_type, 140, 30)
 
-local create_btn = templates.button.new("Create", (function() print("Clicked Create") enchanting_ui.enchant_item() return true end), 80, 30)
-local cancel_btn = templates.button.new("Cancel", (function() print("Clicked Cancel") ambient.playSound('menu click') enchanting_ui.hide() end), 80, 30)
+local create_btn = templates.button.new("Create", (function() print("Clicked Create") enchanting_ui.enchant_item() return true end), 80, 30, "Yahoo! Cow a bunga dude", v2(100,20), elements.tooltip)
+local cancel_btn = templates.button.new("Cancel", (function() print("Clicked Cancel") ambient.playSound('menu click') enchanting_ui.hide() end), 80, 30, "Yahoo! Cow a bunga dude", v2(100,20), elements.tooltip)
 
 footer = templates.flex({elements.cast_type_btn:create(), elements.chance:create(), elements.price:create(), templates.padding(20, elements.footer_size[2]), create_btn:create(), cancel_btn:create()}, "footer_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.footer_size[1], elements.footer_size[2]))
 
@@ -226,6 +226,9 @@ enchanting_ui.destroy = function()
     end
     if elements.souls_root.created then
         elements.souls_root:destroy()
+    end
+    if elements.tooltip.visible then
+        elements.tooltip:destroy()
     end
     
     elements.root:update()

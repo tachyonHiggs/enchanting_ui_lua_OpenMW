@@ -32,7 +32,7 @@ templates.padding = function(x, y, x_r, y_r)
     local prop
     if x or y then
         prop = {
-            size = Util.vector2(x, y),
+            size = Util.vector2(x, y)
         }
     else 
         prop = {
@@ -148,7 +148,7 @@ templates.window.new = function(name, type, template, properties, content)
 
     function window:create()
         print("templates.window.create: ", self.name)
-        window.created = true
+        self.created = true
 
         self.ui = UI.create{
             name = self.name .. "_window",
@@ -182,15 +182,119 @@ templates.window.new = function(name, type, template, properties, content)
     return window
 end
 
+templates.tooltips = {}
+---@note set this equal to a UI element event field
+---@return table
+templates.tooltips.new = function(name)
+    print("templates.tooltips.new: ", name)
+
+    local tooltip = {}
+    tooltip.name = name
+    tooltip.root = {}
+    tooltip.visible = false
+
+    tooltip.offset = v2(0, -20)
+    tooltip.max_width = 200
+
+    function tooltip:create(text, autoSize, size)
+        if self.visible then
+            print("Already created")
+            return
+        end
+        print("Create tooltip: ", self.name)
+
+        self.ui = UI.create {
+            name = self.name .. "_tooltip",
+            layer = "Notification",
+            type =  UI.TYPE.Container,
+            template = I.MWUI.templates.boxSolid,
+            props = {
+                anchor = v2(0.5, 1),
+            },
+            content = UI.content {
+                {
+                    type = UI.TYPE.Widget,
+                    props = {
+                        size = size + v2(20, 20),
+                        anchor = v2(0.5,0.5),
+                        -- relativePosition = v2(0.5, 0.5)
+                    },
+                    content = UI.content {
+                        {
+                            name = name.."_tooltip_text",
+                            type = UI.TYPE.Text,
+                            template = I.MWUI.templates.textNormal,
+                            props = {
+                                text = text,
+                                textSize = 20,
+                                wordWrap = true,
+                                textAlignH = UI.ALIGNMENT.Center,
+                                textAlignV = UI.ALIGNMENT.Center,
+
+                                autoSize = autoSize,
+                                size = size,
+
+                                anchor = v2(0.5,0.5),
+                                -- relativePosition = v2(1, 0.5)
+                            }
+                        }
+                    }
+
+                }
+                
+            }
+        }
+
+        self.ui:update()
+        self.visible = true
+    end
+
+    function tooltip:destroy()
+        print("Destroy tooltip: ", self.name)
+
+        if self.visible then
+            auxUi.deepDestroy(self.ui)
+            self.ui:update()
+            self.visible = false
+        end
+    end
+
+    function tooltip:update(mouseEvent)
+        print("Udpate tooltip: ", self.name)
+
+        if self.visible then
+            self.ui.layout.props.position = mouseEvent.position + tooltip.offset
+            self.ui:update()
+            self.visible = true
+        end
+    end
+
+    return tooltip
+end
+
 -- Templates
 templates.button = {}
-templates.button.new = function(name, on_click_fnc, size_x, size_y)
+templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text, tooltip_size, tooltip_element)
 
     local button = {}
 
     button.name = name
     button.size_x = size_x
     button.size_y = size_y
+
+    button.has_tooltip = false
+    if tooltip_text then
+        print("button has tooltip")
+        button.has_tooltip = true
+        button.tooltip_text = tooltip_text
+        button.tooltip_element = tooltip_element -- pass by reference
+        button.tooltip_autoSize = false
+        button.tooltip_size = v2(100,20)
+        if tooltip_size then
+            button.tooltip_autoSize = false
+            button.tooltip_size = tooltip_size
+        end
+    end
 
     button.name_element = {
         name = button.name .. "_btn",
@@ -245,8 +349,26 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y)
             },
             content = UI.content {
                 templates.padding(self.size_x, self.size_y),
-                button.name_element,
+                self.name_element,
+            },
+            events = {
+                focusGain = async:callback(function()
+                    if self.has_tooltip then
+                        self.tooltip_element:create(self.tooltip_text, self.tooltip_autoSize, self.tooltip_size)
+                    end
+                end),
+                focusLoss = async:callback(function()
+                    if self.has_tooltip then
+                        self.tooltip_element:destroy()
+                    end
+                end),
+                mouseMove = async:callback(function(mouseEvent)
+                    if self.has_tooltip then
+                        self.tooltip_element:update(mouseEvent)
+                    end
+                end),
             }
+
         }
 
         return self.ui

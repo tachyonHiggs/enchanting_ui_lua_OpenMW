@@ -18,6 +18,8 @@ local elements = {}
 elements.text_size = 20
 elements.padding_size = 10
 
+elements.tooltip = templates.tooltips.new("GeneralToolTip")
+
 -- Inputs
 elements.name_input = templates.text_input.new("Name:", 200, function(text) enchanter.name = text end, function() elements.root:update() end)
 elements.soul_input = {}
