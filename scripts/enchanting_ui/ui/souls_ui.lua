@@ -114,7 +114,7 @@ local function create_soul(id, object, value, icon, name, soul_name)
             arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.Start,
             size = v2(600, elements.text_size),
-            visible = true
+            visible = true,
         },
         userData = {
             index = 1,

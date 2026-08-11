@@ -81,8 +81,6 @@ effect_ui.create_effect_item = function(effect)
     if core.magic.effects.records[effect.id].hasDuration and enchanter.enchantment.type ~= core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         table.insert(parts, ("for %d sec"):format(effect.duration))
     end
-
-    local has_area
     
     print("Has area: ", enchanter.enchantment.has_area)
     if enchanter.enchantment.has_area then

@@ -67,6 +67,8 @@ end
 local function create_enchantable_item(id, object, icon, type, name, enchant_pts)
     print("create_enchantable_item")
 
+    local element_max_height = elements.items_list_sizes[1]
+
     local icon_element = {
         name = "icon",
         type = UI.TYPE.Image,
@@ -147,10 +149,12 @@ local function create_enchantable_item(id, object, icon, type, name, enchant_pts
             horizontal = true,
             arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.Start,
+            visible = true,
         },
         userData = {
             index = 1,
-            info = {icon, name, enchant_pts, type_text, object.count}
+            info = {icon, name, enchant_pts, type_text, object.count},
+            max_height = element_max_height
         },
         content = UI.content {
             icon_element,

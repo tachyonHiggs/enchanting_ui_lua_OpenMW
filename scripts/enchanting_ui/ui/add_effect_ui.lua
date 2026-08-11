@@ -46,6 +46,9 @@ add_effect_ui.on_magic_effect_clicked = function(id)
 end
 
 local function create_magic_effect_item(id, name)
+
+    local element_max_height = elements.add_effects_list_sizes[1]
+
     -- TODO: add more like magic school info
     local record = core.magic.effects.records[id]
     local icon = record.icon
@@ -96,10 +99,12 @@ local function create_magic_effect_item(id, name)
             horizontal = true,
             arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.Start,
+            visible = true,
         },
         userData = {
             index = 1,
-            info = {icon, name, school}
+            info = {icon, name, school},
+            max_height = element_max_height,
         },
         content = UI.content {
             icon_element,
