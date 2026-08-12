@@ -199,19 +199,20 @@ templates.scrollbar.new = function(length, list)
     scrollbar.bar_padding = scrollbar.bar_heigth/2 / scrollbar.background_bar_length -- gets the fraction of background_bar_length
 
     function scrollbar:set_bar_position(current_y)
-        
-        local current_y_abs = math.abs(current_y)
-        print("scrollbar:set_bar_position: ", current_y_abs)
+
+        -- Check if list even needs to scroll
+        local max_scroll = math.max(list.current_length - list.size.y, 0)
+        if max_scroll <= 0 then
+            scrollbar.bar_element.props.relativePosition = v2(0, scrollbar.bar_padding)
+            return
+        end
+
+        local list_length_out_of_sight = list.current_length - list.size.y
+        local t = math.abs(current_y) / list_length_out_of_sight   -- Get fraction of current length vs total length
+        t = math.max(0, math.min(1, t))
 
         local relative_position_y = 0
-
-        print("list.current_length: ", list.current_length)
-        local list_length_out_of_sight = list.current_length - list.size.y
-
-        local t = current_y_abs / list_length_out_of_sight   -- Get fraction of current length vs total length
-        t = math.max(0, math.min(1, t))
         relative_position_y = (1 - 2*scrollbar.bar_padding)*t + scrollbar.bar_padding
-        print(relative_position_y)
         scrollbar.bar_element.props.relativePosition = v2(0, relative_position_y)
     end
 
@@ -339,21 +340,25 @@ templates.scrollbar.new = function(length, list)
     function scrollbar:on_background_bar_clicked(mouse_y)
         print("scrollbar:on_background_bar_clicked")
 
-        local relative_bar_position_y = mouse_y / scrollbar.background_bar_length
+        -- Check if list even needs to scroll
+        local max_scroll = math.max(list.current_length - list.size.y, 0)
+        if max_scroll <= 0 then
+            scrollbar.bar_element.props.relativePosition = v2(0, scrollbar.bar_padding)
+            return
+        end
 
-        relative_bar_position_y = math.max(relative_bar_position_y, scrollbar.bar_padding)
-        relative_bar_position_y = math.min(relative_bar_position_y, 1 - scrollbar.bar_padding)
+        -- Mouse position as 0..1 along the scrollbar
+        local t = mouse_y / scrollbar.background_bar_length
+        -- Normalize to 0 to 1, ignore padding
+        t = (t - scrollbar.bar_padding) / (1 - 2 * scrollbar.bar_padding)
 
-        local scaled_bar_position_y = (relative_bar_position_y - scrollbar.bar_padding) / (1 - 2*scrollbar.bar_padding)
-        local list_length_out_of_sight = math.max(list.current_length - list.size.y, 0)
-        local list_position_y = -math.floor(scaled_bar_position_y * list_length_out_of_sight)
+        -- clamp it
+        t = math.max(0, math.min(1, t))
 
-        -- now clamp it
+        -- Round it for pixels
+        local list_position_y = -math.floor(t * max_scroll)
+        -- Get current x position
         local list_position_x = list.items_container.props.position.x
-
-        list_position_y = math.min(list_position_y, 0)
-        list_position_y = math.max(list_position_y, -list_length_out_of_sight)
-        print("items_container.y: ", list_position_y)
         
         list.items_container.props.position = v2(list_position_x, list_position_y)
 
