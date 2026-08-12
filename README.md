@@ -3,12 +3,15 @@
 ## TODO / Change Log
 
 ### Vanilla Features
-- Add tool tips
+- Add tool tips text to all elements
 - Organize UI
 
 ### Expanded Features
 - Potentially add the ability use vendor's soul gems while enchanting
 - Allow bartering for vendor enchanted items services
+- Add cheat that makes menu show all magic effects in the game
+- Allow bartering to use vendor known magic effects
+- Add cast type to item list
 
 ### Development
 - Add descriptions, params, fields etc to functions and files

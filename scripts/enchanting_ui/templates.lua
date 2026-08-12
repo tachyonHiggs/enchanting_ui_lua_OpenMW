@@ -193,10 +193,10 @@ templates.tooltips.new = function(name)
     tooltip.root = {}
     tooltip.visible = false
 
+    tooltip.text_size = 18
     tooltip.offset = v2(0, -20)
-    tooltip.max_width = 200
 
-    function tooltip:create(text, autoSize, size)
+    function tooltip:create(text)
         if self.visible then
             print("Already created")
             return
@@ -213,34 +213,23 @@ templates.tooltips.new = function(name)
             },
             content = UI.content {
                 {
-                    type = UI.TYPE.Widget,
+                    name = name.."_tooltip_text",
+                    type = UI.TYPE.Text,
+                    template = I.MWUI.templates.textNormal,
                     props = {
-                        size = size + v2(20, 20),
-                        anchor = v2(0.5,0.5),
-                        -- relativePosition = v2(0.5, 0.5)
-                    },
-                    content = UI.content {
-                        {
-                            name = name.."_tooltip_text",
-                            type = UI.TYPE.Text,
-                            template = I.MWUI.templates.textNormal,
-                            props = {
-                                text = text,
-                                textSize = 20,
-                                wordWrap = true,
-                                textAlignH = UI.ALIGNMENT.Center,
-                                textAlignV = UI.ALIGNMENT.Center,
+                        text = text,
+                        textSize = tooltip.text_size,
 
-                                autoSize = autoSize,
-                                size = size,
+                        multiline = true,
+                        textAlignH = UI.ALIGNMENT.Start,
+                        textAlignV = UI.ALIGNMENT.Center,
 
-                                anchor = v2(0.5,0.5),
-                                -- relativePosition = v2(1, 0.5)
-                            }
-                        }
+                        autoSize = true,
+
+                        anchor = v2(0, 0),
                     }
-
                 }
+                    
                 
             }
         }
@@ -260,7 +249,7 @@ templates.tooltips.new = function(name)
     end
 
     function tooltip:update(mouseEvent)
-        print("Udpate tooltip: ", self.name)
+        -- print("Udpate tooltip: ", self.name)
 
         if self.visible then
             self.ui.layout.props.position = mouseEvent.position + tooltip.offset
@@ -274,7 +263,7 @@ end
 
 -- Templates
 templates.button = {}
-templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text, tooltip_size, tooltip_element)
+templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text, tooltip_element)
 
     local button = {}
 
@@ -288,12 +277,6 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
         button.has_tooltip = true
         button.tooltip_text = tooltip_text
         button.tooltip_element = tooltip_element -- pass by reference
-        button.tooltip_autoSize = false
-        button.tooltip_size = v2(100,20)
-        if tooltip_size then
-            button.tooltip_autoSize = false
-            button.tooltip_size = tooltip_size
-        end
     end
 
     button.name_element = {
@@ -354,7 +337,7 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
             events = {
                 focusGain = async:callback(function()
                     if self.has_tooltip then
-                        self.tooltip_element:create(self.tooltip_text, self.tooltip_autoSize, self.tooltip_size)
+                        self.tooltip_element:create(self.tooltip_text)
                     end
                 end),
                 focusLoss = async:callback(function()
