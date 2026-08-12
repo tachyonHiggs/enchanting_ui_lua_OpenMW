@@ -43,6 +43,9 @@ function souls_ui.on_soul_clicked(id, object, value, icon)
 end
 
 local function create_soul(id, object, value, icon, name, soul_name)
+
+    local element_max_height = elements.souls_list_sizes[1]
+
     local icon_element = {
         name = "icon",
         type = UI.TYPE.Image,
@@ -52,7 +55,7 @@ local function create_soul(id, object, value, icon, name, soul_name)
                 path = icon
             }),
             alpha = 1,
-            size = v2(elements.souls_list_sizes[1],50),
+            size = v2(elements.souls_list_sizes[1],elements.souls_list_sizes[1]),
         },
     }
     local name_element = {
@@ -110,11 +113,13 @@ local function create_soul(id, object, value, icon, name, soul_name)
             horizontal = true,
             arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.Start,
-            size = v2(600, elements.text_size)
+            size = v2(600, elements.text_size),
+            visible = true,
         },
         userData = {
             index = 1,
             info = {icon, name, value, soul_name, object.count},
+            max_height = element_max_height
         },
         content = UI.content {
             icon_element,

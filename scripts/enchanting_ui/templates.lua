@@ -182,6 +182,206 @@ templates.window.new = function(name, type, template, properties, content)
     return window
 end
 
+templates.scrollbar = {}
+templates.scrollbar.new = function(length, list) 
+    print("templates.scrollbar.new: ")
+
+    local scrollbar = {}
+    if list.update_target then
+        scrollbar.update_target = list.update_target
+    end
+
+    scrollbar.bar_width = 20
+    scrollbar.bar_heigth = 40
+    scrollbar.image_size = 20
+    scrollbar.text_size = 20
+    scrollbar.background_bar_length = length - scrollbar.image_size*2 -- For two buttons
+    scrollbar.bar_padding = scrollbar.bar_heigth/2 / scrollbar.background_bar_length -- gets the fraction of background_bar_length
+
+    function scrollbar:set_bar_position(current_y)
+
+        -- Check if list even needs to scroll
+        local max_scroll = math.max(list.current_length - list.size.y, 0)
+        if max_scroll <= 0 then
+            scrollbar.bar_element.props.relativePosition = v2(0, scrollbar.bar_padding)
+            return
+        end
+
+        local list_length_out_of_sight = list.current_length - list.size.y
+        local t = math.abs(current_y) / list_length_out_of_sight   -- Get fraction of current length vs total length
+        t = math.max(0, math.min(1, t))
+
+        local relative_position_y = 0
+        relative_position_y = (1 - 2*scrollbar.bar_padding)*t + scrollbar.bar_padding
+        scrollbar.bar_element.props.relativePosition = v2(0, relative_position_y)
+    end
+
+    scrollbar.up_arrow_element = {
+        name = "up",
+        template = I.MWUI.templates.borders,
+        type = UI.TYPE.Image,
+        props = {
+            resource = UI.texture({
+                path = "Textures/menu_scroll_up.dds",
+                offset = v2(-5, -5), -- TODO: what to set this as to avoid magic nums
+            }),
+            alpha = 1,
+            size = v2(scrollbar.image_size, scrollbar.image_size),
+        },
+        events = {
+            mouseClick = async:callback(function() scrollbar:up_clicked() end)
+        }
+    }
+    scrollbar.down_arrow_element = {
+        name = "up",
+        template = I.MWUI.templates.borders,
+        type = UI.TYPE.Image,
+        props = {
+            resource = UI.texture({
+                path = "Textures/menu_scroll_down.dds",
+                offset = v2(-5, -5), -- TODO: what to set this as to avoid magic nums
+            }),
+            alpha = 1,
+            size = v2(scrollbar.image_size, scrollbar.image_size),
+        },
+        events = {
+            mouseClick = async:callback(function() scrollbar:down_clicked() end)
+        }
+    }
+    scrollbar.bar_element = {
+        name = "bar",
+        template = I.MWUI.templates.borders,
+        type = UI.TYPE.Image,
+        props = {
+            resource = UI.texture({
+                path = "Textures/menu_bar_yellow.dds"
+            }),
+            alpha = 1,
+            size = v2(scrollbar.bar_width, scrollbar.bar_heigth),
+            anchor = v2(0,0.5),
+            relativePosition = v2(0,0)
+        }
+    }
+    scrollbar:set_bar_position(0)
+    scrollbar.background_element = {
+        name = "background_bar",
+        template = I.MWUI.templates.borders,
+        type = UI.TYPE.Image,
+        props = {
+            resource = UI.texture({
+                path = "black"
+            }),
+            alpha = 1,
+            size = v2( scrollbar.bar_width, scrollbar.background_bar_length),
+        },
+        content = UI.content {
+            scrollbar.bar_element
+        },
+        events = {
+            mousePress = async:callback(function(mouseEvent) scrollbar:on_background_bar_clicked(mouseEvent.offset.y) end)
+        }
+    }
+
+    function scrollbar:reset()
+        -- reset items container position
+        if list.items_container then
+            list.items_container.props.position = v2(list.items_container.props.position.x, 0)
+        end
+
+        -- reset bar element position
+        self:set_bar_position(0)
+
+        if scrollbar.update_target then
+            scrollbar.update_target()
+        end
+    end
+
+    function scrollbar:up_clicked()
+        print("scrollbar:up_clicked")
+
+        if list.items_container.props.position.y >= -20 then
+            list.items_container.props.position = v2(list.items_container.props.position.x, 0)
+        else
+            list.items_container.props.position = list.items_container.props.position + v2(0, 20)
+        end
+
+        self:set_bar_position(list.items_container.props.position.y)
+
+        if self.update_target then
+            self.update_target()
+        end
+    end
+
+    function scrollbar:down_clicked()
+        print("scrollbar:down_clicked")
+
+        if list.current_length <= list.size.y then
+            return
+        end
+
+        if list.items_container.props.position.y <= -math.abs(list.current_length - list.size.y) then
+            -- Don't update since not enough items
+            return
+        end
+
+        list.items_container.props.position = list.items_container.props.position - v2(0, 20)
+
+        self:set_bar_position(list.items_container.props.position.y)
+
+        if scrollbar.update_target then
+            scrollbar.update_target()
+        end
+    end
+
+    function scrollbar:dragged()
+        print("scrollbar:dragged")
+    end
+
+    function scrollbar:on_background_bar_clicked(mouse_y)
+        print("scrollbar:on_background_bar_clicked")
+
+        -- Check if list even needs to scroll
+        local max_scroll = math.max(list.current_length - list.size.y, 0)
+        if max_scroll <= 0 then
+            scrollbar.bar_element.props.relativePosition = v2(0, scrollbar.bar_padding)
+            return
+        end
+
+        -- Mouse position as 0..1 along the scrollbar
+        local t = mouse_y / scrollbar.background_bar_length
+        -- Normalize to 0 to 1, ignore padding
+        t = (t - scrollbar.bar_padding) / (1 - 2 * scrollbar.bar_padding)
+
+        -- clamp it
+        t = math.max(0, math.min(1, t))
+
+        -- Round it for pixels
+        local list_position_y = -math.floor(t * max_scroll)
+        -- Get current x position
+        local list_position_x = list.items_container.props.position.x
+        
+        list.items_container.props.position = v2(list_position_x, list_position_y)
+
+        self:set_bar_position(list_position_y)
+
+        if scrollbar.update_target then
+            scrollbar.update_target()
+        end
+    end
+
+    function scrollbar:create()
+        print("scrollbar:create")
+        
+        self.ui = templates.flex({self.up_arrow_element, self.background_element, self.down_arrow_element}, "scroll_bar_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 1)
+
+
+        return self.ui
+
+    end
+
+    return scrollbar
+end
+
 -- Templates
 templates.button = {}
 templates.button.new = function(name, on_click_fnc, size_x, size_y)
@@ -529,6 +729,10 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
     list.padding = 10
 
+    print("Creating new list called: ", name)
+    list.size = list_size
+    list.update_target = update_target
+
     -- Assign default basic props if not assigned
     list.basic_props = basic_props
     if list.basic_props == nil or list.basic_props == {} then
@@ -540,21 +744,37 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
     list.name = name
 
+    list.current_length = 0
+    list.scrollbar = templates.scrollbar.new(list.size.y, list)
+    function list:update_current_length()
+        print("list:update_current_length")
+        list.current_length = 0
+
+        for _, item in ipairs(self.items) do
+            if item.props.visible then
+                list.current_length = list.current_length + item.userData.max_height
+            end
+        end
+        list.scrollbar:reset()
+        print("List height is: ", list.current_length)
+
+    end
+
     function list:update_item_indices()
         print("update_item_indices")
+
         for index, item in ipairs(self.items) do
             -- print(item, " ", index)
             item.userData = item.userData or {}
             item.userData.index = index
+
         end
+        list:update_current_length()
         if list.update_target then
             list.update_target()
         end
     end
-
-    print("Creating new list called: ", name)
-    list.size = list_size
-    list.update_target = update_target
+    
     print("udpate target is: ", list.update_target)
     list.items = generate_items() or {}
     list:update_item_indices()
@@ -684,6 +904,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                         list:show_item(index)
                     end
                 end
+                list:update_current_length()
             end
 
             -- TODO: search icon or word?
@@ -715,10 +936,30 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             horizontal = false,
             arrange = list.basic_props.alignment,
             align = list.basic_props.alignment,
-            size = list_size,
+            autoSize = true,
+            size = v2(0,0), -- ONLY used to get the current list size
+
+            anchor = v2(0, 0),
+            position = v2(0, 0),
         },
         content = UI.content{
             table.unpack(list.items)
+        }
+    }
+
+    list.items_container_border = {
+        name = "border",
+        type = UI.TYPE.Image,
+        template = I.MWUI.templates.borders,
+        props = {
+            resource = UI.texture({
+                path = "black",
+                alpha = 1,
+            }),
+            size = v2(list.size.x, list.size.y)
+        },
+        content = UI.content{
+            list.items_container
         }
     }
 
@@ -822,22 +1063,6 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             list.column_elements[list.get_sort_btn_index(list.sort_column)].props.resource = list.sort_descending_texture
         end
 
-        -- TBH my superior system where you first have to click on a arrow to make it active and then it sorts 
-        -- if list.sort_column == index then
-        --     list.column_elements[index*2].template = I.MWUI.templates.bordersThick
-        --     list.sort_direction =( list.sort_direction + 1) % 2 -- toggle direction
-        --     if list.sort_direction == list.sort_ascending then
-        --         list.column_elements[index*2].props.resource = list.sort_ascending_texture
-        --     else
-        --         list.column_elements[index*2].props.resource = list.sort_descending_texture
-        --     end
-        -- else
-        --     list.column_elements[index*2].template = I.MWUI.templates.bordersThick
-        --     list.column_elements[list.sort_column*2].template = I.MWUI.templates.borders
-        --     list.sort_column = index
-        --     -- Don't toggle direction
-        -- end
-
         --Now sort list items by column and direction
         list:sort_items()
 
@@ -900,16 +1125,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             content = UI.content {
                 list.name_element,
                 list.header,
-                {
-                    name = "border",
-                    template = list.basic_props.border,
-                    props = {
-                        size = self.size,
-                    },
-                    content = UI.content {
-                        self.items_container
-                    }
-                }
+                templates.flex({list.items_container_border, self.scrollbar:create()}, "list_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 5),
             }
         }
         return self.ui
