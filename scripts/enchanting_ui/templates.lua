@@ -192,9 +192,28 @@ templates.scrollbar.new = function(length, list)
     end
 
     scrollbar.bar_width = 20
+    scrollbar.bar_heigth = 40
     scrollbar.image_size = 20
     scrollbar.text_size = 20
     scrollbar.background_bar_length = length - scrollbar.image_size*2 -- For two buttons
+    scrollbar.bar_padding = scrollbar.bar_heigth/2 / scrollbar.background_bar_length -- gets the fraction of background_bar_length
+
+    function scrollbar:set_bar_position(current_y)
+        
+        local current_y_abs = math.abs(current_y)
+        print("scrollbar:set_bar_position: ", current_y_abs)
+
+        local relative_position_y = 0
+
+        print("list.current_length: ", list.current_length)
+        local list_length_out_of_sight = list.current_length - list.size.y
+
+        local t = current_y_abs / list_length_out_of_sight   -- Get fraction of current length vs total length
+        t = math.max(0, math.min(1, t))
+        relative_position_y = (1 - 2*scrollbar.bar_padding)*t + scrollbar.bar_padding
+        
+        scrollbar.bar_element.props.relativePosition = v2(0, relative_position_y)
+    end
 
     scrollbar.up_arrow_element = {
         name = "up",
@@ -237,11 +256,12 @@ templates.scrollbar.new = function(length, list)
                 path = "Textures/menu_bar_yellow.dds"
             }),
             alpha = 1,
-            size = v2(scrollbar.bar_width, scrollbar.text_size),
+            size = v2(scrollbar.bar_width, scrollbar.bar_heigth),
             anchor = v2(0,0.5),
-            --relativePosition = slider:value_to_position(start)
+            relativePosition = v2(0,0)
         }
     }
+    scrollbar:set_bar_position(0)
     scrollbar.background_element = {
         name = "background_bar",
         template = I.MWUI.templates.borders,
@@ -261,18 +281,18 @@ templates.scrollbar.new = function(length, list)
         }
     }
 
-    function scrollbar:value_to_position(value)
-        print("scrollbar value_to_position")
-        local t = 0
-        if self.max <= self.min then
-            t = 0.5
-        else
-            t = (value - self.min) / (self.max - self.min)
+    function scrollbar:reset()
+        -- reset items container position
+        if list.items_container then
+            list.items_container.props.position = v2(list.items_container.props.position.x, 0)
         end
-        local x = self.bar_padding +
-                t * (1 - 2 * self.bar_padding)
 
-        return v2(x, 0)
+        -- reset bar element position
+        self:set_bar_position(0)
+
+        if scrollbar.update_target then
+            scrollbar.update_target()
+        end
     end
 
     function scrollbar:up_clicked()
@@ -284,31 +304,29 @@ templates.scrollbar.new = function(length, list)
             list.items_container.props.position = list.items_container.props.position + v2(0, 20)
         end
 
-        if scrollbar.update_target then
-            scrollbar.update_target()
+        self:set_bar_position(list.items_container.props.position.y)
+
+        if self.update_target then
+            self.update_target()
         end
     end
 
     function scrollbar:down_clicked()
         print("scrollbar:down_clicked")
 
-        print("list.current_length: ", list.current_length)
-        print("list.size.y: ", list.size.y)
-        print("list.items_container.props.position.y: ", list.items_container.props.position.y)
-        
-        --  two conditions not to scroll down
-        -- list.current_length < list.size.y
         if list.current_length <= list.size.y then
             return
         end
 
-        -- list.items_container.props.position.y is outside of list.current_length
         if list.items_container.props.position.y <= -math.abs(list.current_length - list.size.y) then
             -- Don't update since not enough items
             return
         end
 
         list.items_container.props.position = list.items_container.props.position - v2(0, 20)
+
+        self:set_bar_position(list.items_container.props.position.y)
+
         if scrollbar.update_target then
             scrollbar.update_target()
         end
@@ -682,6 +700,10 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
     list.padding = 10
 
+    print("Creating new list called: ", name)
+    list.size = list_size
+    list.update_target = update_target
+
     -- Assign default basic props if not assigned
     list.basic_props = basic_props
     if list.basic_props == nil or list.basic_props == {} then
@@ -694,6 +716,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     list.name = name
 
     list.current_length = 0
+    list.scrollbar = templates.scrollbar.new(list.size.y, list)
     function list:update_current_length()
         print("list:update_current_length")
         list.current_length = 0
@@ -703,6 +726,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                 list.current_length = list.current_length + item.userData.max_height
             end
         end
+        list.scrollbar:reset()
         print("List height is: ", list.current_length)
 
     end
@@ -721,10 +745,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             list.update_target()
         end
     end
-
-    print("Creating new list called: ", name)
-    list.size = list_size
-    list.update_target = update_target
+    
     print("udpate target is: ", list.update_target)
     list.items = generate_items() or {}
     list:update_item_indices()
@@ -1061,9 +1082,6 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
 
     function list:create()
         print("list:create")
-        self.scrollbar = templates.scrollbar.new(list.size.y, list)
-
-
 
         self.ui = {
             name = self.name .. "_list",
