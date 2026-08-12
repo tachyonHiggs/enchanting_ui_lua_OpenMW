@@ -5,6 +5,7 @@
 ### Vanilla Features
 - Add tool tips
 - Organize UI
+- Ability to drag sliders and scroll bars
 
 ### Expanded Features
 - Potentially add the ability use vendor's soul gems while enchanting
