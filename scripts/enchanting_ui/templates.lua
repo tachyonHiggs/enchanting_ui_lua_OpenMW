@@ -196,6 +196,22 @@ templates.tooltips.new = function(name)
     tooltip.text_size = 18
     tooltip.offset = v2(0, -20)
 
+    function tooltip:get_events(self)
+        return {
+            focusGain = async:callback(function()
+                self.tooltip_element:create(self.tooltip_text)
+            end),
+
+            focusLoss = async:callback(function()
+                self.tooltip_element:destroy()
+            end),
+
+            mouseMove = async:callback(function(mouseEvent)
+                self.tooltip_element:update(mouseEvent)
+            end),
+        }
+    end
+
     function tooltip:create(text)
         if self.visible then
             print("Already created")
@@ -323,6 +339,11 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
 
     function button:create()
 
+        local events = {}
+        if self.has_tooltip then
+            events = button.tooltip_element:get_events(self)
+        end
+
         self.ui = {
             name = self.name .. "_btn_border",
             type = UI.TYPE.Container,
@@ -334,23 +355,7 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
                 templates.padding(self.size_x, self.size_y),
                 self.name_element,
             },
-            events = {
-                focusGain = async:callback(function()
-                    if self.has_tooltip then
-                        self.tooltip_element:create(self.tooltip_text)
-                    end
-                end),
-                focusLoss = async:callback(function()
-                    if self.has_tooltip then
-                        self.tooltip_element:destroy()
-                    end
-                end),
-                mouseMove = async:callback(function(mouseEvent)
-                    if self.has_tooltip then
-                        self.tooltip_element:update(mouseEvent)
-                    end
-                end),
-            }
+            events = events
 
         }
 
@@ -361,7 +366,7 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
 end
 
 templates.text_input = {}
-templates.text_input.new = function(name, text_length, on_text_changed_fnc, update_ui)
+templates.text_input.new = function(name, text_length, on_text_changed_fnc, update_ui, tooltip_text, tooltip_element)
 
     local text_input = {}
 
@@ -371,6 +376,14 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
     text_input.text = ""
     text_input.text_length = text_length
     text_input.update_ui = update_ui or nil
+
+    text_input.has_tooltip = false
+    if tooltip_text then
+        print("text_input has tooltip")
+        text_input.has_tooltip = true
+        text_input.tooltip_text = tooltip_text
+        text_input.tooltip_element = tooltip_element -- pass by reference
+    end
 
     text_input.input = {
         name = name .. "_input",
@@ -440,6 +453,12 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
 
         print("text_input create: ", self.name)
 
+        -- Prep events
+        local tooltip_events = {}
+        if self.has_tooltip then
+            tooltip_events = text_input.tooltip_element:get_events(self)
+        end
+
         local name_element = {
             name = self.name .. "_name",
             type = UI.TYPE.Text,
@@ -447,7 +466,8 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
             props = {
                 text = self.name,
                 textSize = 20,
-            }
+            },
+            events = tooltip_events
         }
 
         local refresh_element = {
@@ -472,7 +492,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
                         end
                         update_ui()
                     end
-                end),
+                end)
             }
         }
 
@@ -485,7 +505,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
 end
 
 templates.text_output = {}
-templates.text_output.new = function(name, text_length, padding_length, default_text, text_align_h)
+templates.text_output.new = function(name, text_length, padding_length, default_text, text_align_h, tooltip_text, tooltip_element)
 
     local text_output = {}
 
@@ -494,6 +514,14 @@ templates.text_output.new = function(name, text_length, padding_length, default_
     text_output.text_length = text_length
     text_output.padding_length = padding_length
     text_output.text_align_h = text_align_h or UI.ALIGNMENT.Start
+
+    text_output.has_tooltip = false
+    if tooltip_text then
+        print("text_input has tooltip")
+        text_output.has_tooltip = true
+        text_output.tooltip_text = tooltip_text
+        text_output.tooltip_element = tooltip_element -- pass by reference
+    end
 
     text_output.output = {
         name = "output",
@@ -520,6 +548,12 @@ templates.text_output.new = function(name, text_length, padding_length, default_
     end
 
     function text_output:create()
+
+        local tooltip_events = {}
+        if self.has_tooltip then
+            tooltip_events = text_output.tooltip_element:get_events(self)
+        end
+
         self.ui = {
             name = self.name .. "_text_output",
             type = UI.TYPE.Flex,
@@ -541,7 +575,7 @@ templates.text_output.new = function(name, text_length, padding_length, default_
                 },
                 templates.padding(self.padding_length, 0),
                 self.output,
-            }
+            }, events = tooltip_events
         }
 
         return self.ui
@@ -551,7 +585,7 @@ templates.text_output.new = function(name, text_length, padding_length, default_
 end
 
 templates.text_image = {}
-templates.text_image.new = function(name, image_size, padding_length, on_image_mouse_click)
+templates.text_image.new = function(name, image_size, padding_length, on_image_mouse_click, tooltip_text, tooltip_element)
 
     local text_image = {}
 
@@ -559,6 +593,14 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
     text_image.image_size = image_size
     text_image.padding_length = padding_length
     text_image.default_image = "black"
+
+    text_image.has_tooltip = false
+    if tooltip_text then
+        print("text_input has tooltip")
+        text_image.has_tooltip = true
+        text_image.tooltip_text = tooltip_text
+        text_image.tooltip_element = tooltip_element -- pass by reference
+    end
 
     text_image.image = {
         name = "image",
@@ -595,6 +637,11 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
     end
 
     function text_image:create()
+        local tooltip_events = {}
+        if self.has_tooltip then
+            tooltip_events = text_image.tooltip_element:get_events(self)
+        end
+
         self.ui = {
             name = self.name .. "_text_image",
             type = UI.TYPE.Flex,
@@ -618,7 +665,9 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
                 },
                 templates.padding(self.padding_length, 0),
                 self.image,
-            }
+            },
+            -- TODO: is this the best place for the toltip?
+            events = tooltip_events,
         }
 
         return self.ui

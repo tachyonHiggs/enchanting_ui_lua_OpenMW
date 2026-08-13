@@ -6,8 +6,19 @@
 
 local tooltips_text = {}
 
+-- Buttons
 tooltips_text.add_effect_btn = " This initiates a pop-up showing \n all available magic effects "
 tooltips_text.cast_type_btn = " Depending on the item selected for enchanting, \n iterrates through the valid cast types "
+
+-- Text inputs
+tooltips_text.name_input = " The name the enchanted item shall take "
+
+-- Text outputs
+tooltips_text.cost = " Effect to add cost "
+tooltips_text.stats_enchantment = " Enchantment "
+tooltips_text.stats_charge = " Charge "
+tooltips_text.price = " Price "
+tooltips_text.chance = " Chance "
 
 -- Unused
 tooltips_text.create_btn = " Attempts to create or buy an enchanted item, \n if all menu inputs are valid "

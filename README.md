@@ -3,8 +3,8 @@
 ## TODO / Change Log
 
 ### Vanilla Features
-- Add tool tips text to all elements
 - Organize UI
+- Finish tool tips text to relevant elements
 
 ### Expanded Features
 - Potentially add the ability use vendor's soul gems while enchanting
@@ -22,7 +22,7 @@
 ## Known Issues
  - (FIXED) Opening the enchantment menu immediately upon starting causes the menus to not load all items, souls, and magic effects
  - Minimum sized magic effects cause the item to have 0 charge
- - Menus layering issue
+ - Menus layering issue, !!IMPORTANT!!
  - Skill menu select for effect does not wrap, will fix this with new OpenMW release or will implement it myself later
  - (FIXED) Issue with canceling editing an effect
  - (FIXED) Sorting lists can get directions flipped

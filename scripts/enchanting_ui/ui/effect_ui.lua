@@ -11,6 +11,7 @@ local storage = require('openmw.storage')
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
+local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
 
 
 local effect_ui = {}
@@ -493,7 +494,7 @@ effect_ui.new = function(modify, effect_to_add)
 
     instance.delete_btn = nil
     instance.range = templates.button.new("Self", toggle_range_type, 100, 30)
-    instance.cost = templates.text_output.new("Cost:", 100, 10, "0", UI.ALIGNMENT.End)
+    instance.cost = templates.text_output.new("Cost:", 100, 10, "0", UI.ALIGNMENT.End, tooltips_text.cost, elements.tooltip)
     
     if modify then
         instance.delete_btn = templates.button.new("Delete", delete_effect, 100, 30)
