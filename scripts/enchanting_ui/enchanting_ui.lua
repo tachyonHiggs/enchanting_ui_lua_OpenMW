@@ -15,6 +15,7 @@ local elements = require("scripts.enchanting_ui.ui.elements")
 local add_effect_ui = require("scripts.enchanting_ui.ui.add_effect_ui")
 local items_ui = require("scripts.enchanting_ui.ui.items_ui")
 local souls_ui = require("scripts.enchanting_ui.ui.souls_ui")
+local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
 
 -- TODO: tooltips hovering
 
@@ -119,10 +120,9 @@ header = templates.flex({inputs(), stats()}, "header_flex", true, UI.ALIGNMENT.S
 -- main_content
 local function add_effect()
     print("Clicked Add Effect")
-    -- TODO: add column sorting
     add_effect_ui.show_add_effect_list()
 end
-local add_effect_btn = templates.button.new("Add Effect", add_effect, 105, 30)
+local add_effect_btn = templates.button.new("Add Effect", add_effect, 105, 30, tooltips_text.add_effect_btn, elements.tooltip)
 
 elements.effects = templates.list.new("Effects", v2(elements.mc_effects_size[1],elements.mc_effects_size[2]), nil, function() end)
 main_content = templates.flex({add_effect_btn:create(), elements.effects:create()}, "content_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.mc_size[1], elements.mc_size[2]))
@@ -132,7 +132,7 @@ main_content = templates.flex({add_effect_btn:create(), elements.effects:create(
 
 -- footer
 
-elements.cast_type_btn = templates.button.new("Cast Once", toggle_cast_type, 140, 30)
+elements.cast_type_btn = templates.button.new("Cast Once", toggle_cast_type, 140, 30, tooltips_text.cast_type_btn, elements.tooltip)
 
 local create_btn = templates.button.new("Create", (function() print("Clicked Create") enchanting_ui.enchant_item() return true end), 80, 30)
 local cancel_btn = templates.button.new("Cancel", (function() print("Clicked Cancel") ambient.playSound('menu click') enchanting_ui.hide() end), 80, 30)
@@ -226,6 +226,9 @@ enchanting_ui.destroy = function()
     end
     if elements.souls_root.created then
         elements.souls_root:destroy()
+    end
+    if elements.tooltip.visible then
+        elements.tooltip:destroy()
     end
     
     elements.root:update()

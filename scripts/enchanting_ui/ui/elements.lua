@@ -11,6 +11,7 @@ local types = require('openmw.types')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
+local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
 
 -- TODO: add description
 
@@ -18,8 +19,10 @@ local elements = {}
 elements.text_size = 20
 elements.padding_size = 10
 
+elements.tooltip = templates.tooltips.new("GeneralToolTip")
+
 -- Inputs
-elements.name_input = templates.text_input.new("Name:", 200, function(text) enchanter.name = text end, function() elements.root:update() end)
+elements.name_input = templates.text_input.new("Name:", 200, function(text) enchanter.name = text end, function() elements.root:update() end, tooltips_text.name_input, elements.tooltip)
 elements.soul_input = {}
 elements.item_input = {}
 elements.count_input = {}
@@ -30,12 +33,12 @@ elements.set_stats_enchantment = function()
     
     elements.stats_enchantment:set_text(string.format("%.1f", enchanter.enchantment.base_cost).."/"..string.format("%.1f", enchanter.item.enchantment_capacity))
 end
-elements.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End)
+elements.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
 elements.set_stats_charge = function()
     print("set_stats_charge")
     elements.stats_charge:set_text(string.format("%.1f", enchanter.enchantment.effective_cost) .. "/" .. string.format("%.1f", enchanter.soul.charge))
 end
-elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End)
+elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
 
 elements.set_cast_type = function()
     elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
@@ -46,12 +49,12 @@ elements.set_price = function()
     print("set_price")
     elements.price:set_text(tostring(enchanter.price))
 end
-elements.price = templates.text_output.new("Price:", 100, 10, "1", UI.ALIGNMENT.End)
+elements.price = templates.text_output.new("Price:", 100, 10, "1", UI.ALIGNMENT.End, tooltips_text.price, elements.tooltip)
 elements.set_chance = function()
     print("set_chance")
     elements.chance:set_text(string.format("%.1f", enchanter.chance))
 end
-elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMENT.End)
+elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMENT.End, tooltips_text.chance, elements.tooltip)
 elements.is_vendor = false
 
 -- lists
