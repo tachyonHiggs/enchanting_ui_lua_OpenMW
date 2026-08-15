@@ -58,6 +58,7 @@ end
 ---@return table
 templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y, size, anchor, relativePosition)
 
+    -- defaults
     arrange = arrange or UI.ALIGNMENT.Start
     align = align or UI.ALIGNMENT.Start
 
@@ -72,17 +73,69 @@ templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y,
     if not relativePosition then
         relativePosition = v2(0.5, 0.5)
     end
+    if gap_x == nil then
+        gap_x = 1
+    end
+    if gap_y == nil  then
+        gap_y = 1
+    end
 
     print("templates.flex")
 
-    local content = {}
-    table.insert(content, templates.padding(gap_x, gap_y))
+    local padding = {}
+
+    -- Pad individual items
+    local individual_padded_content = {}
+    
+    if horizontal then
+        -- Horizontal list, first add padding above and below to individual items
+        padding = templates.padding(1, gap_y)
+    else
+        -- Vertical list, first add padding infront and behind to individual items
+        padding = templates.padding(gap_x, 1)
+    end
+
     for index, item in ipairs(items) do
-        if item == nil or item == {} then
+        if item == nil then
+            print("Item at index: ", index, " is nil")
+        else 
+            local item_flex = {
+                name = name .. "_item_" .. index,
+                type = UI.TYPE.Flex,
+                props = {
+                    horizontal = not horizontal,
+                    arrange = arrange,
+                    align = align,
+                    autoSize = true,
+                    anchor = anchor,
+                    relativePosition = relativePosition,
+                    visible = true,
+                },
+                content = UI.content {
+                    padding,
+                    item,
+                    padding
+                }
+            }
+            table.insert(individual_padded_content, item_flex)
+        end
+    end
+
+    -- create main horizontal or vertical with padding
+    local content = {}
+    if horizontal then
+        padding = templates.padding(gap_x, 1)
+    else
+        padding = templates.padding(1, gap_y)
+    end
+
+    table.insert(content, padding)
+    for index, item in ipairs(individual_padded_content) do
+        if item == nil then
             print("Item at index: ", index, " is nil")
         else 
             table.insert(content, item)
-            table.insert(content, templates.padding(gap_x, gap_y))
+            table.insert(content, padding)
         end
     end
 
@@ -117,7 +170,7 @@ templates.window.new = function(name, type, template, properties, content)
     local window = {}
     window.name = name or ""
     window.type = type
-    window.template = template or I.MWUI.templates.boxSolid
+    window.template = template --or I.MWUI.templates.boxSolid
     window.properties = properties or {}
     window.properties.visible = window.properties.visible or true
     window.created = false -- Used to communicate to external scripts
@@ -150,16 +203,29 @@ templates.window.new = function(name, type, template, properties, content)
         print("templates.window.create: ", self.name)
         self.created = true
 
-        self.ui = UI.create{
-            name = self.name .. "_window",
-            layer = "Windows",
-            type = self.type,
-            template = self.template,
-            props = properties,
-            content = UI.content{
-                table.unpack(self.content)
+        if self.type == UI.TYPE.Widget then
+            print("UI.TYPE.Widget CREATED")
+            self.ui = UI.create{
+                name = self.name .. "_window",
+                layer = "Windows",
+                type = self.type,
+                props = properties,
+                content = UI.content{
+                    table.unpack(self.content)
+                }
             }
-        }
+        else 
+            self.ui = UI.create{
+                name = self.name .. "_window",
+                layer = "Windows",
+                type = self.type,
+                template = self.template,
+                props = properties,
+                content = UI.content{
+                    table.unpack(self.content)
+                }
+            }
+        end
         self:update()
     end
 
@@ -374,7 +440,6 @@ templates.scrollbar.new = function(length, list)
         
         self.ui = templates.flex({self.up_arrow_element, self.background_element, self.down_arrow_element}, "scroll_bar_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 1)
 
-
         return self.ui
 
     end
@@ -513,6 +578,9 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
             mouseClick = async:callback(function(...)
                 ambient.playSound("menu click")
 
+                if button.has_tooltip then
+                    button.tooltip_element:destroy()
+                end
                 if on_click_fnc then
                     return on_click_fnc(...)
                 end
@@ -606,8 +674,8 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
         }
     }
 
-    text_input.input_bar = templates.flex(
-        {templates.padding(text_length, 24), 
+    text_input.input_bar = templates.flex({
+        templates.padding(text_length, 24), 
         {
             name = name .. "_input_bar",
             type = UI.TYPE.Image,
@@ -615,8 +683,8 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
             props = {
                 size = v2(text_length, 1),
             },
-        }},
-        "input_bar_flex", false, UI.ALIGNMENT.Center,UI.ALIGNMENT.End, 1, 1, v2(text_length, 25), v2(0,0), v2(0,0))
+        }
+    }, "input_bar_flex", false, UI.ALIGNMENT.Center,UI.ALIGNMENT.End, 1, 1, v2(text_length, 25), v2(0,0), v2(0,0))
 
     text_input.input_ui = {
         name = name .. "_input_ui",
@@ -1279,7 +1347,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             content = UI.content {
                 list.name_element,
                 list.header,
-                templates.flex({list.items_container_border, self.scrollbar:create()}, "list_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 5),
+                templates.flex({list.items_container_border, self.scrollbar:create()}, "list_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 1),
             }
         }
         return self.ui
@@ -1531,6 +1599,7 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
                 horizontal = true,
                 arrange = UI.ALIGNMENT.Start,
                 align = UI.ALIGNMENT.Start,
+                visible = true,
             },
             content = UI.content {
                 {
@@ -1605,9 +1674,11 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
 
     function slider:hide() 
         print("hiding: ", self.text)
-        self.ui.props.visible = false
-        self.ui.props.autoSize = false
-        self.ui.props.size = v2(0,0)
+        if self.ui.props then
+            self.ui.props.visible = false
+            self.ui.props.autoSize = false
+            self.ui.props.size = v2(0,0)
+        end
 
         if self.update_target then
             self.update_target()

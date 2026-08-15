@@ -210,7 +210,7 @@ select_list_ui.new = function(name, records, on_click_fnc)
         anchor = v2(0.5, 0.5),
         visible = true,
     }
-    local content = templates.flex({instance.name_element, instance.list_element:create()}, "flex", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 0, 10)
+    local content = templates.flex({instance.name_element, instance.list_element:create()}, "flex", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 1, 10)
     instance.ui = templates.window.new(instance.name, UI.TYPE.Container, I.MWUI.templates.boxSolid, props, {content})
 
     return instance.ui
@@ -583,7 +583,7 @@ effect_ui.new = function(modify, effect_to_add)
         end
 
         local magic_effect_to_add_elements = {effect_icon_element, range_element, instance.skill:create(), instance.attribute:create(), instance.magnitude:create(), instance.magnitude_max:create(), instance.duration:create(), instance.area:create(), templates.button.new("Cancel", cancel_magic_effect, 100, 30):create(), templates.button.new("OK", ok_magic_effect, 100, 30):create(), delete_btn}
-        instance.ui = templates.flex(magic_effect_to_add_elements, "magic_effect_add_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 0, 5, v2(elements.effects_size[1], elements.effects_size[2]), v2(0,0), v2(0, 0))
+        instance.ui = templates.flex(magic_effect_to_add_elements, "magic_effect_add_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 1, v2(elements.effects_size[1], elements.effects_size[2]), v2(0,0), v2(0, 0))
 
         update_effect_to_add_cost()
         show_valid_effect_sliders()

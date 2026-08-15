@@ -20,7 +20,6 @@ local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
 -- TODO: tooltips hovering
 
 local enchanting_ui = {}
-local header = {element = {}}
 local footer = {element = {}}
 local main_content = {element = {}}
 
@@ -31,7 +30,7 @@ local title = {
     props = {
         text = "Enchanting Menu",
         textSize = elements.text_size,
-        size = v2(elements.root_size[1],elements.text_size),
+        size = v2(elements.main_menu_size[1],elements.text_size),
         autoSize = false,
         textAlignH = UI.ALIGNMENT.Center,
         textAlignV = UI.ALIGNMENT.Center,
@@ -42,104 +41,90 @@ enchanting_ui.create_ui = function()
 
     print("create_ui")
 
-    local v2_size = v2(elements.root_size[1], elements.root_size[2])
-
-    local props = {
-        size = v2_size,
-        relativePosition = v2(0.5, 0.5),
-        anchor = v2(0.5, 0.5),
-    }
-    local content = {
-        name = "root_flex",
-        type = UI.TYPE.Flex,
+    local main_menu = {
+        name = "main_menu",
+        type = UI.TYPE.Widget,
         props = {
-            horizontal = false,
-            arrange = UI.ALIGNMENT.Start,
-            align = UI.ALIGNMENT.Start,
-            autoSize = false,
-            size = v2_size,
+            size = v2(elements.main_menu_size[1], elements.main_menu_size[2]),
         },
         content = UI.content {
-            title,
-            templates.padding(0, 1),
-            header,
-            main_content,
-            footer,
+            templates.make_border(v2(elements.main_menu_size[1], elements.main_menu_size[2]), 1),
+            {
+                name = "main_flex",
+                type = UI.TYPE.Flex,
+                props = {
+                    horizontal = false,
+                    arrange = UI.ALIGNMENT.Start,
+                    align = UI.ALIGNMENT.Start,
+                    autoSize = true,
+                    anchor = v2(0.5, 0.5),
+                    relativePosition = v2(0.5, 0.5),
+                },
+                content = UI.content {
+                    title,
+                    templates.padding(0, elements.padding_size),
+                    templates.flex({elements.item_input:create(), elements.soul_input:create()}, "inputs_flex_2", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0),
+                    templates.padding(0, elements.padding_size),
+                    elements.cast_type_btn:create(),
+                    templates.padding(0, elements.padding_size),
+                    elements.name_input:create(),
+                    templates.padding(0, elements.padding_size),
+                    enchanting_ui.add_effect_btn:create(),
+                    templates.padding(0, elements.padding_size),
+                    elements.effects:create(),
+                    templates.padding(0, elements.padding_size),
+                    -- templates.padding(0, elements.padding_size),
+                    elements.count_input:create(),
+                    -- templates.padding(0, elements.padding_size),
+                    templates.flex({templates.padding(20, elements.footer_size[2]), enchanting_ui.create_btn:create(), enchanting_ui.cancel_btn:create()}, "footer_flex", true, UI.ALIGNMENT.End, UI.ALIGNMENT.End, 10, 0),
+                }
+            }
         }
     }
 
-    elements.root = templates.window.new("root_window", UI.TYPE.Container, I.MWUI.templates.boxSolid, props, {content})
+    local stats_panel = {
+        name = "stats_panel",
+        type = UI.TYPE.Widget,
+        props = {
+            size = v2(elements.stats_panel_size[1], elements.stats_panel_size[2])
+        },
+        content = UI.content {
+            templates.make_border(v2(elements.stats_panel_size[1], elements.stats_panel_size[2]), 1),
+            templates.flex({elements.stats_enchantment:create(), elements.stats_charge:create(), elements.chance:create(), elements.price:create()}, "stats_panel_content", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0, 0), v2(0, 0)),
+        }
+    }
+
+    local content = templates.flex({main_menu, stats_panel}, "content", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0.5, 0.5), v2(0.5, 0.5))
+
+    local props = {
+        relativeSize = v2(1,1),
+        anchor = v2(0.5, 0.5),
+        relativePosition = v2(0.5, 0.5),
+    }
+
+    elements.root = templates.window.new("root_window", UI.TYPE.Widget, 0, props, {content})
     elements.root:create()
 
     print("Created UI")
 end
 
-local function toggle_cast_type()
-    print("toggle_cast_type")
-
-    ambient.playSound('menu click')
-
-    -- TODO: have this toggle update magic effects, for now just clear them
-    enchanter.enchantment.base_cost = 0
-    enchanter.chance = 0
-    enchanter.enchantment.effective_cost = 0
-    enchanter.effects_with_params = {}
-    enchanter.enchantment.isAutocalc = true
-    elements.effects:clear()
-    
-    elements.set_cast_type()
-    elements.set_stats_enchantment()
-    elements.set_chance()
-    elements.root:update()
-end
-
--- header
+-- All Inputs
 elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, items_ui.show_item_list)
 elements.soul_input = templates.text_image.new("Soul:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, souls_ui.show_soul_list)
-
 elements.count_input = templates.slider.new("Count", 1, 1, 1, function() if elements.root.created then elements.root:update() end end, function(value) print("setting item count to: ", value) enchanter.item.count = value end, function() end, 55, 30, 140)
+elements.cast_type_btn = templates.button.new("Cast Once", elements.set_cast_type, 140, 30, tooltips_text.cast_type_btn, elements.tooltip)
 
-local function inputs()
-    print("inputs") 
-    local input_elements = templates.flex({elements.item_input:create(), elements.soul_input:create()}, "inputs_flex_2", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0)
-    
-    local inputs = templates.flex({elements.name_input:create(), input_elements, elements.count_input:create()}, "inputs_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 0, 10)
-    
-    return inputs
-end
+-- All Stats
 
-local function stats()
-    return templates.flex({elements.stats_enchantment:create(), elements.stats_charge:create()}, "stats_flex", false, UI.ALIGNMENT.End, UI.ALIGNMENT.Start, 0, 10, v2(elements.header_elements_size[1], elements.header_elements_size[2]))
-end
-
-header = templates.flex({inputs(), stats()}, "header_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.header_size[1], elements.header_size[2]))
-
--- End header
-
-
--- main_content
-local function add_effect()
-    print("Clicked Add Effect")
-    add_effect_ui.show_add_effect_list()
-end
-local add_effect_btn = templates.button.new("Add Effect", add_effect, 105, 30, tooltips_text.add_effect_btn, elements.tooltip)
-
+-- All Effects
+enchanting_ui.add_effect_btn = templates.button.new("Add Effect", add_effect_ui.show_add_effect_list, 105, 30, tooltips_text.add_effect_btn, elements.tooltip)
 elements.effects = templates.list.new("Effects", v2(elements.mc_effects_size[1],elements.mc_effects_size[2]), nil, function() end)
-main_content = templates.flex({add_effect_btn:create(), elements.effects:create()}, "content_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.mc_size[1], elements.mc_size[2]))
 
--- End main_content
+-- All Outputs
+enchanting_ui.create_btn = templates.button.new("Create", (function() print("Clicked Create") enchanting_ui.enchant_item() return true end), 80, 30)
+enchanting_ui.cancel_btn = templates.button.new("Cancel", (function() print("Clicked Cancel") ambient.playSound('menu click') enchanting_ui.hide() end), 80, 30)
 
-
--- footer
-
-elements.cast_type_btn = templates.button.new("Cast Once", toggle_cast_type, 140, 30, tooltips_text.cast_type_btn, elements.tooltip)
-
-local create_btn = templates.button.new("Create", (function() print("Clicked Create") enchanting_ui.enchant_item() return true end), 80, 30)
-local cancel_btn = templates.button.new("Cancel", (function() print("Clicked Cancel") ambient.playSound('menu click') enchanting_ui.hide() end), 80, 30)
-
-footer = templates.flex({elements.cast_type_btn:create(), elements.chance:create(), elements.price:create(), templates.padding(20, elements.footer_size[2]), create_btn:create(), cancel_btn:create()}, "footer_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0, v2(elements.footer_size[1], elements.footer_size[2]))
-
--- End footer
+-- Helper functions
 
 enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     print("Menu Show")

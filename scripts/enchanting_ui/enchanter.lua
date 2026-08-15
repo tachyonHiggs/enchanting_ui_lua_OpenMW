@@ -554,6 +554,14 @@ enchanter.get_vanilla_success = function(success_percent)
 end
 
 enchanter.toggle_cast_type = function()
+
+    -- Clear
+    enchanter.enchantment.base_cost = 0
+    enchanter.chance = 0
+    enchanter.enchantment.effective_cost = 0
+    enchanter.effects_with_params = {}
+    enchanter.enchantment.isAutocalc = true
+
     local text = ""
 
     local valid_types = {}

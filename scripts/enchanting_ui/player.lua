@@ -13,9 +13,8 @@ I.Settings.registerPage ({
 
 
 local function show()
-    enchanting_ui.reset()
-    -- Only create, dont render
-    enchanting_ui.create_ui()
+    enchanting_ui.create_ui()   -- Only create, dont render
+    enchanting_ui.reset()       -- Then reset newely created UI elements
 end
     
 local function hide()
@@ -37,7 +36,6 @@ end
 local function onLoad(data)
     -- Register Window and reset
     I.UI.registerWindow('EnchantingDialog', show, hide)
-    enchanting_ui.reset()
 end
 
 return {

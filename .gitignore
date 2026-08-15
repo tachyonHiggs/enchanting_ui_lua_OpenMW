@@ -1,2 +1,5 @@
 # OpenMW CS project file
 *.omwaddon.project
+
+# Cod3x file
+.luarc.json

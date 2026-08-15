@@ -33,15 +33,21 @@ elements.set_stats_enchantment = function()
     
     elements.stats_enchantment:set_text(string.format("%.1f", enchanter.enchantment.base_cost).."/"..string.format("%.1f", enchanter.item.enchantment_capacity))
 end
-elements.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
+elements.stats_enchantment = templates.text_output.new(" Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
 elements.set_stats_charge = function()
     print("set_stats_charge")
     elements.stats_charge:set_text(string.format("%.1f", enchanter.enchantment.effective_cost) .. "/" .. string.format("%.1f", enchanter.soul.charge))
 end
-elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
+elements.stats_charge = templates.text_output.new(" Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
 
+-- TODO: move this into enchanting_ui
 elements.set_cast_type = function()
+
+    elements.effects:clear()
     elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
+    elements.set_stats_enchantment()
+    elements.set_chance()
+    elements.root:update()
 end
 elements.cast_type_btn = {}
 
@@ -49,12 +55,12 @@ elements.set_price = function()
     print("set_price")
     elements.price:set_text(tostring(enchanter.price))
 end
-elements.price = templates.text_output.new("Price:", 100, 10, "1", UI.ALIGNMENT.End, tooltips_text.price, elements.tooltip)
+elements.price = templates.text_output.new(" Price:", 100, 10, "1", UI.ALIGNMENT.End, tooltips_text.price, elements.tooltip)
 elements.set_chance = function()
     print("set_chance")
     elements.chance:set_text(string.format("%.1f", enchanter.chance))
 end
-elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMENT.End, tooltips_text.chance, elements.tooltip)
+elements.chance = templates.text_output.new(" Chance:", 100, 10, "0", UI.ALIGNMENT.End, tooltips_text.chance, elements.tooltip)
 elements.is_vendor = false
 
 -- lists
@@ -68,6 +74,8 @@ elements.effects = {}
 
 -- Root UI constants
 elements.root_size = {800, 600}
+elements.main_menu_size = {550, 600}
+elements.stats_panel_size = {250, 600}
 
 -- Header UI constants
 elements.header_size = {800, 170}
