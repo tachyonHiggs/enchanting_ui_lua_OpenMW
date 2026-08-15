@@ -33,12 +33,12 @@ elements.set_stats_enchantment = function()
     
     elements.stats_enchantment:set_text(string.format("%.1f", enchanter.enchantment.base_cost).."/"..string.format("%.1f", enchanter.item.enchantment_capacity))
 end
-elements.stats_enchantment = templates.text_output.new(" Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
+elements.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
 elements.set_stats_charge = function()
     print("set_stats_charge")
     elements.stats_charge:set_text(string.format("%.1f", enchanter.enchantment.effective_cost) .. "/" .. string.format("%.1f", enchanter.soul.charge))
 end
-elements.stats_charge = templates.text_output.new(" Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
+elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
 
 -- TODO: move this into enchanting_ui
 elements.set_cast_type = function()
@@ -55,12 +55,12 @@ elements.set_price = function()
     print("set_price")
     elements.price:set_text(tostring(enchanter.price))
 end
-elements.price = templates.text_output.new(" Price:", 100, 10, "1", UI.ALIGNMENT.End, tooltips_text.price, elements.tooltip)
+elements.price = templates.text_output.new("Price:", 100, 10, "1", UI.ALIGNMENT.End, tooltips_text.price, elements.tooltip)
 elements.set_chance = function()
     print("set_chance")
     elements.chance:set_text(string.format("%.1f", enchanter.chance))
 end
-elements.chance = templates.text_output.new(" Chance:", 100, 10, "0", UI.ALIGNMENT.End, tooltips_text.chance, elements.tooltip)
+elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMENT.End, tooltips_text.chance, elements.tooltip)
 elements.is_vendor = false
 
 -- lists
@@ -83,7 +83,7 @@ elements.header_elements_size = {380, 120}
 elements.input_image_size = {75, 75}
 
 -- Main Content UI constants
-elements.mc_effects_size = {500, 300}
+elements.mc_effects_size = {520, 200}
 elements.mc_list_gap = 5
 elements.mc_size = {800, 350}
 

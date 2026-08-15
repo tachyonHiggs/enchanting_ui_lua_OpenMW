@@ -444,6 +444,20 @@ templates.scrollbar.new = function(length, list)
 
     end
 
+    function scrollbar:hide()
+        print("scrollbar:hide CAN NOT BE UNDONE")
+        
+        self.up_arrow_element.props.size = v2(0,0)
+        self.down_arrow_element.props.size = v2(0,0)
+        self.bar_element.props.size = v2(0,0)
+        self.background_element.props.size = v2(0,0)
+
+        if scrollbar.update_target then
+            scrollbar.update_target()
+        end
+
+    end
+
     return scrollbar
 end
 
@@ -675,7 +689,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
     }
 
     text_input.input_bar = templates.flex({
-        templates.padding(text_length, 24), 
+        templates.padding(text_length, 19),
         {
             name = name .. "_input_bar",
             type = UI.TYPE.Image,
@@ -684,7 +698,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
                 size = v2(text_length, 1),
             },
         }
-    }, "input_bar_flex", false, UI.ALIGNMENT.Center,UI.ALIGNMENT.End, 1, 1, v2(text_length, 25), v2(0,0), v2(0,0))
+    }, "input_bar_flex", false, UI.ALIGNMENT.Center,UI.ALIGNMENT.End, 1, 1, v2(text_length, 20), v2(0,0), v2(0,0))
 
     text_input.input_ui = {
         name = name .. "_input_ui",
@@ -764,7 +778,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
             }
         }
 
-        self.ui = templates.flex({name_element, self.input_ui, refresh_element}, "text_input_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
+        self.ui = templates.flex({name_element, self.input_ui, refresh_element}, "text_input_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 1)
 
         return self.ui
     end
@@ -967,18 +981,23 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     list.name = name
 
     list.current_length = 0
-    list.scrollbar = templates.scrollbar.new(list.size.y, list)
+    list.scrollbar = templates.scrollbar.new(list.size.y, list) 
+    if not header_info then
+        list.scrollbar:hide()
+    end
+    
     function list:update_current_length()
         print("list:update_current_length")
-        list.current_length = 0
+        self.current_length = 0
 
         for _, item in ipairs(self.items) do
             if item.props.visible then
-                list.current_length = list.current_length + item.userData.max_height
+                self.current_length = self.current_length + item.userData.max_height
             end
         end
-        list.scrollbar:reset()
-        print("List height is: ", list.current_length)
+        self.scrollbar:reset()
+        
+        print("List height is: ", self.current_length)
 
     end
 
@@ -1378,6 +1397,7 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     slider.value = start
     slider.value_text = tostring(slider.value)
     slider.text_size = 20
+    slider.visible = false
 
     slider.min = min
     slider.max = max

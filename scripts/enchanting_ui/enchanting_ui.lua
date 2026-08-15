@@ -49,36 +49,16 @@ enchanting_ui.create_ui = function()
         },
         content = UI.content {
             templates.make_border(v2(elements.main_menu_size[1], elements.main_menu_size[2]), 1),
-            {
-                name = "main_flex",
-                type = UI.TYPE.Flex,
-                props = {
-                    horizontal = false,
-                    arrange = UI.ALIGNMENT.Start,
-                    align = UI.ALIGNMENT.Start,
-                    autoSize = true,
-                    anchor = v2(0.5, 0.5),
-                    relativePosition = v2(0.5, 0.5),
-                },
-                content = UI.content {
-                    title,
-                    templates.padding(0, elements.padding_size),
-                    templates.flex({elements.item_input:create(), elements.soul_input:create()}, "inputs_flex_2", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 0),
-                    templates.padding(0, elements.padding_size),
-                    elements.cast_type_btn:create(),
-                    templates.padding(0, elements.padding_size),
-                    elements.name_input:create(),
-                    templates.padding(0, elements.padding_size),
-                    enchanting_ui.add_effect_btn:create(),
-                    templates.padding(0, elements.padding_size),
-                    elements.effects:create(),
-                    templates.padding(0, elements.padding_size),
-                    -- templates.padding(0, elements.padding_size),
-                    elements.count_input:create(),
-                    -- templates.padding(0, elements.padding_size),
-                    templates.flex({templates.padding(20, elements.footer_size[2]), enchanting_ui.create_btn:create(), enchanting_ui.cancel_btn:create()}, "footer_flex", true, UI.ALIGNMENT.End, UI.ALIGNMENT.End, 10, 0),
-                }
-            }
+            templates.flex({
+                title, 
+                templates.flex({elements.item_input:create(), elements.soul_input:create()}, "inputs_flex_2", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 1),
+                elements.cast_type_btn:create(),
+                elements.name_input:create(),
+                enchanting_ui.add_effect_btn:create(),
+                elements.effects:create(),
+                -- elements.count_input:create(),
+                templates.flex({enchanting_ui.create_btn:create(), enchanting_ui.cancel_btn:create()}, "footer_flex", true, UI.ALIGNMENT.End, UI.ALIGNMENT.End, 10, 10, v2(elements.main_menu_size[1] - 20, 40), v2(0, 1), v2(0, 1)),
+            }, "main_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0, 0), v2(0, 0)),
         }
     }
 
