@@ -54,12 +54,14 @@ enchanting_ui.create_ui = function()
                     name = "inputs_menu",
                     type = UI.TYPE.Widget,
                     props = {
-                        size = v2(elements.main_menu_size[1] - 30, elements.input_image_size[2] + 20),
+                        size = v2(elements.mc_effects_size[1], elements.input_image_size[2] + 20),
                         anchor = v2(0.5, 0),
                     },
                     content = UI.content {
                         elements.item_input:create(),
-                        elements.cast_type_btn:create(),
+                        -- elements.cast_type_btn:create(),
+                        templates.flex({elements.cast_once:create(), elements.cast_on_strike:create(), elements.cast_on_use:create(), elements.constant:create()}, "cast_types", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 1, nil, v2(0.5, 1), v2(0.5, 1)),
+                        -- templates.flex({}, "cast_2_types", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 1, nil, v2(0.5, 1), v2(0.5, 1)),
                         elements.name_input:create(),
                         elements.soul_input:create(),
                     }
@@ -70,7 +72,7 @@ enchanting_ui.create_ui = function()
                     type = UI.TYPE.Widget,
                     props = {
                         size = v2(elements.mc_effects_size[1],elements.mc_effects_size[2]+35)
-                },
+                    },
                     content = UI.content {
                         elements.effects:create(),
                         enchanting_ui.add_effect_btn:create(),
@@ -89,7 +91,7 @@ enchanting_ui.create_ui = function()
         },
         content = UI.content {
             templates.make_border(v2(elements.stats_panel_size[1], elements.stats_panel_size[2]), 1),
-            templates.flex({elements.stats_enchantment:create(), elements.stats_charge:create(), elements.chance:create(), elements.price:create()}, "stats_panel_content", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0, 0), v2(0, 0)),
+            elements.create_stats(),
         }
     }
 
@@ -100,6 +102,9 @@ enchanting_ui.create_ui = function()
         anchor = v2(0.5, 0.5),
         relativePosition = v2(0.5, 0.5),
     }
+
+    print("Disabling cast once")
+    elements.cast_once:disable()
 
     elements.root = templates.window.new("root_window", UI.TYPE.Widget, 0, props, {content})
     elements.root:create()
@@ -113,8 +118,13 @@ elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_
 elements.soul_input = templates.text_image.new("Soul:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, souls_ui.show_soul_list, nil, nil, {anchor = v2(1, 0), relativePosition = v2(1,0)})
 elements.cast_type_btn = templates.button.new("Cast Once", elements.set_cast_type, 140, 30, tooltips_text.cast_type_btn, elements.tooltip, {anchor = v2(0.5, 1), relativePosition = v2(0.5, 1)})
 
+elements.cast_once = templates.button.new("Cast Once", elements.set_cast_type, 70, 25, tooltips_text.cast_type_btn, elements.tooltip, nil, 15)
+elements.cast_on_strike = templates.button.new("Cast on Strike", elements.set_cast_type, 100, 25, tooltips_text.cast_type_btn, elements.tooltip, nil, 15)
+elements.cast_on_use = templates.button.new("Cast on Use", elements.set_cast_type, 100, 25, tooltips_text.cast_type_btn, elements.tooltip, nil, 15)
+elements.constant = templates.button.new("Constant", elements.set_cast_type, 70, 25, tooltips_text.cast_type_btn, elements.tooltip, nil, 15)
+
 -- All Effects
-enchanting_ui.add_effect_btn = templates.button.new("Add Effect", add_effect_ui.show_add_effect_list, 105, 30, tooltips_text.add_effect_btn, elements.tooltip, {visible = true, anchor = v2(1, 0), relativePosition = v2(1,0)})
+enchanting_ui.add_effect_btn = templates.button.new("Add Effect", add_effect_ui.show_add_effect_list, 105, 30, tooltips_text.add_effect_btn, elements.tooltip, {anchor = v2(1,0), relativePosition = v2(1,0)})
 elements.effects = templates.list.new("Effects", v2(elements.mc_effects_size[1],elements.mc_effects_size[2]), nil, function() end, nil, {visible = true, anchor = v2(0, 0), relativePosition = v2(0,0.05)})
 
 elements.count_input = templates.slider.new("Count", 1, 1, 1, function() if elements.root.created then elements.root:update() end end, function(value) print("setting item count to: ", value) enchanter.item.count = value end, function() end, 55, 30, 140)

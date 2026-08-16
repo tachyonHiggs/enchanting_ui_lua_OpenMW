@@ -11,7 +11,10 @@ local templates = {}
 -- TODO: replace text size with a passed in parameter
 
 -- Helper fncs
-templates.make_border = function(size, alpha)
+templates.make_border = function(size, alpha, properties)
+    properties = properties or {}
+    properties.anchor = properties.anchor or v2(0,0)
+    properties.relativePosition = properties.relativePosition or v2(0,0)
     return {
         template = I.MWUI.templates.bordersThick,
         type = UI.TYPE.Image,
@@ -21,8 +24,8 @@ templates.make_border = function(size, alpha)
             }),
             alpha = alpha,
             size = size,
-            anchor = v2(0.5, 0.5),
-            relativePosition = v2(0.5, 0.5),
+            anchor = properties.anchor,
+            properties.relativePosition,
         }
     }
 end
@@ -558,7 +561,7 @@ end
 
 -- Templates
 templates.button = {}
-templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text, tooltip_element, main_properties)
+templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text, tooltip_element, main_properties, text_size)
 
     local button = {}
 
@@ -574,8 +577,12 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
         button.tooltip_element = tooltip_element -- pass by reference
     end
 
+    button.text_size = text_size or 20
+
     button.main_properties = main_properties or {}
-    button.main_properties.visible = button.main_properties.visible or true
+    button.main_properties.anchor = button.main_properties.anchor or v2(0.5, 0.5)
+    button.main_properties.relativePosition = button.main_properties.relativePosition or v2(0.5, 0.5)
+    button.main_properties.size = v2(button.size_x, button.size_y)
 
     button.name_element = {
         name = button.name .. "_btn",
@@ -583,11 +590,9 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
         template = I.MWUI.templates.textNormal,
         props = {
             text = button.name,
-            textSize = 20,
-            size = v2(button.size_x, 20),
+            textSize = button.text_size,
+            size = v2(button.size_x, button.size_y),
             autoSize = false,
-            anchor = v2(0.05, 0), -- TODO: magic number here, for some reason the buttons won't be centered otherwise
-            relativePosition = v2(0.5, 0.5),
             textAlignH = UI.ALIGNMENT.Center,
             textAlignV = UI.ALIGNMENT.Center,
         },
@@ -607,7 +612,7 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
 
     function button:show()
         self.ui.props.visible = true
-        self.ui.content = UI.content {
+        self.ui.content.content = UI.content {
             templates.padding(self.size_x, self.size_y),
             button.name_element,
         }
@@ -615,11 +620,15 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
 
     function button:hide()
         self.ui.props.visible = false
-        self.ui.content = UI.content {}
+        self.ui.content.content = UI.content {}
+    end
+
+    function button:disable()
+        self.ui.template = I.MWUI.templates.disabled
     end
 
     function button:set_text(text)
-        button.name_element.props.text = text
+        self.name_element.props.text = text
     end
 
     function button:create()
@@ -628,22 +637,17 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
         if self.has_tooltip then
             events = button.tooltip_element:get_events(self)
         end
-        -- table.insert(events, {focusGain = async:callback(function()
-        --         self.ui.template = I.MWUI.templates.bordersThick end)
-        --     }
-        -- )
 
         self.ui = {
             name = self.name .. "_btn_border",
             type = UI.TYPE.Container,
-            template = I.MWUI.templates.bordersThick,
+            template = 0,
             props = button.main_properties,
             content = UI.content {
-                templates.padding(self.size_x, self.size_y),
+                templates.make_border( v2(self.size_x, self.size_y), 1),
                 self.name_element,
             },
             events = events
-
         }
 
         return self.ui

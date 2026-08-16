@@ -18,6 +18,7 @@
 ### Development
 - Add descriptions, params, fields etc to functions and files
 - Make it so that changing item does not cause the enchanting menu to reset
+- Add Support/references, etc
 
 ## Removed/Useless GMST's
 

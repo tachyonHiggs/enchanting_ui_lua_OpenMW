@@ -28,17 +28,33 @@ elements.item_input = {}
 elements.count_input = {}
 
 -- Stats
+elements.stats_enchantment = templates.text_output.new("Enchantment Pts:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
+elements.stats_base_cost = templates.text_output.new("  Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
+elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
+elements.stats_effective_cost = templates.text_output.new("  Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
+
+elements.create_stats = function()
+    
+    local content = {
+        elements.stats_enchantment:create(),
+        elements.stats_base_cost:create(),
+        elements.stats_charge:create(),
+        elements.stats_effective_cost:create(),
+        elements.chance:create(),
+        elements.price:create(),
+    }
+    return templates.flex(content, "stats_panel_content", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0, 0), v2(0, 0))
+end
+
 elements.set_stats_enchantment = function()
     print("set_stats_enchantment")
     
     elements.stats_enchantment:set_text(string.format("%.1f", enchanter.enchantment.base_cost).."/"..string.format("%.1f", enchanter.item.enchantment_capacity))
 end
-elements.stats_enchantment = templates.text_output.new("Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
 elements.set_stats_charge = function()
     print("set_stats_charge")
     elements.stats_charge:set_text(string.format("%.1f", enchanter.enchantment.effective_cost) .. "/" .. string.format("%.1f", enchanter.soul.charge))
 end
-elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
 
 -- TODO: move this into enchanting_ui
 elements.set_cast_type = function()
@@ -50,6 +66,12 @@ elements.set_cast_type = function()
     elements.root:update()
 end
 elements.cast_type_btn = {}
+
+-- Type
+elements.cast_once = {}
+elements.cast_on_strike = {}
+elements.cast_on_use = {}
+elements.constant = {}
 
 elements.set_price = function()
     print("set_price")
@@ -73,15 +95,15 @@ elements.magic_effects_list = {}
 elements.effects = {}
 
 -- Root UI constants
-elements.root_size = {800, 500}
-elements.main_menu_size = {550, 500}
-elements.stats_panel_size = {250, 500}
+elements.root_size = {800, 450}
+elements.main_menu_size = {550, 450}
+elements.stats_panel_size = {250, 450}
 
 -- Header UI constants
 elements.input_image_size = {75, 75}
 
 -- Main Content UI constants
-elements.mc_effects_size = {520, 200}
+elements.mc_effects_size = {525, 200}
 elements.mc_list_gap = 5
 elements.mc_size = {800, 350}
 
