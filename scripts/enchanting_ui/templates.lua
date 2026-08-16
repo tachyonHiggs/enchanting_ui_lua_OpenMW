@@ -558,7 +558,7 @@ end
 
 -- Templates
 templates.button = {}
-templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text, tooltip_element)
+templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text, tooltip_element, main_properties)
 
     local button = {}
 
@@ -573,6 +573,9 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
         button.tooltip_text = tooltip_text
         button.tooltip_element = tooltip_element -- pass by reference
     end
+
+    button.main_properties = main_properties or {}
+    button.main_properties.visible = button.main_properties.visible or true
 
     button.name_element = {
         name = button.name .. "_btn",
@@ -630,9 +633,7 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
             name = self.name .. "_btn_border",
             type = UI.TYPE.Container,
             template = I.MWUI.templates.bordersThick,
-            props = {
-                visible = true,
-            },
+            props = button.main_properties,
             content = UI.content {
                 templates.padding(self.size_x, self.size_y),
                 self.name_element,

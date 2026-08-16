@@ -20,8 +20,6 @@ local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
 -- TODO: tooltips hovering
 
 local enchanting_ui = {}
-local footer = {element = {}}
-local main_content = {element = {}}
 
 local title = {
     name = "title",
@@ -41,6 +39,7 @@ enchanting_ui.create_ui = function()
 
     print("create_ui")
 
+
     local main_menu = {
         name = "main_menu",
         type = UI.TYPE.Widget,
@@ -54,8 +53,17 @@ enchanting_ui.create_ui = function()
                 templates.flex({elements.item_input:create(), elements.soul_input:create()}, "inputs_flex_2", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 1),
                 elements.cast_type_btn:create(),
                 elements.name_input:create(),
-                enchanting_ui.add_effect_btn:create(),
-                elements.effects:create(),
+                {
+                    name = "effects_menu",
+                    type = UI.TYPE.Widget,
+                    props = {
+                        size = v2(elements.mc_effects_size[1]+35,elements.mc_effects_size[2]+35)
+                    },
+                    content = UI.content {
+                        elements.effects:create(),
+                        enchanting_ui.add_effect_btn:create(),
+                    }
+                },
                 -- elements.count_input:create(),
                 templates.flex({enchanting_ui.create_btn:create(), enchanting_ui.cancel_btn:create()}, "footer_flex", true, UI.ALIGNMENT.End, UI.ALIGNMENT.End, 10, 10, v2(elements.main_menu_size[1] - 20, 40), v2(0, 1), v2(0, 1)),
             }, "main_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0, 0), v2(0, 0)),
@@ -97,8 +105,8 @@ elements.cast_type_btn = templates.button.new("Cast Once", elements.set_cast_typ
 -- All Stats
 
 -- All Effects
-enchanting_ui.add_effect_btn = templates.button.new("Add Effect", add_effect_ui.show_add_effect_list, 105, 30, tooltips_text.add_effect_btn, elements.tooltip)
-elements.effects = templates.list.new("Effects", v2(elements.mc_effects_size[1],elements.mc_effects_size[2]), nil, function() end)
+enchanting_ui.add_effect_btn = templates.button.new("Add Effect", add_effect_ui.show_add_effect_list, 105, 30, tooltips_text.add_effect_btn, elements.tooltip, {visible = true, anchor = v2(1, 0), relativePosition = v2(0.94,0)})
+elements.effects = templates.list.new("Effects", v2(elements.mc_effects_size[1],elements.mc_effects_size[2]), nil, function() end, nil, {visible = true, anchor = v2(0, 0), relativePosition = v2(0,0.05)})
 
 -- All Outputs
 enchanting_ui.create_btn = templates.button.new("Create", (function() print("Clicked Create") enchanting_ui.enchant_item() return true end), 80, 30)

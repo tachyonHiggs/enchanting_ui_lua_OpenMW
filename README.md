@@ -13,6 +13,7 @@
 - Add cheat that makes menu show all magic effects in the game
 - Allow bartering to use vendor known magic effects
 - Add cast type to item list
+- Add option to make fortify speechcraft, mercantile, alchemy, smithing, enchanting, etc have much higher costs for 1 second
 
 ### Development
 - Add descriptions, params, fields etc to functions and files
