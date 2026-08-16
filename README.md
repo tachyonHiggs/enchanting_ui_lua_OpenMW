@@ -28,3 +28,4 @@
  - Skill menu select for effect does not wrap, will fix this with new OpenMW release or will implement it myself later
  - (FIXED) Issue with canceling editing an effect
  - (FIXED) Sorting lists can get directions flipped
+ - Hitting cast type will always reset effects even if the type does not change

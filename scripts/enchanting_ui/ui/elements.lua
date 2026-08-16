@@ -22,7 +22,7 @@ elements.padding_size = 10
 elements.tooltip = templates.tooltips.new("GeneralToolTip")
 
 -- Inputs
-elements.name_input = templates.text_input.new("Name:", 200, function(text) enchanter.name = text end, function() elements.root:update() end, tooltips_text.name_input, elements.tooltip)
+elements.name_input = {}
 elements.soul_input = {}
 elements.item_input = {}
 elements.count_input = {}
@@ -73,13 +73,11 @@ elements.magic_effects_list = {}
 elements.effects = {}
 
 -- Root UI constants
-elements.root_size = {800, 600}
-elements.main_menu_size = {550, 600}
-elements.stats_panel_size = {250, 600}
+elements.root_size = {800, 500}
+elements.main_menu_size = {550, 500}
+elements.stats_panel_size = {250, 500}
 
 -- Header UI constants
-elements.header_size = {800, 170}
-elements.header_elements_size = {380, 120}
 elements.input_image_size = {75, 75}
 
 -- Main Content UI constants

@@ -628,6 +628,10 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
         if self.has_tooltip then
             events = button.tooltip_element:get_events(self)
         end
+        -- table.insert(events, {focusGain = async:callback(function()
+        --         self.ui.template = I.MWUI.templates.bordersThick end)
+        --     }
+        -- )
 
         self.ui = {
             name = self.name .. "_btn_border",
@@ -649,7 +653,7 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
 end
 
 templates.text_input = {}
-templates.text_input.new = function(name, text_length, on_text_changed_fnc, update_ui, tooltip_text, tooltip_element)
+templates.text_input.new = function(name, text_length, on_text_changed_fnc, update_ui, tooltip_text, tooltip_element, main_properties)
 
     local text_input = {}
 
@@ -667,6 +671,12 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
         text_input.tooltip_text = tooltip_text
         text_input.tooltip_element = tooltip_element -- pass by reference
     end
+
+    text_input.main_properties = main_properties or {}
+    text_input.main_properties.arrange = text_input.main_properties.arrange or UI.ALIGNMENT.Start
+    text_input.main_properties.align = text_input.main_properties.align or UI.ALIGNMENT.Start
+    text_input.main_properties.anchor = text_input.main_properties.anchor or v2(0,0)
+    text_input.main_properties.relativePosition = text_input.main_properties.relativePosition or v2(0,0)
 
     text_input.input = {
         name = name .. "_input",
@@ -779,7 +789,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
             }
         }
 
-        self.ui = templates.flex({name_element, self.input_ui, refresh_element}, "text_input_flex", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 1)
+        self.ui = templates.flex({name_element, self.input_ui, refresh_element}, "text_input_flex", true, text_input.main_properties.arrange, text_input.main_properties.align, 1, 1, nil, text_input.main_properties.anchor, text_input.main_properties.relativePosition)
 
         return self.ui
     end
@@ -868,7 +878,7 @@ templates.text_output.new = function(name, text_length, padding_length, default_
 end
 
 templates.text_image = {}
-templates.text_image.new = function(name, image_size, padding_length, on_image_mouse_click, tooltip_text, tooltip_element)
+templates.text_image.new = function(name, image_size, padding_length, on_image_mouse_click, tooltip_text, tooltip_element, main_properties)
 
     local text_image = {}
 
@@ -884,6 +894,12 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
         text_image.tooltip_text = tooltip_text
         text_image.tooltip_element = tooltip_element -- pass by reference
     end
+
+    text_image.main_properties = main_properties or {}
+    text_image.main_properties.visible = text_image.main_properties.visible or true
+    text_image.main_properties.arrange = text_image.main_properties.arrange or UI.ALIGNMENT.Start
+    text_image.main_properties.align = text_image.main_properties.align or UI.ALIGNMENT.Start
+    text_image.main_properties.horizontal = false
 
     text_image.image = {
         name = "image",
@@ -928,12 +944,7 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
         self.ui = {
             name = self.name .. "_text_image",
             type = UI.TYPE.Flex,
-            props = {
-                horizontal = true,
-                arrange = UI.ALIGNMENT.Start,
-                align = UI.ALIGNMENT.Start,
-                visible = true,
-            },
+            props = text_image.main_properties,
             content = UI.content {
                 {
                     name = "name",
@@ -943,7 +954,7 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
                         text = self.name,
                         textSize = 20,
                         autoSize = false,
-                        size = v2(45, 20)
+                        size = v2(45, 20),
                     }
                 },
                 templates.padding(self.padding_length, 0),
