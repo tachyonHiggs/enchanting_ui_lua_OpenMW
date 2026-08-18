@@ -29,18 +29,54 @@ elements.item_input = {}
 elements.count_input = {}
 
 -- Stats
-elements.stats_enchantment = templates.text_output.new("Enchantment Pts:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
-elements.stats_base_cost = templates.text_output.new("  Enchantment:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_enchantment, elements.tooltip)
-elements.stats_charge = templates.text_output.new("Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
-elements.stats_effective_cost = templates.text_output.new("  Charge:", 200, 10, "0/0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
+elements.stats_max_enchantment_pts = templates.text_output.new("   Max:", 200, 10, "0", UI.ALIGNMENT.End, tooltips_text.stats_max_enchantment_pts, elements.tooltip)
+elements.stats_in_use_enchantment_pts = templates.text_output.new("   In Use:", 200, 10, "0", UI.ALIGNMENT.End, tooltips_text.stats_in_use_enchantment_pts, elements.tooltip)
+elements.stats_charge = templates.text_output.new("   Charge:", 200, 10, "0", UI.ALIGNMENT.End, tooltips_text.stats_charge, elements.tooltip)
+elements.stats_num_uses = templates.text_output.new("   Uses:", 200, 10, "0", UI.ALIGNMENT.End, tooltips_text.stats_num_uses, elements.tooltip)
+elements.stats_skill_bonus = templates.text_output.new("Enchant Skill Bonus:", 200, 10, "+0%", UI.ALIGNMENT.End, nil, nil) -- TODO: this
 
 elements.create_stats = function()
+
+    local enchantment_points_header = {
+        name = "Enchantment Points",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = "Enchantment Points",
+            textSize = elements.text_size,
+            size = v2(elements.stats_panel_size[1],elements.text_size),
+            autoSize = true,
+            textAlignH = UI.ALIGNMENT.Start,
+            textAlignV = UI.ALIGNMENT.Start,
+        },
+    }
+    local soul_charge_header = {
+        name = "Soul Charge",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = "Soul Charge",
+            textSize = elements.text_size,
+            size = v2(elements.stats_panel_size[1],elements.text_size),
+            autoSize = true,
+            textAlignH = UI.ALIGNMENT.Start,
+            textAlignV = UI.ALIGNMENT.Start,
+        },
+    }
     
     local content = {
-        elements.stats_enchantment:create(),
-        elements.stats_base_cost:create(),
+        enchantment_points_header,
+        elements.stats_max_enchantment_pts:create(),
+        elements.stats_in_use_enchantment_pts:create(),
+        templates.padding(10,5),
+
+        soul_charge_header,
         elements.stats_charge:create(),
-        elements.stats_effective_cost:create(),
+        elements.stats_num_uses:create(),
+        templates.padding(10,5),
+
+        elements.stats_skill_bonus:create(),
+        templates.padding(10,10),
         elements.chance:create(),
         elements.price:create(),
     }
@@ -49,12 +85,27 @@ end
 
 elements.set_stats_enchantment = function()
     print("set_stats_enchantment")
-    
-    elements.stats_enchantment:set_text(string.format("%.1f", enchanter.enchantment.base_cost).."/"..string.format("%.1f", enchanter.item.enchantment_capacity))
+    elements.stats_max_enchantment_pts:set_text(string.format("%.1f", enchanter.item.enchantment_capacity))
+    elements.stats_in_use_enchantment_pts:set_text(string.format("%.1f", enchanter.enchantment.base_cost))
 end
 elements.set_stats_charge = function()
     print("set_stats_charge")
-    elements.stats_charge:set_text(string.format("%.1f", enchanter.enchantment.effective_cost) .. "/" .. string.format("%.1f", enchanter.soul.charge))
+    elements.stats_charge:set_text(string.format("%.1f", enchanter.soul.charge))
+    local uses = 0
+
+    if enchanter.enchantment.effective_cost ~= 0 then -- Some effects are in. To avoid infinite
+        uses = enchanter.soul.charge/enchanter.enchantment.effective_cost
+    end
+
+    if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnce then
+        elements.stats_num_uses:set_text("1")
+        return
+    elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        elements.stats_num_uses:set_text("Constant")
+        return
+    end
+    
+    elements.stats_num_uses:set_text(string.format("%.0f", uses)) -- round down/ floor value
 end
 
 -- TODO: move this into enchanting_ui
@@ -111,9 +162,8 @@ elements.magic_effects_list = {}
 elements.effects = {}
 
 -- Root UI constants
-elements.root_size = {800, 500}
 elements.main_menu_size = {575, 500}
-elements.stats_panel_size = {225, 500}
+elements.stats_panel_size = {250, 500}
 
 -- Header UI constants
 elements.input_image_size = {75, 75}
@@ -143,12 +193,14 @@ elements.effect_icon_size = v2(20,20)
 
 -- Souls UI constants
 elements.souls_root = {}
+elements.souls_window_size = {800, 500}
 elements.souls_list_column_names = {"", "Name", "Charge", "Soul Name", "Count"}
 elements.souls_list_sizes = {50, 250, 80, 200, 80}
 elements.souls_list_sorting = {false, true, true, true, true}
 
 -- Items UI constants
 elements.items_root = {}
+elements.items_window_size = {800, 500}
 elements.items_list_column_names = {"", "Name", "Enchant Pts", "Type", "Count"}
 elements.items_list_sizes = {50, 250, 120, 100, 80}
 elements.items_list_sorting = {false, true, true, true, true}

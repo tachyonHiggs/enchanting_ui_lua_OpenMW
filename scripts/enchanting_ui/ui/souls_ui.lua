@@ -156,7 +156,7 @@ function souls_ui.show_soul_list()
 
     print("CREATING SOUL UI")
     
-    elements.souls_list = templates.list.new("Souls", v2(elements.root_size[1], elements.root_size[2]), souls_ui.update, souls_ui.make_souls_list, {column_names=elements.souls_list_column_names, column_widths=elements.souls_list_sizes, enable_column_sortings=elements.souls_list_sorting}, nil, true)
+    elements.souls_list = templates.list.new("Souls", v2(elements.souls_window_size[1], elements.souls_window_size[2]), souls_ui.update, souls_ui.make_souls_list, {column_names=elements.souls_list_column_names, column_widths=elements.souls_list_sizes, enable_column_sortings=elements.souls_list_sorting}, nil, true)
 
     ambient.playSound('menu click')
     elements.root:hide()

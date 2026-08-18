@@ -56,7 +56,7 @@ enchanter.reset_enchantment = function()
     enchanter.enchantment = {}
     enchanter.enchantment.id = 0
     enchanter.enchantment.isAutocalc = true
-    enchanter.enchantment.type = 0
+    enchanter.enchantment.type = -1
     enchanter.enchantment.base_cost = 0
     enchanter.enchantment.effective_cost = 0
     enchanter.enchantment.has_area = false -- Added for ease
@@ -359,6 +359,13 @@ enchanter.check_requirements = function(is_vendor_enchant)
         return false
     end
 
+    -- Check type has been selected
+    if enchanter.enchantment.type == -1 then
+        UI.showMessage("No type selected, please select an enchantment type")
+        print("Failed: no type selected")
+        return false
+    end
+
     -- Check effects
     if enchanter.effects_with_params[1] == nil then
         UI.showMessage("No effects selected")
@@ -551,78 +558,6 @@ enchanter.get_vanilla_success = function(success_percent)
         success = false
     end 
     return success
-end
-
-enchanter.toggle_cast_type = function()
-
-    local text = ""
-
-    local valid_types = {}
-
-    if enchanter.item.type == nil or enchanter.item.type == 0 then
-        valid_types = {
-            core.magic.ENCHANTMENT_TYPE.CastOnce
-        }
-    elseif enchanter.item.type == "Weapon" then
-        local weapon_type = types.Weapon.records[enchanter.item.id].type
-        print("Weapon type: ", weapon_type)
-
-        if weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown then
-            valid_types = {
-                core.magic.ENCHANTMENT_TYPE.CastOnStrike
-            }
-        elseif weapon_type == types.Weapon.TYPE.MarksmanBow or weapon_type == types.Weapon.TYPE.MarksmanCrossbow then
-            valid_types = {
-                core.magic.ENCHANTMENT_TYPE.CastOnUse,
-                core.magic.ENCHANTMENT_TYPE.ConstantEffect, -- TODO: in vanilla this is not allowed, should it be here? or add a settings menu
-            }
-        else
-            valid_types = {
-                core.magic.ENCHANTMENT_TYPE.CastOnStrike,
-                core.magic.ENCHANTMENT_TYPE.CastOnUse,
-                core.magic.ENCHANTMENT_TYPE.ConstantEffect,
-            }
-        end
-    elseif enchanter.item.type == "Armor" or enchanter.item.type == "Clothing" then
-        valid_types = {
-            core.magic.ENCHANTMENT_TYPE.CastOnUse,
-            core.magic.ENCHANTMENT_TYPE.ConstantEffect,
-        }
-    else 
-        valid_types = {
-            core.magic.ENCHANTMENT_TYPE.CastOnce,
-        }
-    end
-
-    local currentIndex = 0
-    for i, enchantType in ipairs(valid_types) do
-        if enchantType == enchanter.enchantment.type then
-            currentIndex = i
-            break
-        end
-    end
-
-    -- Advance to the next valid type
-    currentIndex = (currentIndex % #valid_types) + 1
-    print(currentIndex)
-    enchanter.enchantment.type = valid_types[currentIndex]
-    print("New type: ", enchanter.enchantment.type)
-
-    enchanter.enchantment.isAutocalc = true
-    if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnce then
-        text = "Cast Once"
-    elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnStrike then
-        text = "Cast on Strike"
-    elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnUse then
-        text = "Cast on Use"
-    elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
-        text = "Constant Effect"
-        enchanter.enchantment.isAutocalc = false
-    end
-
-    enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
-
-    return text
 end
 
 enchanter.item_supports_cast_once = function()
