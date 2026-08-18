@@ -555,13 +555,6 @@ end
 
 enchanter.toggle_cast_type = function()
 
-    -- Clear
-    enchanter.enchantment.base_cost = 0
-    enchanter.chance = 0
-    enchanter.enchantment.effective_cost = 0
-    enchanter.effects_with_params = {}
-    enchanter.enchantment.isAutocalc = true
-
     local text = ""
 
     local valid_types = {}
@@ -630,6 +623,81 @@ enchanter.toggle_cast_type = function()
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
     return text
+end
+
+enchanter.item_supports_cast_once = function()
+
+    if enchanter.item.type == nil or enchanter.item.type == 0 then
+        return false
+    end
+
+    if enchanter.item.type == "Weapon" or enchanter.item.type == "Armor" or enchanter.item.type == "Clothing" then
+        return false
+    end
+
+    return true
+end
+enchanter.item_supports_cast_on_strike = function()
+
+    if enchanter.item.type == nil or enchanter.item.type == 0 then
+        return false
+    end
+
+    if enchanter.item.type == "Armor" or enchanter.item.type == "Clothing" or enchanter.item.type == "Book" then
+        return false
+    end
+
+    if enchanter.item.type == "Weapon" then
+        local weapon_type = types.Weapon.records[enchanter.item.id].type
+        print("Weapon type: ", weapon_type)
+        if weapon_type == types.Weapon.TYPE.MarksmanBow or weapon_type == types.Weapon.TYPE.MarksmanCrossbow then
+            return false
+        end
+    end
+
+    return true
+end
+enchanter.item_supports_cast_on_use = function()
+
+    if enchanter.item.type == nil or enchanter.item.type == 0 then
+        return false
+    end
+
+    if enchanter.item.type == "Book" then
+        return false
+    end
+
+    if enchanter.item.type == "Weapon" then
+        local weapon_type = types.Weapon.records[enchanter.item.id].type
+        print("Weapon type: ", weapon_type)
+
+        if weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown then
+            return false
+        end
+    end
+
+    return true
+end
+enchanter.item_supports_constant = function()
+
+    if enchanter.item.type == nil or enchanter.item.type == 0 then
+        return false
+    end
+
+    if enchanter.item.type == "Book" then
+        return false
+    end
+
+    if enchanter.item.type == "Weapon" then
+        local weapon_type = types.Weapon.records[enchanter.item.id].type
+        print("Weapon type: ", weapon_type)
+
+        if weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown then
+            return false
+        end
+    end
+
+    return true
 end
 
 return enchanter

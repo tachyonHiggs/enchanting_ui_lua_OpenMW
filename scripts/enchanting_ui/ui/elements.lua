@@ -17,6 +17,7 @@ local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
 
 local elements = {}
 elements.text_size = 20
+elements.title_text_size = 22
 elements.padding_size = 10
 
 elements.tooltip = templates.tooltips.new("GeneralToolTip")
@@ -57,15 +58,30 @@ elements.set_stats_charge = function()
 end
 
 -- TODO: move this into enchanting_ui
-elements.set_cast_type = function()
+elements.show_valid_cast_types = function()
 
-    elements.effects:clear()
-    elements.cast_type_btn:set_text(enchanter.toggle_cast_type())
-    elements.set_stats_enchantment()
-    elements.set_chance()
-    elements.root:update()
+    local function valid_type(element, check_fnc)
+        if check_fnc() then
+            print("Item has valid type: ", element.name)
+            element:enable()
+        else
+            print("Item does not have valid type: ", element.name)
+            element:disable()
+        end
+    end
+
+    valid_type(elements.cast_once, enchanter.item_supports_cast_once)
+    valid_type(elements.cast_on_strike, enchanter.item_supports_cast_on_strike)
+    valid_type(elements.cast_on_use, enchanter.item_supports_cast_on_use)
+    valid_type(elements.constant, enchanter.item_supports_constant)
+
 end
-elements.cast_type_btn = {}
+function elements.reset_type_buttons_backgrounds()
+    elements.cast_once:reset_button_border()
+    elements.cast_on_strike:reset_button_border()
+    elements.cast_on_use:reset_button_border()
+    elements.constant:reset_button_border()
+end
 
 -- Type
 elements.cast_once = {}
@@ -95,9 +111,9 @@ elements.magic_effects_list = {}
 elements.effects = {}
 
 -- Root UI constants
-elements.root_size = {800, 450}
-elements.main_menu_size = {550, 450}
-elements.stats_panel_size = {250, 450}
+elements.root_size = {800, 500}
+elements.main_menu_size = {575, 500}
+elements.stats_panel_size = {225, 500}
 
 -- Header UI constants
 elements.input_image_size = {75, 75}

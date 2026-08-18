@@ -16,7 +16,7 @@ templates.make_border = function(size, alpha, properties)
     properties.anchor = properties.anchor or v2(0,0)
     properties.relativePosition = properties.relativePosition or v2(0,0)
     return {
-        template = I.MWUI.templates.bordersThick,
+        template = I.MWUI.templates.borders,
         type = UI.TYPE.Image,
         props = {
             resource = UI.texture({
@@ -561,7 +561,7 @@ end
 
 -- Templates
 templates.button = {}
-templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text, tooltip_element, main_properties, text_size)
+templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text, tooltip_element, main_properties, text_size, hold_on_click)
 
     local button = {}
 
@@ -577,7 +577,10 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
         button.tooltip_element = tooltip_element -- pass by reference
     end
 
+    button.hold_on_click = hold_on_click or false
+
     button.text_size = text_size or 20
+    button.default_alpha = 1
 
     button.main_properties = main_properties or {}
     button.main_properties.anchor = button.main_properties.anchor or v2(0.5, 0.5)
@@ -604,31 +607,52 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
                     button.tooltip_element:destroy()
                 end
                 if on_click_fnc then
-                    return on_click_fnc(...)
+                    on_click_fnc(...)
+                end
+                if button.hold_on_click then
+                    button.ui.content[1].template = I.MWUI.templates.bordersThick
+                    button.name_element.props.textSize = button.text_size+1
                 end
             end)
         }
     }
 
+    function button:reset_button_border()
+        if button.hold_on_click then
+            button.ui.content[1].template = I.MWUI.templates.borders
+            button.name_element.props.textSize = button.text_size
+        end
+    end
+
     function button:show()
         self.ui.props.visible = true
-        self.ui.content.content = UI.content {
-            templates.padding(self.size_x, self.size_y),
-            button.name_element,
+        self.ui.content = UI.content {
+            templates.make_border( v2(self.size_x, self.size_y), button.default_alpha),
+            self.name_element,
         }
+        button:reset_button_border()
     end
 
     function button:hide()
         self.ui.props.visible = false
-        self.ui.content.content = UI.content {}
+        self.ui.content = UI.content {}
+        button:reset_button_border()
     end
 
     function button:disable()
         self.ui.template = I.MWUI.templates.disabled
     end
+    function button:enable()
+        self.ui.template = 0
+        button:reset_button_border()
+    end
 
     function button:set_text(text)
         self.name_element.props.text = text
+    end
+
+    function button:set_template(template)
+        self.ui.templates = template
     end
 
     function button:create()
@@ -1404,7 +1428,7 @@ templates.slider = {}
 ---@param value_to_set_fnc function?
 ---@param on_slider_moved function?
 ---@return table
-templates.slider.new = function(text, max, min, start, update_target, value_to_set_fnc, on_slider_moved, text_length, value_length, background_bar_length)
+templates.slider.new = function(text, max, min, start, update_target, value_to_set_fnc, on_slider_moved, text_length, value_length, background_bar_length, anchor, relativePosition)
     local slider = {}
 
     slider.ui = {}
@@ -1430,6 +1454,15 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     slider.value_length = value_length
     if not slider.value_length then
         slider.value_length = 60
+    end
+
+    slider.anchor = anchor
+    if not slider.anchor then
+        slider.anchor = v2(0,0)
+    end
+    slider.relativePosition = relativePosition
+    if not slider.relativePosition then
+        slider.relativePosition = v2(0,0)
     end
 
     local thumbWidth = 20
@@ -1636,6 +1669,8 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
                 arrange = UI.ALIGNMENT.Start,
                 align = UI.ALIGNMENT.Start,
                 visible = true,
+                anchor = slider.anchor,
+                relativePosition = slider.relativePosition,
             },
             content = UI.content {
                 {

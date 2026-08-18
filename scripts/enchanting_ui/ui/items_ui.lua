@@ -52,10 +52,11 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     print("enchant_pts: ", string.format("%.1f", enchant_pts))
     elements.item_input:set_image(icon)
     
-    elements.set_cast_type()
+    elements.show_valid_cast_types()
 
     elements.set_stats_charge()
     elements.set_stats_enchantment()
+    elements.set_chance()
 
     elements.effects:clear()
     
