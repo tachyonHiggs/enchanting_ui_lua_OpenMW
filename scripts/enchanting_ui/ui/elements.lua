@@ -187,22 +187,25 @@ elements.add_effects_list_sorting = {false, true, true}
 elements.effects_root = {}
 elements.effects_size = {500, 350}
 elements.attribute_button_size = {120, 30}
-elements.select_list_size = {250, 250}
+elements.select_list_size = {200, 200}
 elements.effects_sliders_size = {300, 30}
 elements.effect_icon_size = v2(20,20)
+
+elements.skill_select_root = {}
+elements.attribute_select_root = {}
 
 -- Souls UI constants
 elements.souls_root = {}
 elements.souls_window_size = {800, 500}
 elements.souls_list_column_names = {"", "Name", "Charge", "Soul Name", "Count"}
-elements.souls_list_sizes = {50, 250, 80, 200, 80}
+elements.souls_list_sizes = {30, 200, 80, 180, 90}
 elements.souls_list_sorting = {false, true, true, true, true}
 
 -- Items UI constants
 elements.items_root = {}
 elements.items_window_size = {800, 500}
 elements.items_list_column_names = {"", "Name", "Enchant Pts", "Type", "Count"}
-elements.items_list_sizes = {50, 250, 120, 100, 80}
+elements.items_list_sizes = {30, 250, 120, 105, 80}
 elements.items_list_sorting = {false, true, true, true, true}
 
 return elements

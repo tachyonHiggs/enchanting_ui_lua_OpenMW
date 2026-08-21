@@ -146,39 +146,69 @@ select_list_ui.new = function(name, records, on_click_fnc)
 
     local instance = {}
     instance.name = name
-    instance.list = {}
-    for _, record in ipairs(records) do
-        table.insert(instance.list, record.name)
-    end
+    instance.records = records
+
     instance.on_click_fnc = on_click_fnc
 
-    local function generate_list_elements() 
+    local function generate_list_elements(properties) 
         print("select_list_ui.generate_list_elements")
-        local list_elements = {}
 
-        for _, item in pairs(instance.list) do
-            local element = {
-                name = item,
-                type = UI.TYPE.Text,
-                template = I.MWUI.templates.textNormal,
-                props = {
-                    text = tostring(item),
-                    textSize = 20,
-                    textAlignV = UI.ALIGNMENT.Center,
-                    textAlignH = UI.ALIGNMENT.Center,
-                    autoSize = false,
-                    size = v2(elements.select_list_size[1], 20)
-                },
-                events = {
-                    mouseClick = async:callback(function()
-                        instance.on_click_fnc(item)
-                    end)
-                }
-            }
-            table.insert(list_elements, element)
+        local list_groups = {}
+        local num_groups = 0
+        local max_height = 0
+        local padding = 1
+        local text_size = 20 + padding
+
+        for _, groups in pairs(instance.records) do
+            num_groups = num_groups + 1
+            local list_height = 0
+            for _, _ in pairs(groups) do
+                list_height = list_height + text_size
+            end
+            max_height = math.max(max_height, list_height)
         end
+        max_height = max_height + 5*padding -- add some padding
+        print("NUM GROUPS: ", num_groups)
+        if num_groups == 1 then
+            properties.border = ""
+            print("properties border", properties.border)
+        end
+
+        for group, groups in pairs(instance.records) do
+            print("Now sorting: ", group)
+            local list_elements = {}
+
+            if group == 1 then
+                group = ""
+            end
+
+            for _, item in pairs(groups) do
+                local element = {
+                    name = item,
+                    type = UI.TYPE.Text,
+                    template = I.MWUI.templates.textNormal,
+                    props = {
+                        text = tostring(item),
+                        textSize = 20,
+                        textAlignV = UI.ALIGNMENT.Center,
+                        textAlignH = UI.ALIGNMENT.Center,
+                        autoSize = false,
+                        size = v2(elements.select_list_size[1], text_size)
+                    },
+                    events = {
+                        mouseClick = async:callback(function()
+                            instance.on_click_fnc(item)
+                        end)
+                    }
+                }
+                table.insert(list_elements, element)
+            end
+
+            table.insert(list_groups, templates.list.new(group:sub(1, 1):upper() .. group:sub(2), v2(elements.select_list_size[1], max_height), nil, function() return list_elements end, nil, properties):create())
+        end
+
         print("generate list elements")
-        return list_elements
+        return templates.flex(list_groups, "flex", true, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 1, 1)
     end
 
     instance.name_element = {
@@ -187,7 +217,7 @@ select_list_ui.new = function(name, records, on_click_fnc)
         template = I.MWUI.templates.textNormal,
         props = {
             text = instance.name,
-            textSize = elements.text_size,
+            textSize = elements.text_size+3,
             size = v2(elements.select_list_size[1], elements.text_size),
             autoSize = false,
             textAlignH = UI.ALIGNMENT.Center,
@@ -196,21 +226,21 @@ select_list_ui.new = function(name, records, on_click_fnc)
     }
 
     local list_basic_props = {
-        alignment = UI.ALIGNMENT.Center,
+        arrange = UI.ALIGNMENT.Center,
+        align = UI.ALIGNMENT.End,
+        anchor = v2(0.5, 0.5),
         relativePosition = v2(0.5, 0.5),
-        border = "",
     }
-    instance.list_element = templates.list.new("", v2(elements.select_list_size[1], elements.select_list_size[2]), nil, generate_list_elements, nil, list_basic_props)
-    
+
     print("select_list_ui.create")
     
     local props = {
         relativeSize = v2(1, 1),
-        relativePosition = v2(0.5, 0.5),
         anchor = v2(0.5, 0.5),
+        relativePosition = v2(0.5, 0.5),
         visible = true,
     }
-    local content = templates.flex({instance.name_element, instance.list_element:create()}, "flex", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 1, 10)
+    local content = templates.flex({instance.name_element, generate_list_elements(list_basic_props)}, "flex", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 1, 5)
     instance.ui = templates.window.new(instance.name, UI.TYPE.Container, I.MWUI.templates.boxSolid, props, {content})
 
     return instance.ui
@@ -426,7 +456,7 @@ effect_ui.new = function(modify, effect_to_add)
         function instance.set_skill(skill) 
 
             -- Close UI
-            instance.skill_root:destroy()
+            elements.skill_select_root:destroy()
 
             -- Update current enchantment with new value
             enchanter.effect_to_add.affectedSkill = skill
@@ -440,8 +470,16 @@ effect_ui.new = function(modify, effect_to_add)
         end
 
         -- New UI popup
-        instance.skill_root = select_list_ui.new("Choose Skill", core.stats.Skill.records, instance.set_skill)
-        instance.skill_root:create()
+        local skills_by_specialization = {}
+        -- TODO: get skills by specialization
+        for _, record in ipairs(core.stats.Skill.records) do
+            if not skills_by_specialization[record.specialization] then
+                skills_by_specialization[record.specialization] = {}
+            end
+            table.insert(skills_by_specialization[record.specialization], record.name)
+        end
+        elements.skill_select_root = select_list_ui.new("Choose a Skill", skills_by_specialization, instance.set_skill)
+        elements.skill_select_root:create()
         
     end
     local function on_attribute_select_click()
@@ -452,7 +490,7 @@ effect_ui.new = function(modify, effect_to_add)
             print("effect_ui.set_attribute: ", attribute)
 
             -- Close UI
-            instance.attribute_root:destroy()
+            elements.attribute_select_root:destroy()
 
             -- Update current enchantment with new value
             enchanter.effect_to_add.affectedAttribute = attribute
@@ -466,8 +504,13 @@ effect_ui.new = function(modify, effect_to_add)
         end
 
         -- New UI popup
-        instance.attribute_root = select_list_ui.new("Choose an Attribute", core.stats.Attribute.records, instance.set_attribute)
-        instance.attribute_root:create()
+        local attributes = {{}}
+
+        for _, record in ipairs(core.stats.Attribute.records) do
+            table.insert(attributes[1], record.name)
+        end
+        elements.attribute_select_root = select_list_ui.new("Choose an Attribute", attributes, instance.set_attribute)
+        elements.attribute_select_root:create()
     end
 
     local function on_effect_mag_slider_clicked(name, value)

@@ -692,6 +692,8 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
     text_input.text_length = text_length
     text_input.update_ui = update_ui or nil
 
+    text_input.height = 22 -- Added more pixels to give more space
+
     text_input.has_tooltip = false
     if tooltip_text then
         print("text_input has tooltip")
@@ -713,7 +715,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
         props = {
             text = text_input.text,
             textSize = 20,
-            size = v2(text_length, 20),
+            size = v2(text_length, text_input.height),
         },
         events = {
             textChanged = async:callback(function(text)
@@ -727,23 +729,11 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
         }
     }
 
-    text_input.input_bar = templates.flex({
-        templates.padding(text_length, 19),
-        {
-            name = name .. "_input_bar",
-            type = UI.TYPE.Image,
-            template = I.MWUI.templates.horizontalLine,
-            props = {
-                size = v2(text_length, 1),
-            },
-        }
-    }, "input_bar_flex", false, UI.ALIGNMENT.Center,UI.ALIGNMENT.End, 1, 1, v2(text_length, 20), v2(0,0), v2(0,0))
-
     text_input.input_ui = {
         name = name .. "_input_ui",
         type = UI.TYPE.Container,
+        template = I.MWUI.templates.borders,
         content = UI.content{
-            text_input.input_bar,
             text_input.input,
         }
     }
@@ -801,7 +791,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
                     path = "Textures/menu_bar_yellow.dds"
                 }),
                 alpha = 1,
-                size = v2(20,20),
+                size = v2(text_input.height,text_input.height),
             },
             events = {
                 mouseClick = async:callback(function()
@@ -817,7 +807,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
             }
         }
 
-        self.ui = templates.flex({name_element, self.input_ui, refresh_element}, "text_input_flex", true, text_input.main_properties.arrange, text_input.main_properties.align, 1, 1, nil, text_input.main_properties.anchor, text_input.main_properties.relativePosition)
+        self.ui = templates.flex({name_element, self.input_ui, refresh_element}, "text_input_flex", true, text_input.main_properties.arrange, text_input.main_properties.align, 1, 0, nil, text_input.main_properties.anchor, text_input.main_properties.relativePosition)
 
         return self.ui
     end
@@ -1015,8 +1005,10 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         list.basic_props = {}
         list.basic_props.alignment = UI.ALIGNMENT.Start
         list.basic_props.relativePosition = v2(0.5, 0.5)
-        list.basic_props.border = I.MWUI.templates.boxSolid
+        list.basic_props.border = I.MWUI.templates.borders
     end
+    list.basic_props.border = list.basic_props.border or I.MWUI.templates.borders
+    print("LIST BORDER: ", list.basic_props.border)
 
     list.name = name
 
@@ -1081,7 +1073,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         props = {
             text = list.name,
             textSize = 22,
-            textAlignH = list.basic_props.alignment,
+            textAlignH = list.basic_props.arrange,
             textAlignV = list.basic_props.alignment,
         }
     }
@@ -1095,7 +1087,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     if header_info then
 
         -- Header constants
-        list.sort_btn_size = 20
+        list.sort_btn_size = 22
         function list.get_sort_btn_index(column_index)
             return column_index*3 - 1 -- Gets the 
         end
@@ -1135,7 +1127,9 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                     text = column_name,
                     textSize = 20,
                     size = v2(column_width - list.sort_btn_size, 20),
-                    autoSize = false
+                    autoSize = false,
+                    anchor = v2(0,1),
+                    relativePosition = v2(0,1),
                 },
             }
             table.insert(list.column_elements, column_element)
@@ -1150,6 +1144,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                         resource = list.sort_descending_texture,
                         alpha = 1,
                         size = v2(list.sort_btn_size,list.sort_btn_size),
+                        anchor = v2(0,1),
+                        relativePosition = v2(0,1),
                     },
                     events = {
                         mouseClick = async:callback(function ()
@@ -1188,8 +1184,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                 list:update_current_length()
             end
 
-            -- TODO: search icon or word?
-            list.search_text_input = templates.text_input.new("Search", header_info.column_widths[#header_info.column_widths], on_search_text_changed, list.update_target)
+            list.search_text_input = templates.text_input.new("Search", header_info.column_widths[#header_info.column_widths], on_search_text_changed, list.update_target, nil, nil, {anchor = v2(0,1), relativePosition = v2(0,1)})
             table.insert(list.column_elements, list.search_text_input:create())
         end
 
@@ -1198,8 +1193,10 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             type = UI.TYPE.Flex,
             props = {
                 horizontal = true,
-                arrange = list.basic_props.alignment,
+                arrange = list.basic_props.arrange,
                 align = list.basic_props.alignment,
+                anchor = v2(0,1),
+                relativePosition = v2(0,1),
             },
             content = UI.content (
                 list.column_elements
@@ -1215,7 +1212,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         type = UI.TYPE.Flex,
         props = {
             horizontal = false,
-            arrange = list.basic_props.alignment,
+            arrange = list.basic_props.arrange,
             align = list.basic_props.alignment,
             autoSize = true,
             size = v2(0,0), -- ONLY used to get the current list size
@@ -1231,7 +1228,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     list.items_container_border = {
         name = "border",
         type = UI.TYPE.Image,
-        template = I.MWUI.templates.borders,
+        template = list.basic_props.border,
         props = {
             resource = UI.texture({
                 path = "black",
@@ -1398,7 +1395,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             type = UI.TYPE.Flex,
             props = {
                 horizontal = false,
-                arrange = list.basic_props.alignment,
+                arrange = list.basic_props.arrange,
                 align = list.basic_props.alignment,
                 size = v2(0,20) + self.size,
                 relativePosition = list.basic_props.relativePosition

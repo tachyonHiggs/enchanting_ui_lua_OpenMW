@@ -253,6 +253,8 @@ end
 enchanter.get_known_magic_effects = function()
 
     local known_magic_effects = {}
+
+    -- TODO: if all effects cheat, get all spells
     local spells = types.Player.spells(self)
 
     for _, spell in ipairs(spells) do

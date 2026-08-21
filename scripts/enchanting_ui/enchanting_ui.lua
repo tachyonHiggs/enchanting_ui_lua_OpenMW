@@ -142,7 +142,7 @@ enchanting_ui.create_ui = function()
 end
 
 -- All Inputs
-elements.name_input = templates.text_input.new("Name:", 200, function(text) enchanter.name = text end, function() elements.root:update() end, tooltips_text.name_input, elements.tooltip, {anchor = v2(0.5, 1), relativePosition = v2(0.5, 1)})
+elements.name_input = templates.text_input.new("Name: ", 200, function(text) enchanter.name = text end, function() elements.root:update() end, tooltips_text.name_input, elements.tooltip, {anchor = v2(0.5, 1), relativePosition = v2(0.5, 1)})
 elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, items_ui.show_item_list, nil, nil, {anchor = v2(0, 0), relativePosition = v2(0.05,0)})
 elements.soul_input = templates.text_image.new("Soul:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, souls_ui.show_soul_list, nil, nil, {anchor = v2(1, 0), relativePosition = v2(0.95,0)})
 
@@ -258,6 +258,12 @@ enchanting_ui.destroy = function()
     end
     if elements.tooltip.visible then
         elements.tooltip:destroy()
+    end
+    if elements.skill_select_root.created then
+        elements.skill_select_root:destroy()
+    end
+    if elements.attribute_select_root.created then
+        elements.attribute_select_root:destroy()
     end
     
     elements.root:update()

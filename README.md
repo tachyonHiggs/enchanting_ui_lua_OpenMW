@@ -3,8 +3,10 @@
 ## TODO / Change Log
 
 ### Vanilla Features
-- Organize UI
+- Final touches to add effect window
+- Layering issues
 - Ability to drag sliders and scroll bars
+    - And replace yellow bar with actual texture
 - Finish tool tips text to relevant elements
 
 ### Expanded Features
