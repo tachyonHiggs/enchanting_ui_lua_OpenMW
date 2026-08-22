@@ -126,6 +126,15 @@ I.Settings.registerGroup {
                 disabled = false,
             }
         },
-
+        {
+            key = 'show_all_magic_effects',
+            renderer = 'checkbox',
+            name = 'Show all Magic effects',
+            description = 'When enabled, the enchanting menu will feature all possible magic effects instead of only player known ones.',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
    	},
 }

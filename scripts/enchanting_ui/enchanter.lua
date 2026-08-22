@@ -254,15 +254,22 @@ enchanter.get_known_magic_effects = function()
 
     local known_magic_effects = {}
 
-    -- TODO: if all effects cheat, get all spells
-    local spells = types.Player.spells(self)
+    -- TODO: if all effects cheat, get all spells 
+    if storage.globalSection("cheats_enchanting_ui"):get("show_all_magic_effects") then
+        for _, effect in ipairs(core.magic.effects.records) do
+            if effect.allowsEnchanting then
+                known_magic_effects[effect.id] = effect.name
+            end
+        end
+    else
+        local spells = types.Player.spells(self)
 
-    for _, spell in ipairs(spells) do
-        if spell.type == core.magic.SPELL_TYPE.Spell then
-            for _, effect in ipairs(spell.effects) do
-                if effect.effect.allowsEnchanting then
-                    known_magic_effects[effect.effect.id] = effect.effect.name
-                    print(effect.effect.name)
+        for _, spell in ipairs(spells) do
+            if spell.type == core.magic.SPELL_TYPE.Spell then
+                for _, effect in ipairs(spell.effects) do
+                    if effect.effect.allowsEnchanting then
+                        known_magic_effects[effect.effect.id] = effect.effect.name
+                    end
                 end
             end
         end
