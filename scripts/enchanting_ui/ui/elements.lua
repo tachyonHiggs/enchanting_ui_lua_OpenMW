@@ -179,8 +179,8 @@ elements.footer_size = {800, 80}
 -- Add Effect UI
 elements.add_effects_root = {}
 elements.add_effects_size = {620, 600}
-elements.add_effects_list_column_names = {"", "Name", "School"}
-elements.add_effects_list_sizes = {25, 250, 100, 120}
+elements.add_effects_list_column_names = {"", "Name", "School", "Cost"}
+elements.add_effects_list_sizes = {25, 250, 120, 65}
 elements.add_effects_list_sorting = {false, true, true}
 
 -- Effect UI constants

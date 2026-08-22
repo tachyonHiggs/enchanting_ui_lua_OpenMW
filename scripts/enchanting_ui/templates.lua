@@ -1013,8 +1013,11 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     list.name = name
 
     list.current_length = 0
-    list.scrollbar = templates.scrollbar.new(list.size.y, list) 
+    list.scrollbar = templates.scrollbar.new(list.size.y, list)
+    list.current_width = list.size.x + list.scrollbar.bar_width
+
     if not header_info then
+        list.current_width = list.size.x
         list.scrollbar:hide()
     end
     
@@ -1184,7 +1187,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                 list:update_current_length()
             end
 
-            list.search_text_input = templates.text_input.new("Search", header_info.column_widths[#header_info.column_widths], on_search_text_changed, list.update_target, nil, nil, {anchor = v2(0,1), relativePosition = v2(0,1)})
+            list.search_text_input = templates.text_input.new("Search", header_info.column_widths[#header_info.column_widths], on_search_text_changed, list.update_target, nil, nil, {anchor = v2(1,1), relativePosition = v2(1,1)})
             table.insert(list.column_elements, list.search_text_input:create())
         end
 
@@ -1196,6 +1199,8 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
                 arrange = list.basic_props.arrange,
                 align = list.basic_props.alignment,
                 anchor = v2(0,1),
+                autoSize = false,
+                size = v2(list.current_width, 25),
                 relativePosition = v2(0,1),
             },
             content = UI.content (

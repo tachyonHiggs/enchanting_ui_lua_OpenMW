@@ -53,6 +53,7 @@ local function create_magic_effect_item(id, name)
     local record = core.magic.effects.records[id]
     local icon = record.icon
     local school = record.school
+    local baseCost = record.baseCost
 
     local icon_element = {
         name = "icon",
@@ -91,6 +92,19 @@ local function create_magic_effect_item(id, name)
         },
     }
 
+    local base_cost = {
+        name = "baseCost",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = string.format("%.1f", baseCost),
+            textSize = elements.text_size,
+            autoSize = false,
+            textAlignH = UI.ALIGNMENT.End,
+            size = v2(elements.add_effects_list_sizes[4], elements.text_size)
+        },
+    }
+
     return 
     {
         name = id,
@@ -112,6 +126,8 @@ local function create_magic_effect_item(id, name)
             name_element,
             templates.padding(elements.padding_size, elements.padding_size),
             school_element,
+            templates.padding(elements.padding_size, elements.padding_size),
+            base_cost,
         },
         events = {
             mouseClick = async:callback(function()
