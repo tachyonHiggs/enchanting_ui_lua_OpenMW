@@ -141,6 +141,36 @@ effect_ui.create_effect_item = function(effect)
     }
 end
 
+effect_ui.regen_effect_items = function()
+
+    for index, effect in ipairs(enchanter.effects_with_params) do
+        local effect_element = effect_ui.create_effect_item(effect)
+        elements.effects:update_item(index, effect_element)
+    end
+        
+    -- Update base cost
+    enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
+    elements.set_stats_enchantment()
+    
+    -- Udpate chance since base_cost changed
+    enchanter.chance = enchanter.get_success_rate()
+    elements.set_chance()
+
+    -- Update effective cost
+    enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
+    elements.set_stats_charge()
+    
+    -- Update count max, but don't show it
+    elements.count_input:set_max_min(enchanter.get_count_max(), nil)
+    
+    -- Update price
+    if elements.is_vendor then
+        enchanter.calculate_price()
+        elements.set_price()
+    end
+
+end
+
 local select_list_ui = {}
 select_list_ui.new = function(name, records, on_click_fnc)
 

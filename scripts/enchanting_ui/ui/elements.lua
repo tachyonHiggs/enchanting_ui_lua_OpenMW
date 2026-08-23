@@ -165,6 +165,14 @@ elements.effects = {}
 elements.main_menu_size = {575, 500}
 elements.stats_panel_size = {250, 500}
 
+-- Cast type
+elements.cast_height = 30
+elements.cast_once_size = {105, elements.cast_height}
+elements.cast_on_strike_size = {145, elements.cast_height}
+elements.cast_on_use_size = {120, elements.cast_height}
+elements.constant_size = {155, elements.cast_height}
+
+
 -- Header UI constants
 elements.input_image_size = {75, 75}
 

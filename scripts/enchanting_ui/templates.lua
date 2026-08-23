@@ -611,7 +611,8 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
                 end
                 if button.hold_on_click then
                     button.ui.content[1].template = I.MWUI.templates.bordersThick
-                    button.name_element.props.textSize = button.text_size+1
+                    button.name_element.props.textShadow = true
+                    button.name_element.props.textShadowColor = Util.color.rgb(80, 80, 80)
                 end
             end)
         }
@@ -620,7 +621,7 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
     function button:reset_button_border()
         if button.hold_on_click then
             button.ui.content[1].template = I.MWUI.templates.borders
-            button.name_element.props.textSize = button.text_size
+            button.name_element.props.textShadow = false
         end
     end
 

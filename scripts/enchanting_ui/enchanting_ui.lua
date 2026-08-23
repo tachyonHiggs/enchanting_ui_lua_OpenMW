@@ -16,6 +16,7 @@ local add_effect_ui = require("scripts.enchanting_ui.ui.add_effect_ui")
 local items_ui = require("scripts.enchanting_ui.ui.items_ui")
 local souls_ui = require("scripts.enchanting_ui.ui.souls_ui")
 local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
+local effect_ui = require("scripts.enchanting_ui.ui.effect_ui")
 
 -- TODO: tooltips hovering
 
@@ -146,17 +147,29 @@ elements.name_input = templates.text_input.new("Name: ", 200, function(text) enc
 elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, items_ui.show_item_list, nil, nil, {anchor = v2(0, 0), relativePosition = v2(0.05,0)})
 elements.soul_input = templates.text_image.new("Soul:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, souls_ui.show_soul_list, nil, nil, {anchor = v2(1, 0), relativePosition = v2(0.95,0)})
 
-local function on_type_clicked()
+local function on_type_clicked(new_type)
+
+    if new_type == enchanter.enchantment.type then
+        print("New type is current tyep")
+        return
+    end
+
+    enchanter.enchantment.type = new_type
+
+    -- This includes a check if the type is constant effect    
+    enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
+
+    -- Update current effects if type changes
+    effect_ui.regen_effect_items()
+
     elements.reset_type_buttons_backgrounds()
-    -- TODO: uncertain if this needs to happen here
-    -- enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
     elements.root:update()
 end
 
-elements.cast_once = templates.button.new("Cast Once", function() print("cast once clicked") enchanter.enchantment.type = core.magic.ENCHANTMENT_TYPE.CastOnce on_type_clicked() end, 100, 30, tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
-elements.cast_on_strike = templates.button.new("Cast on Strike", function() print("Cast on Strike clicked") enchanter.enchantment.type = core.magic.ENCHANTMENT_TYPE.CastOnStrike on_type_clicked() end, 135, 30, tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
-elements.cast_on_use = templates.button.new("Cast on Use", function() print("Cast on Use clicked") enchanter.enchantment.type = core.magic.ENCHANTMENT_TYPE.CastOnUse on_type_clicked() end, 110, 30, tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
-elements.constant = templates.button.new("Constant Effect", function() print("Constant clicked") enchanter.enchantment.type = core.magic.ENCHANTMENT_TYPE.ConstantEffect enchanter.enchantment.isAutocalc = false on_type_clicked() end, 145, 30, tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
+elements.cast_once = templates.button.new("Cast Once", function() print("cast once clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.CastOnce) end,                                                     elements.cast_once_size[1], elements.cast_once_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
+elements.cast_on_strike = templates.button.new("Cast on Strike", function() print("Cast on Strike clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.CastOnStrike) end,                                  elements.cast_on_strike_size[1], elements.cast_on_strike_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
+elements.cast_on_use = templates.button.new("Cast on Use", function() print("Cast on Use clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.CastOnUse) end,                                              elements.cast_on_use_size[1], elements.cast_on_use_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
+elements.constant = templates.button.new("Constant Effect", function() print("Constant clicked") enchanter.enchantment.isAutocalc = false on_type_clicked(core.magic.ENCHANTMENT_TYPE.ConstantEffect) end,  elements.constant_size[1], elements.constant_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
 
 -- All Effects
 enchanting_ui.add_effect_btn = templates.button.new("Add Effect", add_effect_ui.show_add_effect_list, 105, 30, tooltips_text.add_effect_btn, elements.tooltip, {anchor = v2(1,0), relativePosition = v2(1,0)})
