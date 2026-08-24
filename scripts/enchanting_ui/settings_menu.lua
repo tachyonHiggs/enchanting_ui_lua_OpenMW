@@ -9,19 +9,6 @@ I.Settings.registerGroup {
     permanentStorage = true,
     settings = {
         {
-            key = 'constant_effect_threshold',
-            renderer = 'number',
-            name = 'Constant Effect Threshold',
-            description = 'Sets the threshold a Soul needs to have to allow constant effects.',
-            default = 400,
-			argument = {
-                disabled = false,
-                integer = true,
-                min = 1,
-                max = 1000,
-            }
-        },
-        {
             key = 'projectiles_enchant_multiplier',
             renderer = 'number',
             name = 'Projectiles Enchant Multiplier',
@@ -32,6 +19,50 @@ I.Settings.registerGroup {
                 integer = false,
                 min = 0,
                 max = 100,
+            }
+        },
+        {
+            key = 'remove_compound_effect_cost',
+            renderer = 'checkbox',
+            name = 'Remove compounding cost of multiple effects',
+            description = 'When enabled, makes added effects past the first one have the same cost instead of the Vanilla implementation (Vanilla uses compounding effects costs after the first effect)',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
+            key = 'make_fortify_skill_interactions_costlier',
+            renderer = 'checkbox',
+            name = 'Make Fortify Skill Interactions Costlier',
+            description = 'When enabled, forces interaction based fortify skill effects to have a significantly higher enchanting cost. IE alchemy, speechcraft, mercantile, enchant, and armorer. This is to discourage the creation of "Fortify Speechcraft 100 points for 1 second" type effects',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+   	},
+}
+
+I.Settings.registerGroup {
+    key = 'constant_enchanting_ui',
+    page = 'enchanting_ui_page',
+    l10n = 'enchanting_ui',
+    name = 'Enchanting Remastered Options',
+    description = 'Constant Effect - Vanilla Plus',
+    permanentStorage = true,
+    settings = {
+        {
+            key = 'constant_effect_threshold',
+            renderer = 'number',
+            name = 'Constant Effect Threshold',
+            description = 'Sets the threshold a Soul needs to have to allow constant effects.',
+            default = 400,
+			argument = {
+                disabled = false,
+                integer = true,
+                min = 1,
+                max = 1000,
             }
         },
         {
@@ -49,16 +80,6 @@ I.Settings.registerGroup {
             renderer = 'checkbox',
             name = 'Constant Effect Soul Charge Scales Item Enchantment Capacity',
             description = 'When enabled, all new enchantments can create a constant effect from ANY Soul value. However, the value of the soul effects the items enchantment capacity. This uses the value defined by Constant Effect Threshold to represent a scale of 1, or no change in an objects capacity.',
-            default = false,
-			argument = {
-                disabled = false,
-            }
-        },
-        {
-            key = 'remove_compound_effect_cost',
-            renderer = 'checkbox',
-            name = 'Remove compounding cost of multiple effects',
-            description = 'When enabled, makes added effects past the first one have the same cost instead of the Vanilla implementation (Vanilla uses compounding effects costs after the first effect)',
             default = false,
 			argument = {
                 disabled = false,
