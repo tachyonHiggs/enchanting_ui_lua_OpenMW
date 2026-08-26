@@ -1,6 +1,6 @@
 # Enchanting UI
 
-## TODO / Change Log
+## TODO
 
 ### Vanilla Features
 - Final touches to add effect window
@@ -10,10 +10,12 @@
 - Finish tool tips text to relevant elements
 
 ### Expanded Features
-- Potentially add the ability use vendor's soul gems while enchanting
+- TBD add the ability use vendor's soul gems while enchanting
 - Allow bartering for vendor enchanted items services
 - Add option to make fortify speechcraft, mercantile, alchemy, smithing, enchanting, etc have much higher costs for 1 second
 - At higher enchanting skill levels, add ability to rename enchanted item and dis/re-enchant an item
+- TBD add features to make certain soul values, like Vivec's, to have special bonuses
+- TBD negative effects on self, and/or positive effects on enemies lower cost
 
 ### Development
 - Add descriptions, params, fields etc to functions and files

@@ -285,7 +285,7 @@ effect_ui.new = function(modify, effect_to_add)
 
     instance.constant_mag_max_min = false
 
-    if storage.globalSection("options_enchanting_ui"):get("constant_effect_constant_magnitude") then
+    if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") then
         instance.constant_effect_constant_magnitude = true
     end
 
@@ -335,7 +335,7 @@ effect_ui.new = function(modify, effect_to_add)
         local cost = enchanter.get_effect_to_add_cost()
 
         enchanter.effect_to_add.cost = cost
-        instance.cost:set_text(tostring(cost))
+        instance.cost:set_text(string.format("%.1f", cost))
         print("effect cost: ", cost)
 
         if elements.effects_root.created then

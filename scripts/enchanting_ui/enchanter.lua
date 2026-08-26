@@ -98,14 +98,27 @@ end
 enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
     print("scale_enchantment_capacity_factor_from_soul_charge")
     local scale_factor = 1
-    if storage.globalSection("options_enchanting_ui"):get("constant_effect_soul_charge_scales_item_enchant_cap") then
-        if enchanter.item.id ~= "" and enchanter.soul.id ~= "" and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
-            local constant_effect_threshold = storage.globalSection("options_enchanting_ui"):get("constant_effect_threshold")
+    local soul_charge_scales_item_enchant_cap = storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_scales_item_enchant_cap")
+    local soul_charge_scales_item_enchant_cap_constant_effect_only = soul_charge_scales_item_enchant_cap or storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_scales_item_enchant_cap_constant_effect_only")
+
+    if enchanter.item.id ~= "" and enchanter.soul.id ~= "" then -- if valid item and soul gem,
+        print(" ---------------------------------- ")
+
+        local soul_charge_to_enchant_cap_factor = storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_to_enchant_cap_factor")
+
+        if (soul_charge_scales_item_enchant_cap_constant_effect_only and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect) then
             print(enchanter.soul.charge)
-            scale_factor = math.sqrt(enchanter.soul.charge / constant_effect_threshold)
+            scale_factor = math.sqrt(enchanter.soul.charge / soul_charge_to_enchant_cap_factor)
+            print("Scaling item enchant cap by: ", scale_factor)
+
+        elseif soul_charge_scales_item_enchant_cap then -- else setting is true and not constant effect
+            print(enchanter.soul.charge)
+            scale_factor = math.sqrt(enchanter.soul.charge / soul_charge_to_enchant_cap_factor)
+            scale_factor = math.max(scale_factor, 1) -- sets non-constant effects to be equal to or greater than their current enchantment cap
             print("Scaling item enchant cap by: ", scale_factor)
         end
     end
+
     return scale_factor
 end
 
@@ -394,7 +407,7 @@ enchanter.check_requirements = function(is_vendor_enchant)
     -- Check charge
     if storage.globalSection("cheats_enchanting_ui"):get("remove_soul_charge_limit") == false then
         if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
-            local constant_effect_threshold = storage.globalSection("options_enchanting_ui"):get("constant_effect_threshold")
+            local constant_effect_threshold = storage.globalSection("constant_enchanting_ui"):get("constant_effect_threshold")
             if enchanter.soul.charge < constant_effect_threshold then
                 UI.showMessage("Soul Charge below Constant Effect Threshold")
                 print("Failed: Soul Charge below Constant Effect Threshold")

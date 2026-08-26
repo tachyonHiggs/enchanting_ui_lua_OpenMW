@@ -44,6 +44,53 @@ I.Settings.registerGroup {
    	},
 }
 
+
+I.Settings.registerGroup {
+    key = 'enchantment_points_enchanting_ui',
+    page = 'enchanting_ui_page',
+    l10n = 'enchanting_ui',
+    name = 'Enchanting Remastered Enchantment Points Settings',
+    description = "Settings relevant to an Item's Enchantment points",
+    permanentStorage = true,
+    settings = {
+        {
+            key = 'soul_charge_scales_item_enchant_cap',
+            renderer = 'checkbox',
+            name = 'Soul Charge Scales Item Enchantment Capacity',
+            description = "When enabled, all new enchantments will have their item's enchantment capacity scaled depending on the selected Soul gem. This scales via equation: sqrt(soul charge / 'Soul Charge to Enchantment Capacity factor'). Where constant effects can be less than 1, but other types are a minimum of 1. For only constant effect items to be affected, see 'Soul Charge Scales Item Enchantment Capacity - Constant Effects Only' ",
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
+            key = 'soul_charge_scales_item_enchant_cap_constant_effect_only',
+            renderer = 'checkbox',
+            name = 'Soul Charge Scales Item Enchantment Capacity - Constant Effects Only',
+            description = "If 'Soul Charge Scales Item Enchantment Capacity' is enabled, this is enabled. When enabled, all new enchantments can create a constant effect from ANY Soul value. However, the value of the soul affects the item's enchantment capacity. This scales via equation: sqrt(selected soul charge / 'Soul Charge to Enchantment Capacity factor') .",
+            
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
+            key = 'soul_charge_to_enchant_cap_factor',
+            renderer = 'number',
+            name = 'Soul Charge to Enchantment Capacity factor',
+            description = "This determines how an item's enchantment points scale in relation to the selected soul gem's value. Larger values mean larger souls are needed to increase enchantment capacity",
+            default = 400,
+			argument = {
+                disabled = false,
+                integer = true,
+                min = 1,
+                max = 1000,
+            }
+        },
+   	},
+}
+
+
 I.Settings.registerGroup {
     key = 'constant_enchanting_ui',
     page = 'enchanting_ui_page',
@@ -70,16 +117,6 @@ I.Settings.registerGroup {
             renderer = 'checkbox',
             name = 'Constant Effect Constant Magnitude',
             description = 'When enabled, new Constant Effect enchantments have a constant magnitude. Max and min become equal. This is to discourage enchanting items with wide ranges and re-equiping them until the max is reached.',
-            default = false,
-			argument = {
-                disabled = false,
-            }
-        },
-        {
-            key = 'constant_effect_soul_charge_scales_item_enchant_cap',
-            renderer = 'checkbox',
-            name = 'Constant Effect Soul Charge Scales Item Enchantment Capacity',
-            description = 'When enabled, all new enchantments can create a constant effect from ANY Soul value. However, the value of the soul effects the items enchantment capacity. This uses the value defined by Constant Effect Threshold to represent a scale of 1, or no change in an objects capacity.',
             default = false,
 			argument = {
                 disabled = false,

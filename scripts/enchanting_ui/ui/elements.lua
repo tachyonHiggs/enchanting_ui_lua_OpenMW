@@ -85,7 +85,10 @@ end
 
 elements.set_stats_enchantment = function()
     print("set_stats_enchantment")
-    elements.stats_max_enchantment_pts:set_text(string.format("%.1f", enchanter.item.enchantment_capacity))
+    local current_cap = string.format("%.1f", enchanter.item.enchantment_capacity)
+    local modified_cap_by = " (" .. string.format("%.1f", enchanter.item.enchantment_capacity - enchanter.item.default_enchantment_capacity) .. ")"
+    
+    elements.stats_max_enchantment_pts:set_text(current_cap .. modified_cap_by)
     elements.stats_in_use_enchantment_pts:set_text(string.format("%.1f", enchanter.enchantment.base_cost))
 end
 elements.set_stats_charge = function()
