@@ -31,9 +31,9 @@ function souls_ui.on_soul_clicked(id, object, value, icon)
     -- Update count max, but don't show it
     elements.count_input:set_max_min(enchanter.get_count_max(), nil)
     
-    print("click on soul: ", id)
-    print("at icon: ", icon)
-    print("with a soul value of: ", value)
+    -- print("click on soul: ", id)
+    -- print("at icon: ", icon)
+    -- print("with a soul value of: ", value)
     elements.soul_input:set_image(icon)
     elements.root:show()
 

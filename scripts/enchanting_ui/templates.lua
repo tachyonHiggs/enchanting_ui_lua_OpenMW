@@ -83,8 +83,6 @@ templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y,
         gap_y = 1
     end
 
-    print("templates.flex")
-
     local padding = {}
 
     -- Pad individual items
@@ -168,7 +166,7 @@ templates.window = {}
 ---@param properties table
 ---@param content table?
 templates.window.new = function(name, type, template, properties, content) 
-    print("templates.window.new: ", name)
+    -- print("templates.window.new: ", name)
 
     local window = {}
     window.name = name or ""
@@ -203,11 +201,10 @@ templates.window.new = function(name, type, template, properties, content)
     end
 
     function window:create()
-        print("templates.window.create: ", self.name)
+        -- print("templates.window.create: ", self.name)
         self.created = true
 
         if self.type == UI.TYPE.Widget then
-            print("UI.TYPE.Widget CREATED")
             self.ui = UI.create{
                 name = self.name .. "_window",
                 layer = "Windows",
@@ -233,7 +230,7 @@ templates.window.new = function(name, type, template, properties, content)
     end
 
     function window:update()
-        print("window:update")
+        -- print("window:update")
         if self.ui.layout then
             self.ui:update()
         end
@@ -253,7 +250,7 @@ end
 
 templates.scrollbar = {}
 templates.scrollbar.new = function(length, list) 
-    print("templates.scrollbar.new: ")
+    -- print("templates.scrollbar.new: ")
 
     local scrollbar = {}
     if list.update_target then
@@ -366,7 +363,7 @@ templates.scrollbar.new = function(length, list)
     end
 
     function scrollbar:up_clicked()
-        print("scrollbar:up_clicked")
+        -- print("scrollbar:up_clicked")
 
         if list.items_container.props.position.y >= -20 then
             list.items_container.props.position = v2(list.items_container.props.position.x, 0)
@@ -382,7 +379,7 @@ templates.scrollbar.new = function(length, list)
     end
 
     function scrollbar:down_clicked()
-        print("scrollbar:down_clicked")
+        -- print("scrollbar:down_clicked")
 
         if list.current_length <= list.size.y then
             return
@@ -407,7 +404,7 @@ templates.scrollbar.new = function(length, list)
     end
 
     function scrollbar:on_background_bar_clicked(mouse_y)
-        print("scrollbar:on_background_bar_clicked")
+        -- print("scrollbar:on_background_bar_clicked")
 
         -- Check if list even needs to scroll
         local max_scroll = math.max(list.current_length - list.size.y, 0)
@@ -439,7 +436,7 @@ templates.scrollbar.new = function(length, list)
     end
 
     function scrollbar:create()
-        print("scrollbar:create")
+        -- print("scrollbar:create")
         
         self.ui = templates.flex({self.up_arrow_element, self.background_element, self.down_arrow_element}, "scroll_bar_flex", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 1)
 
@@ -468,7 +465,7 @@ templates.tooltips = {}
 ---@note set this equal to a UI element event field
 ---@return table
 templates.tooltips.new = function(name)
-    print("templates.tooltips.new: ", name)
+    -- print("templates.tooltips.new: ", name)
 
     local tooltip = {}
     tooltip.name = name
@@ -499,7 +496,7 @@ templates.tooltips.new = function(name)
             print("Already created")
             return
         end
-        print("Create tooltip: ", self.name)
+        -- print("Create tooltip: ", self.name)
 
         self.ui = UI.create {
             name = self.name .. "_tooltip",
@@ -537,7 +534,7 @@ templates.tooltips.new = function(name)
     end
 
     function tooltip:destroy()
-        print("Destroy tooltip: ", self.name)
+        -- print("Destroy tooltip: ", self.name)
 
         if self.visible then
             auxUi.deepDestroy(self.ui)
@@ -571,7 +568,7 @@ templates.button.new = function(name, on_click_fnc, size_x, size_y, tooltip_text
 
     button.has_tooltip = false
     if tooltip_text then
-        print("button has tooltip")
+        -- print("button has tooltip")
         button.has_tooltip = true
         button.tooltip_text = tooltip_text
         button.tooltip_element = tooltip_element -- pass by reference
@@ -686,7 +683,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
 
     local text_input = {}
 
-    print("text_input new: ", name)
+    -- print("text_input new: ", name)
 
     text_input.name = name
     text_input.text = ""
@@ -697,7 +694,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
 
     text_input.has_tooltip = false
     if tooltip_text then
-        print("text_input has tooltip")
+        -- print("text_input has tooltip")
         text_input.has_tooltip = true
         text_input.tooltip_text = tooltip_text
         text_input.tooltip_element = tooltip_element -- pass by reference
@@ -722,7 +719,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
             textChanged = async:callback(function(text)
                 -- Keep the stored text in sync
                 text_input.text = text_input.input.props.text
-                print("textChanged event: ", text)
+                -- print("textChanged event: ", text)
                 if on_text_changed_fnc then
                     on_text_changed_fnc(text)
                 end
@@ -763,7 +760,7 @@ templates.text_input.new = function(name, text_length, on_text_changed_fnc, upda
 
     function text_input:create()
 
-        print("text_input create: ", self.name)
+        -- print("text_input create: ", self.name)
 
         -- Prep events
         local tooltip_events = {}
@@ -829,7 +826,7 @@ templates.text_output.new = function(name, text_length, padding_length, default_
 
     text_output.has_tooltip = false
     if tooltip_text then
-        print("text_input has tooltip")
+        -- print("text_input has tooltip")
         text_output.has_tooltip = true
         text_output.tooltip_text = tooltip_text
         text_output.tooltip_element = tooltip_element -- pass by reference
@@ -908,7 +905,7 @@ templates.text_image.new = function(name, image_size, padding_length, on_image_m
 
     text_image.has_tooltip = false
     if tooltip_text then
-        print("text_input has tooltip")
+        -- print("text_input has tooltip")
         text_image.has_tooltip = true
         text_image.tooltip_text = tooltip_text
         text_image.tooltip_element = tooltip_element -- pass by reference
@@ -1009,7 +1006,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         list.basic_props.border = I.MWUI.templates.borders
     end
     list.basic_props.border = list.basic_props.border or I.MWUI.templates.borders
-    print("LIST BORDER: ", list.basic_props.border)
+    -- print("LIST BORDER: ", list.basic_props.border)
 
     list.name = name
 
@@ -1023,7 +1020,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
     end
     
     function list:update_current_length()
-        print("list:update_current_length")
+        -- print("list:update_current_length")
         self.current_length = 0
 
         for _, item in ipairs(self.items) do
@@ -1033,7 +1030,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
         end
         self.scrollbar:reset()
         
-        print("List height is: ", self.current_length)
+        -- print("List height is: ", self.current_length)
 
     end
 
@@ -1139,7 +1136,7 @@ templates.list.new = function(name, list_size, update_target, generate_items, he
             table.insert(list.column_elements, column_element)
 
             if header_info.enable_column_sortings[index] then
-                print("allow column sorting: ", header_info.enable_column_sortings[index])
+                -- print("allow column sorting: ", header_info.enable_column_sortings[index])
                 column_sort = {
                     name = "direction"..index,
                     type = UI.TYPE.Image,
@@ -1530,16 +1527,16 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     }
 
     function slider:get_value()
-        print("Slider get_value")
+        -- print("Slider get_value")
         return slider.value
     end
 
     function slider:set_value(value)
-        print("set_value")
+        -- print("set_value")
 
         self.value = value
 
-        print("Setting slider to: ", value)
+        -- print("Setting slider to: ", value)
         
         if self.value < self.min then
             self.value = self.min
@@ -1615,7 +1612,7 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
         ambient.playSound('menu click')
 
         local relativeInterval = self.interval / (self.max - self.min + 1)
-        print("Moving slider right by: ", relativeInterval)
+        -- print("Moving slider right by: ", relativeInterval)
 
         self.value = self.value + self.interval
         if self.value > self.max then
@@ -1640,11 +1637,11 @@ templates.slider.new = function(text, max, min, start, update_target, value_to_s
     end
 
     function slider:on_background_bar_clicked(position)
-        print("slider:on_background_bar_clicked at position: ", position)
+        -- print("slider:on_background_bar_clicked at position: ", position)
 
         -- Convert position to value
         local value = self.min + position*(self.max - self.min)/self.background_bar_length
-        print(value)
+        -- print(value)
 
         -- Check value is in bounds
         value = math.floor(value + 0.5)

@@ -4,9 +4,10 @@ I.Settings.registerGroup {
     key = 'options_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
-    name = 'Enchanting Remastered Options',
-    description = 'Options - Vanilla Plus',
+    name = 'General Options',
+    description = '',
     permanentStorage = true,
+    order = 1,
     settings = {
         {
             key = 'projectiles_enchant_multiplier',
@@ -22,20 +23,10 @@ I.Settings.registerGroup {
             }
         },
         {
-            key = 'remove_compound_effect_cost',
+            key = 'skyrim_like_enchanting',
             renderer = 'checkbox',
-            name = 'Remove compounding cost of multiple effects',
-            description = 'When enabled, makes added effects past the first one have the same cost instead of the Vanilla implementation (Vanilla uses compounding effects costs after the first effect)',
-            default = false,
-			argument = {
-                disabled = false,
-            }
-        },
-        {
-            key = 'make_fortify_skill_interactions_costlier',
-            renderer = 'checkbox',
-            name = 'Make Fortify Skill Interactions Costlier',
-            description = 'When enabled, forces interaction based fortify skill effects to have a significantly higher enchanting cost. IE alchemy, speechcraft, mercantile, enchant, and armorer. This is to discourage the creation of "Fortify Speechcraft 100 points for 1 second" type effects',
+            name = 'Skyrim Like Enchating',
+            description = "When enabled, all new enchantments will always suceed",
             default = false,
 			argument = {
                 disabled = false,
@@ -44,14 +35,14 @@ I.Settings.registerGroup {
    	},
 }
 
-
 I.Settings.registerGroup {
     key = 'enchantment_points_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
-    name = 'Enchanting Remastered Enchantment Points Settings',
-    description = "Settings relevant to an Item's Enchantment points",
+    name = 'Enchantment Points Options',
+    description = "Options relevant to an Item's Enchantment points",
     permanentStorage = true,
+    order = 2,
     settings = {
         {
             key = 'soul_charge_scales_item_enchant_cap',
@@ -90,14 +81,46 @@ I.Settings.registerGroup {
    	},
 }
 
+I.Settings.registerGroup {
+    key = 'effect_cost_enchanting_ui',
+    page = 'enchanting_ui_page',
+    l10n = 'enchanting_ui',
+    name = 'Effect Cost Options',
+    description = "Options relevant to Magic Effects Cost",
+    permanentStorage = true,
+    order = 3,
+    settings = {
+        {
+            key = 'remove_compound_effect_cost',
+            renderer = 'checkbox',
+            name = 'Remove compounding cost of multiple effects',
+            description = 'When enabled, makes added effects past the first one have the same cost instead of the Vanilla implementation (Vanilla uses compounding effects costs after the first effect)',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
+            key = 'make_fortify_skill_interactions_costlier',
+            renderer = 'checkbox',
+            name = 'Make Fortify Skill Interactions Costlier',
+            description = 'When enabled, forces interaction based fortify skill effects to have a significantly higher enchanting cost. IE alchemy, speechcraft, mercantile, enchant, and armorer. This is to discourage the creation of "Fortify Speechcraft 100 points for 1 second" type effects',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+   	},
+}
 
 I.Settings.registerGroup {
     key = 'constant_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
-    name = 'Enchanting Remastered Options',
+    name = 'Constant Effect Options',
     description = 'Constant Effect - Vanilla Plus',
     permanentStorage = true,
+    order = 4,
     settings = {
         {
             key = 'constant_effect_threshold',
@@ -130,9 +153,10 @@ I.Settings.registerGroup {
     key = 'cheats_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
-    name = 'Enchanting Remastered Cheats',
-    description = 'Cheats',
+    name = 'Cheats',
+    description = 'Cheats, over-powered, and fun options',
     permanentStorage = true,
+    order = 5,
     settings = {
         {
             key = 'remove_enchant_cap_limit',

@@ -55,7 +55,7 @@ enchanter.reset_enchantment = function()
 
     enchanter.enchantment = {}
     enchanter.enchantment.id = 0
-    enchanter.enchantment.isAutocalc = true
+    enchanter.enchantment.isAutocalc = false -- Always false
     enchanter.enchantment.type = -1
     enchanter.enchantment.base_cost = 0
     enchanter.enchantment.effective_cost = 0
@@ -216,7 +216,8 @@ end
 
 enchanter.get_effect_to_add_cost = function ()
 
-    local cost
+    print("enchanter.get_effect_to_add_cost")
+    local cost = 0
 
     local constant_effect_bool = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect
     local base_cost = core.magic.effects.records[enchanter.effect_to_add.id].baseCost
@@ -231,13 +232,22 @@ enchanter.get_effect_to_add_cost = function ()
         cost = 1.5 * base_cost * (min_plus_max*enchanter.effect_to_add.duration + enchanter.effect_to_add.area) / 40
     end 
 
+    -- TODO: convert this into a constant for easier modification
+    if storage.globalSection("effect_cost_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
+        print("make_fortify_skill_interactions_costlier is TRUE")
+        if enchanter.effect_to_add.affectedSkill == "Armorer" or enchanter.effect_to_add.affectedSkill == "Enchant" or enchanter.effect_to_add.affectedSkill == "Alchemy" or enchanter.effect_to_add.affectedSkill == "Mercantile" or enchanter.effect_to_add.affectedSkill == "Speechcraft" then
+            print("affectedSkill is: ", enchanter.effect_to_add.affectedSkill)
+            cost = cost * 100
+        end
+    end
+
     return cost
 end
 
 enchanter.get_effects_total_base_cost = function()
     local sum = 0
 
-    if storage.globalSection("options_enchanting_ui"):get("remove_compound_effect_cost") then
+    if storage.globalSection("effect_cost_enchanting_ui"):get("remove_compound_effect_cost") then
         for _, effect in ipairs(enchanter.effects_with_params) do
             sum = sum + effect.cost
         end
@@ -417,7 +427,6 @@ enchanter.check_requirements = function(is_vendor_enchant)
     else 
 
         enchanter.enchantment.base_cost = 0
-        enchanter.enchantment.isAutocalc = false -- Override this to use the above "0" cost
     end
 
     if not storage.globalSection("cheats_enchanting_ui"):get("free_enchantments_from_vendors") then

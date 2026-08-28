@@ -166,10 +166,10 @@ local function on_type_clicked(new_type)
     elements.root:update()
 end
 
-elements.cast_once = templates.button.new("Cast Once", function() print("cast once clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.CastOnce) end,                                                     elements.cast_once_size[1], elements.cast_once_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
-elements.cast_on_strike = templates.button.new("Cast on Strike", function() print("Cast on Strike clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.CastOnStrike) end,                                  elements.cast_on_strike_size[1], elements.cast_on_strike_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
-elements.cast_on_use = templates.button.new("Cast on Use", function() print("Cast on Use clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.CastOnUse) end,                                              elements.cast_on_use_size[1], elements.cast_on_use_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
-elements.constant = templates.button.new("Constant Effect", function() print("Constant clicked") enchanter.enchantment.isAutocalc = false on_type_clicked(core.magic.ENCHANTMENT_TYPE.ConstantEffect) end,  elements.constant_size[1], elements.constant_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
+elements.cast_once = templates.button.new("Cast Once", function() print("cast once clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.CastOnce) end,                     elements.cast_once_size[1], elements.cast_once_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
+elements.cast_on_strike = templates.button.new("Cast on Strike", function() print("Cast on Strike clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.CastOnStrike) end,  elements.cast_on_strike_size[1], elements.cast_on_strike_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
+elements.cast_on_use = templates.button.new("Cast on Use", function() print("Cast on Use clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.CastOnUse) end,              elements.cast_on_use_size[1], elements.cast_on_use_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
+elements.constant = templates.button.new("Constant Effect", function() print("Constant clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.ConstantEffect) end,           elements.constant_size[1], elements.constant_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
 
 -- All Effects
 enchanting_ui.add_effect_btn = templates.button.new("Add Effect", add_effect_ui.show_add_effect_list, 105, 30, tooltips_text.add_effect_btn, elements.tooltip, {anchor = v2(1,0), relativePosition = v2(1,0)})

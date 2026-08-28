@@ -25,6 +25,8 @@ local function create_enchantment_and_item(data)
     -- Create enchantment
     local template_enchantment_record = core.magic.enchantments.records[1]
 
+    enchantment.isAutocalc = false -- TODO: temp
+    print("NEW ENCHANTMENT BASE COST iS: ", enchantment.base_cost)
     -- Update the enchantment field cost for specific cases
     if enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         enchantment.base_cost = 0

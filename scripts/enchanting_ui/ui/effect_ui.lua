@@ -31,9 +31,9 @@ effect_ui.on_effect_clicked = function(index)
     enchanter.effect_to_add.index = index
     enchanter.effect_to_modify = true
 
-    print("CREATING EFFECT ADD UI")
-    print(index)
-    print(enchanter.effect_to_add.id)
+    -- print("CREATING EFFECT ADD UI")
+    -- print(index)
+    -- print(enchanter.effect_to_add.id)
     local props = {
         relativeSize = v2(1, 1),
         relativePosition = v2(0.5, 0.5),
@@ -48,9 +48,10 @@ effect_ui.on_effect_clicked = function(index)
 end
 
 effect_ui.create_effect_item = function(effect)
-    print("create_effect_item")
-    print(effect.id)
+    -- print("create_effect_item for effect: ", effect.id)
     local name = core.magic.effects.records[effect.id].name
+    local cost_size = 40
+    local text_size = elements.mc_effects_size[1] - elements.effect_icon_size.x - cost_size
 
     local icon_element = {
         name = "icon",
@@ -97,7 +98,6 @@ effect_ui.create_effect_item = function(effect)
     end
 
     local text = table.concat(parts, " ")
-    print(effect.range)
     
     local text_element = {
         name = effect.id,
@@ -106,6 +106,20 @@ effect_ui.create_effect_item = function(effect)
         props = {
             text = text,
             textSize = elements.text_size,
+            size = v2(text_size, elements.text_size),
+            autoSize = false
+        },
+    }
+
+    local cost_element = {
+        name = "cost",
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = string.format("%.1f", effect.cost),
+            textSize = elements.text_size,
+            size = v2(cost_size, elements.text_size),
+            autoSize = false
         },
     }
 
@@ -128,6 +142,7 @@ effect_ui.create_effect_item = function(effect)
         content = UI.content {
             icon_element,
             text_element,
+            cost_element,
         },
         userData = userData,
         events = {
@@ -198,10 +213,8 @@ select_list_ui.new = function(name, records, on_click_fnc)
             max_height = math.max(max_height, list_height)
         end
         max_height = max_height + 5*padding -- add some padding
-        print("NUM GROUPS: ", num_groups)
         if num_groups == 1 then
             properties.border = ""
-            print("properties border", properties.border)
         end
 
         for group, groups in pairs(instance.records) do
@@ -261,8 +274,6 @@ select_list_ui.new = function(name, records, on_click_fnc)
         anchor = v2(0.5, 0.5),
         relativePosition = v2(0.5, 0.5),
     }
-
-    print("select_list_ui.create")
     
     local props = {
         relativeSize = v2(1, 1),
@@ -368,15 +379,12 @@ effect_ui.new = function(modify, effect_to_add)
 
         -- however, if constant effect only self is allowed
         if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
-            print("Constant Effect")
             range = core.magic.RANGE.Self -- range has to be self
             text = "Self"
-            enchanter.enchantment.isAutocalc = false -- disable autocalc
         end
 
         enchanter.effect_to_add.range = range
         instance.range:set_text(text)
-        print("New range: ", text)
 
         show_valid_effect_sliders()
         update_effect_to_add_cost()
@@ -456,7 +464,7 @@ effect_ui.new = function(modify, effect_to_add)
             return
         end
 
-        print("removing effect at index: ", enchanter.effect_to_add.index)
+        -- print("removing effect at index: ", enchanter.effect_to_add.index)
         elements.effects:remove_item(enchanter.effect_to_add.index)
         table.remove(enchanter.effects_with_params, enchanter.effect_to_add.index)
         enchanter.reset_effect_to_add()
@@ -494,6 +502,8 @@ effect_ui.new = function(modify, effect_to_add)
 
             -- Update UI
             instance.skill:set_text(skill)
+
+            update_effect_to_add_cost()
 
             -- enable effect UI
             elements.effects_root:show()
@@ -545,7 +555,7 @@ effect_ui.new = function(modify, effect_to_add)
 
     local function on_effect_mag_slider_clicked(name, value)
 
-        print("Setting slider mag values: ", name, value)
+        -- print("Setting slider mag values: ", name, value)
 
         if instance.constant_effect_constant_magnitude and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
             print("constant_effect_constant_magnitude is true")
@@ -553,7 +563,7 @@ effect_ui.new = function(modify, effect_to_add)
             instance.magnitude:set_value(value)
         else 
             if instance.magnitude_max:get_value() < instance.magnitude:get_value() then
-                print("Min is larger than max")
+                -- print("Min is larger than max")
                 if name == "Magnitude Min" then
                     instance.magnitude_max:set_value(value)
                 else 

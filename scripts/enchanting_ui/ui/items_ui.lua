@@ -46,10 +46,10 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     enchanter.item.default_enchantment_capacity = enchant_pts
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
-    print("click on item: ", id)
-    print("Icon: ", icon)
-    print("Type: ", type_text)
-    print("enchant_pts: ", string.format("%.1f", enchant_pts))
+    -- print("click on item: ", id)
+    -- print("Icon: ", icon)
+    -- print("Type: ", type_text)
+    -- print("enchant_pts: ", string.format("%.1f", enchant_pts))
     elements.item_input:set_image(icon)
     
     elements.show_valid_cast_types()
@@ -59,6 +59,8 @@ local function on_item_clicked(id, object, icon, enchant_pts, type_text)
     elements.set_chance()
 
     elements.effects:clear()
+    
+    elements.reset_type_buttons_backgrounds()
     
     elements.root:show()
 
