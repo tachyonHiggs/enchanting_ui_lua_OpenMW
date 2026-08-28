@@ -27,4 +27,3 @@
 ## Known Issues
  - Minimum sized magic effects cause the item to have 0 charge
  - Menus layering issue, !!IMPORTANT!!
- - Seems enchantments have a skill and attribute element
