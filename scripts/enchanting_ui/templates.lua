@@ -1,3 +1,4 @@
+---@omw-context player
 local UI = require('openmw.ui')
 local I = require('openmw.interfaces')
 local Util = require('openmw.util')
@@ -240,8 +241,7 @@ templates.window.new = function(name, type, template, properties, content)
         window.created = false 
 
         if self.ui.layout then
-            auxUi.deepDestroy(self.ui)
-            self.ui:update()
+            I.UIToolkit.queueDestroy(self.ui, true)
         end
     end
 
