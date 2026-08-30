@@ -21,7 +21,7 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@field school string
 ---@field baseCost number
 
-local rowHeight = elements.add_effects_list_sizes[1]
+local rowHeight = 25
 
 ---@type UIToolkit.SortedList.Column[]
 local columns = {
@@ -58,9 +58,9 @@ local columns = {
     },
 }
 
-local add_effect_ui = {}
+local magic_effects_ui = {}
 
-add_effect_ui.on_magic_effect_clicked = function(id)
+magic_effects_ui.on_magic_effect_clicked = function(id)
     print("On magic effect clicked: ", id)
 
     ambient.playSound('menu click')
@@ -86,7 +86,7 @@ add_effect_ui.on_magic_effect_clicked = function(id)
     elements.effects_root = templates.window.new("effects_window", UI.TYPE.Container, I.MWUI.templates.boxSolid, props,
         { effect_ui_add:create() })
     elements.effects_root:create()
-    elements.add_effects_root:destroy()
+    elements.magic_effects_root:destroy()
 end
 
 ---@return EffectListData
@@ -109,7 +109,7 @@ local function create_magic_effect_item(id)
 end
 
 ---@return EffectListData[]
-function add_effect_ui.make_magic_effects_list()
+function magic_effects_ui.make_magic_effects_list()
     local known_magic_effects = enchanter.get_known_magic_effects()
     if known_magic_effects == nil then
         print("!! ERROR magic_effects_list is NIL")
@@ -124,21 +124,21 @@ function add_effect_ui.make_magic_effects_list()
     return items or {} -- return the list or just an empty one
 end
 
-function add_effect_ui.show_add_effect_list()
-    print("add_effect_ui.show_add_effect_list")
+function magic_effects_ui.show_add_effect_list()
+    print("magic_effects_ui.show_add_effect_list")
     local theme = I.UIToolkit.getTheme()
 
     ambient.playSound('menu click')
 
     local titleHeight = math.floor(1.5 * rowHeight)
-    local allItems = add_effect_ui.make_magic_effects_list()
+    local allItems = magic_effects_ui.make_magic_effects_list()
 
     local list = I.UIToolkit.Components.sortedList {
-        size = v2(elements.add_effects_size[1], elements.add_effects_size[2] - titleHeight),
+        size = v2(elements.magic_effects_window_size[1], elements.magic_effects_window_size[2] - titleHeight),
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
-            add_effect_ui.on_magic_effect_clicked(data.id)
+            magic_effects_ui.on_magic_effect_clicked(data.id)
         end,
     }
     list:setItems(allItems)
@@ -189,7 +189,7 @@ function add_effect_ui.show_add_effect_list()
         content = UI.content {
             {
                 props = {
-                    size = v2(elements.add_effects_size[1], titleHeight),
+                    size = v2(elements.magic_effects_window_size[1], titleHeight),
                 },
                 content = ui.content {
                     {
@@ -207,16 +207,16 @@ function add_effect_ui.show_add_effect_list()
         }
     }
 
-    elements.add_effects_root = templates.window.new("magic_effects_window", UI.TYPE.Container,
+    elements.magic_effects_root = templates.window.new("magic_effects_window", UI.TYPE.Container,
         I.UIToolkit.Templates.box { padding = 5, background = 'transparent' }, props, { layout })
-    elements.add_effects_root:create()
+    elements.magic_effects_root:create()
 end
 
-function add_effect_ui.update()
-    if elements.add_effects_root.created then
-        elements.add_effects_root:update()
+function magic_effects_ui.update()
+    if elements.magic_effects_root.created then
+        elements.magic_effects_root:update()
         elements.magic_effects_list:set_input_text()
     end
 end
 
-return add_effect_ui
+return magic_effects_ui

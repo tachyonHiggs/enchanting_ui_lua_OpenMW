@@ -12,10 +12,9 @@ local types = require('openmw.types')
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
---local add_effect_ui = require("scripts.enchanting_ui.ui.add_effect_ui")
-local add_effect_ui = require("scripts.enchanting_ui.ui_toolkit.add_effect_ui")
+local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
 local items_ui = require("scripts.enchanting_ui.ui.items_ui")
-local souls_ui = require("scripts.enchanting_ui.ui.souls_ui")
+local souls_ui = require("scripts.enchanting_ui.ui_toolkit.souls_ui")
 local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
 local effect_ui = require("scripts.enchanting_ui.ui.effect_ui")
 
@@ -173,7 +172,7 @@ elements.cast_on_use = templates.button.new("Cast on Use", function() print("Cas
 elements.constant = templates.button.new("Constant Effect", function() print("Constant clicked") on_type_clicked(core.magic.ENCHANTMENT_TYPE.ConstantEffect) end,           elements.constant_size[1], elements.constant_size[2], tooltips_text.cast_type_btn, elements.tooltip, nil, 20, true)
 
 -- All Effects
-enchanting_ui.add_effect_btn = templates.button.new("Add Effect", add_effect_ui.show_add_effect_list, 105, 30, tooltips_text.add_effect_btn, elements.tooltip, {anchor = v2(1,0), relativePosition = v2(1,0)})
+enchanting_ui.add_effect_btn = templates.button.new("Add Effect", magic_effects_ui.show_add_effect_list, 105, 30, tooltips_text.add_effect_btn, elements.tooltip, {anchor = v2(1,0), relativePosition = v2(1,0)})
 elements.effects = templates.list.new("Effects", v2(elements.mc_effects_size[1],elements.mc_effects_size[2]), nil, function() end, nil, {visible = true, anchor = v2(0, 0), relativePosition = v2(0,0.05)})
 
 elements.count_input = templates.slider.new("Count", 1, 1, 1, function() if elements.root.created then elements.root:update() end end, function(value) print("setting item count to: ", value) enchanter.item.count = value end, function() end, 55, 30, 140, v2(0,1), v2(0.05,1))
@@ -258,8 +257,8 @@ enchanting_ui.destroy = function()
     enchanting_ui.hide()
 
     elements.root:destroy()
-    if elements.add_effects_root.created then
-        elements.add_effects_root:destroy()
+    if elements.magic_effects_root.created then
+        elements.magic_effects_root:destroy()
     end
     if elements.effects_root.created then
         elements.effects_root:destroy()

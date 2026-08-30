@@ -367,7 +367,7 @@ enchanter.get_inventory_souls = function ()
             local soul_name = types.Creature.records[soul].name
             local name = types.Miscellaneous.records[item.recordId].name
             -- local quantity = 
-            table.insert(souls, {item.recordId, item, soul_value, icon, name, soul_name})
+            table.insert(souls, item)
         end
     end
 

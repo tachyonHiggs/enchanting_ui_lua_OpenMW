@@ -188,11 +188,8 @@ elements.mc_size = {800, 350}
 elements.footer_size = {800, 80}
 
 -- Add Effect UI
-elements.add_effects_root = {}
-elements.add_effects_size = {620, 600}
-elements.add_effects_list_column_names = {"", "Name", "School", "Cost"}
-elements.add_effects_list_sizes = {25, 250, 120, 65}
-elements.add_effects_list_sorting = {false, true, true}
+elements.magic_effects_root = {}
+elements.magic_effects_window_size = {620, 600}
 
 -- Effect UI constants
 elements.effects_root = {}
@@ -207,16 +204,13 @@ elements.attribute_select_root = {}
 
 -- Souls UI constants
 elements.souls_root = {}
-elements.souls_window_size = {800, 500}
-elements.souls_list_column_names = {"", "Name", "Charge", "Soul Name", "Count"}
-elements.souls_list_sizes = {30, 200, 80, 180, 90}
-elements.souls_list_sorting = {false, true, true, true, true}
+elements.souls_window_size = {620, 600}
 
 -- Items UI constants
 elements.items_root = {}
 elements.items_window_size = {800, 500}
 elements.items_list_column_names = {"", "Name", "Enchant Pts", "Type", "Count"}
-elements.items_list_sizes = {30, 250, 120, 105, 80}
+elements.items_list_sizes = {25, 250, 120, 105, 80}
 elements.items_list_sorting = {false, true, true, true, true}
 
 return elements
