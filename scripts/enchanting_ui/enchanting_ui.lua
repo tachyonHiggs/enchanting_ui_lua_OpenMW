@@ -13,7 +13,7 @@ local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
-local items_ui = require("scripts.enchanting_ui.ui.items_ui")
+local items_ui = require("scripts.enchanting_ui.ui_toolkit.items_ui")
 local souls_ui = require("scripts.enchanting_ui.ui_toolkit.souls_ui")
 local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
 local effect_ui = require("scripts.enchanting_ui.ui.effect_ui")
@@ -144,7 +144,7 @@ end
 
 -- All Inputs
 elements.name_input = templates.text_input.new("Name: ", 200, function(text) enchanter.name = text end, function() elements.root:update() end, tooltips_text.name_input, elements.tooltip, {anchor = v2(0.5, 1), relativePosition = v2(0.5, 1)})
-elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, items_ui.show_item_list, nil, nil, {anchor = v2(0, 0), relativePosition = v2(0.05,0)})
+elements.item_input = templates.text_image.new("Item:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, items_ui.show_items_list, nil, nil, {anchor = v2(0, 0), relativePosition = v2(0.05,0)})
 elements.soul_input = templates.text_image.new("Soul:", v2(elements.input_image_size[1],elements.input_image_size[2]), 10, souls_ui.show_soul_list, nil, nil, {anchor = v2(1, 0), relativePosition = v2(0.95,0)})
 
 local function on_type_clicked(new_type)

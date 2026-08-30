@@ -215,8 +215,7 @@ end
 function magic_effects_ui.update()
     if elements.magic_effects_root.created then
         elements.magic_effects_root:update()
-        elements.magic_effects_list:set_input_text()
-    end
+        end
 end
 
 return magic_effects_ui

@@ -312,40 +312,28 @@ enchanter.get_enchantable_inventory_items = function()
     for _, item in ipairs(weapons) do
         -- check not enchanted
         if types.Weapon.records[item.recordId].enchant == nil then
-            local icon = types.Weapon.records[item.recordId].icon
-            local name = types.Weapon.records[item.recordId].name
-            local enchant_pts = types.Weapon.records[item.recordId].enchantCapacity
-            table.insert(enchantable_inventory_items, {item.recordId, item, icon, item.type, name, enchant_pts})
+            table.insert(enchantable_inventory_items, item)
             -- print(item.recordId)
         end
     end
     for _, item in ipairs(armors) do
         -- check not enchanted
         if types.Armor.records[item.recordId].enchant == nil then
-            local icon = types.Armor.records[item.recordId].icon
-            local name = types.Armor.records[item.recordId].name
-            local enchant_pts = types.Armor.records[item.recordId].enchantCapacity
-            table.insert(enchantable_inventory_items, {item.recordId, item, icon, item.type, name, enchant_pts})
+            table.insert(enchantable_inventory_items, item)
             -- print(item.recordId)
         end
     end
     for _, item in ipairs(clothing) do
         -- check not enchanted
         if types.Clothing.records[item.recordId].enchant == nil then
-            local icon = types.Clothing.records[item.recordId].icon
-            local name = types.Clothing.records[item.recordId].name
-            local enchant_pts = types.Clothing.records[item.recordId].enchantCapacity
-            table.insert(enchantable_inventory_items, {item.recordId, item, icon, item.type, name, enchant_pts})
+            table.insert(enchantable_inventory_items, item)
             -- print(item.recordId)
         end
     end
     for _, item in ipairs(books) do
         -- check not enchanted
         if types.Book.records[item.recordId].enchant == nil then
-            local icon = types.Book.records[item.recordId].icon
-            local name = types.Book.records[item.recordId].name
-            local enchant_pts = types.Book.records[item.recordId].enchantCapacity
-            table.insert(enchantable_inventory_items, {item.recordId, item, icon, item.type, name, enchant_pts})
+            table.insert(enchantable_inventory_items, item)
             -- print(item.recordId)
         end
     end

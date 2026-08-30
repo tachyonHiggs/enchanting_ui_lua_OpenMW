@@ -158,10 +158,6 @@ elements.is_vendor = false
 -- lists
 
 elements.root = {}
-
-elements.items_list = {}
-elements.souls_list = {}
-elements.magic_effects_list = {}
 elements.effects = {}
 
 -- Root UI constants
@@ -209,8 +205,5 @@ elements.souls_window_size = {620, 600}
 -- Items UI constants
 elements.items_root = {}
 elements.items_window_size = {800, 500}
-elements.items_list_column_names = {"", "Name", "Enchant Pts", "Type", "Count"}
-elements.items_list_sizes = {25, 250, 120, 105, 80}
-elements.items_list_sorting = {false, true, true, true, true}
 
 return elements
