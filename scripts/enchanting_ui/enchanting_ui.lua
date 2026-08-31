@@ -258,6 +258,10 @@ enchanting_ui.destroy = function()
     enchanting_ui.hide()
 
     elements.root:destroy()
+    --this method exists only in ui toolkit version
+    if add_effect_ui.closeEffectListPopup then
+        add_effect_ui.closeEffectListPopup()
+    end
     if elements.add_effects_root.created then
         elements.add_effects_root:destroy()
     end

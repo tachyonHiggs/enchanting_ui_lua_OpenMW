@@ -86,7 +86,13 @@ add_effect_ui.on_magic_effect_clicked = function(id)
     elements.effects_root = templates.window.new("effects_window", UI.TYPE.Container, I.MWUI.templates.boxSolid, props,
         { effect_ui_add:create() })
     elements.effects_root:create()
-    elements.add_effects_root:destroy()
+    add_effect_ui.closeEffectListPopup()
+end
+
+function add_effect_ui.closeEffectListPopup()
+    if not add_effect_ui._closeListPopup then return end
+    add_effect_ui._closeListPopup()
+    add_effect_ui._closeListPopup = nil
 end
 
 ---@return EffectListData
@@ -146,12 +152,6 @@ function add_effect_ui.show_add_effect_list()
 
     -- Change and update UI
     elements.root:hide()
-    local props = {
-        relativeSize = v2(1, 1),
-        relativePosition = v2(0.5, 0.5),
-        anchor = v2(0.5, 0.5),
-        visible = true,
-    }
 
     local filter = I.UIToolkit.Components.textEdit {
         width = 250,
@@ -207,9 +207,9 @@ function add_effect_ui.show_add_effect_list()
         }
     }
 
-    elements.add_effects_root = templates.window.new("magic_effects_window", UI.TYPE.Container,
-        I.UIToolkit.Templates.box { padding = 5, background = 'transparent' }, props, { layout })
-    elements.add_effects_root:create()
+    add_effect_ui._closeListPopup = I.UIToolkit.Popups.show {
+        body = layout,
+    }
 end
 
 function add_effect_ui.update()
