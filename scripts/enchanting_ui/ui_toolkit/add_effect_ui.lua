@@ -212,11 +212,4 @@ function add_effect_ui.show_add_effect_list()
     }
 end
 
-function add_effect_ui.update()
-    if elements.add_effects_root.created then
-        elements.add_effects_root:update()
-        elements.magic_effects_list:set_input_text()
-    end
-end
-
 return add_effect_ui
