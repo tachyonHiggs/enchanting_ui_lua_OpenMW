@@ -33,7 +33,7 @@ local columns = {
     {
         id = 'name',
         name = 'Name', --TODO: add L10N
-        auto = 5,
+        auto = 10,
         sort = {},
         render = ColumnItem.renderText,
 
@@ -41,7 +41,7 @@ local columns = {
     {
         id = 'school',
         name = 'School', --TODO: add L10N
-        auto = 3,
+        auto = 5,
         sort = {},
         render = ColumnItem.renderText,
         arg = { textAlignH = ui.ALIGNMENT.Center },
@@ -50,7 +50,7 @@ local columns = {
     {
         id = 'baseCost',
         name = 'Base Cost', --TODO: add L10N
-        auto = 2,
+        auto = 3,
         sort = { numeric = true },
         render = ColumnItem.renderText,
         arg = { textAlignH = ui.ALIGNMENT.End },
