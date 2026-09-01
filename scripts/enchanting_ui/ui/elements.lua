@@ -2,12 +2,7 @@ local UI = require('openmw.ui')
 local I = require('openmw.interfaces')
 local Util = require('openmw.util')
 local v2 = Util.vector2
-local auxUi = require("openmw_aux.ui")
-local ambient = require('openmw.ambient')
-local self = require('openmw.self')
-local async = require('openmw.async')
 local core = require('openmw.core')
-local types = require('openmw.types')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
@@ -200,10 +195,8 @@ elements.attribute_select_root = {}
 
 -- Souls UI constants
 elements.souls_root = {}
-elements.souls_window_size = {620, 600}
 
 -- Items UI constants
 elements.items_root = {}
-elements.items_window_size = {800, 500}
 
 return elements

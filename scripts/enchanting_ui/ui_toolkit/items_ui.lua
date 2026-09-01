@@ -23,6 +23,7 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@field item userdata
 
 local rowHeight = 25
+local items_window_size = {620, 600}
 local icon_width = 35
 local enchant_pts_width = 100
 
@@ -162,7 +163,7 @@ function items_ui.show_items_list()
     local allItems = items_ui.make_enchantable_items_list()
 
     local list = I.UIToolkit.Components.sortedList {
-        size = v2(elements.items_window_size[1], elements.items_window_size[2] - titleHeight),
+        size = v2(items_window_size[1], items_window_size[2] - titleHeight),
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
@@ -217,7 +218,7 @@ function items_ui.show_items_list()
         content = UI.content {
             {
                 props = {
-                    size = v2(elements.items_window_size[1], titleHeight),
+                    size = v2(items_window_size[1], titleHeight),
                 },
                 content = ui.content {
                     {

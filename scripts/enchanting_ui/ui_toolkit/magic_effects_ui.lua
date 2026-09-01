@@ -11,7 +11,7 @@ local core = require('openmw.core')
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
-local effect_ui = require("scripts.enchanting_ui.ui.effect_ui")
+local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 
 
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
@@ -33,7 +33,7 @@ local columns = {
     {
         id = 'name',
         name = 'Name', --TODO: add L10N
-        auto = 5,
+        auto = 10,
         sort = {},
         render = ColumnItem.renderText,
 
@@ -41,7 +41,7 @@ local columns = {
     {
         id = 'school',
         name = 'School', --TODO: add L10N
-        auto = 3,
+        auto = 5,
         sort = {},
         render = ColumnItem.renderText,
         arg = { textAlignH = ui.ALIGNMENT.Center },
@@ -50,7 +50,7 @@ local columns = {
     {
         id = 'baseCost',
         name = 'Base Cost', --TODO: add L10N
-        auto = 2,
+        auto = 3,
         sort = { numeric = true },
         render = ColumnItem.renderText,
         arg = { textAlignH = ui.ALIGNMENT.End },
@@ -74,19 +74,16 @@ magic_effects_ui.on_magic_effect_clicked = function(id)
     enchanter.effect_to_add.id = id
     enchanter.effect_to_modify = false
 
-    print("CREATING MAGIC EFFECT ADD UI")
+    -- Close this popup
+    magic_effects_ui.closePopup()
+    -- create customize_effect_ui popup
+    customize_effect_ui.show_customize_effect_ui()
+end
 
-    local props = {
-        relativeSize = v2(1, 1),
-        relativePosition = v2(0.5, 0.5),
-        anchor = v2(0.5, 0.5),
-        visible = true,
-    }
-    local effect_ui_add = effect_ui.new(enchanter.effect_to_modify, enchanter.effect_to_add)
-    elements.effects_root = templates.window.new("effects_window", UI.TYPE.Container, I.MWUI.templates.boxSolid, props,
-        { effect_ui_add:create() })
-    elements.effects_root:create()
-    elements.magic_effects_root:destroy()
+function magic_effects_ui.closePopup()
+    if not magic_effects_ui._closeListPopup then return end
+    magic_effects_ui._closeListPopup()
+    magic_effects_ui._closeListPopup = nil
 end
 
 ---@return EffectListData
@@ -146,12 +143,6 @@ function magic_effects_ui.show_add_effect_list()
 
     -- Change and update UI
     elements.root:hide()
-    local props = {
-        relativeSize = v2(1, 1),
-        relativePosition = v2(0.5, 0.5),
-        anchor = v2(0.5, 0.5),
-        visible = true,
-    }
 
     local filter = I.UIToolkit.Components.textEdit {
         width = 250,
@@ -207,15 +198,9 @@ function magic_effects_ui.show_add_effect_list()
         }
     }
 
-    elements.magic_effects_root = templates.window.new("magic_effects_window", UI.TYPE.Container,
-        I.UIToolkit.Templates.box { padding = 5, background = 'transparent' }, props, { layout })
-    elements.magic_effects_root:create()
-end
-
-function magic_effects_ui.update()
-    if elements.magic_effects_root.created then
-        elements.magic_effects_root:update()
-        end
+    magic_effects_ui._closeListPopup = I.UIToolkit.Popups.show {
+        body = layout,
+    }
 end
 
 return magic_effects_ui

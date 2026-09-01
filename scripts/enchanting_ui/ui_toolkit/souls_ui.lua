@@ -22,6 +22,7 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@field count number
 
 local rowHeight = 25
+local souls_window_size = {620, 600}
 
 ---@type UIToolkit.SortedList.Column[]
 local columns = {
@@ -138,7 +139,7 @@ function souls_ui.show_soul_list()
     local allItems = souls_ui.make_souls_list()
 
     local list = I.UIToolkit.Components.sortedList {
-        size = v2(elements.souls_window_size[1], elements.souls_window_size[2] - titleHeight),
+        size = v2(souls_window_size[1], souls_window_size[2] - titleHeight),
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
@@ -193,7 +194,7 @@ function souls_ui.show_soul_list()
         content = UI.content {
             {
                 props = {
-                    size = v2(elements.souls_window_size[1], titleHeight),
+                    size = v2(souls_window_size[1], titleHeight),
                 },
                 content = ui.content {
                     {

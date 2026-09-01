@@ -475,7 +475,9 @@ end
 -- This fnc assumes passed in values have already been verified as valid
 enchanter.create_item = function()
     print("create_item")
-    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item=enchanter.item, soul = enchanter.soul, enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
+    local item_copy = enchanter.item
+    item_copy.type = tostring(enchanter.item.type) -- Copy string version of type over
+    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item = item_copy, soul = enchanter.soul, enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
 end
 
 local reset_nothing = 0
@@ -585,7 +587,7 @@ enchanter.item_supports_cast_once = function()
         return false
     end
 
-    if enchanter.item.type == "Weapon" or enchanter.item.type == "Armor" or enchanter.item.type == "Clothing" then
+    if enchanter.item.type == types.Weapon or enchanter.item.type == types.Armor or enchanter.item.type == types.Clothing then
         return false
     end
 
@@ -597,11 +599,11 @@ enchanter.item_supports_cast_on_strike = function()
         return false
     end
 
-    if enchanter.item.type == "Armor" or enchanter.item.type == "Clothing" or enchanter.item.type == "Book" then
+    if enchanter.item.type == types.Armor or enchanter.item.type == types.Clothing or enchanter.item.type == types.Book then
         return false
     end
 
-    if enchanter.item.type == "Weapon" then
+    if enchanter.item.type == types.Weapon then
         local weapon_type = types.Weapon.records[enchanter.item.id].type
         print("Weapon type: ", weapon_type)
         if weapon_type == types.Weapon.TYPE.MarksmanBow or weapon_type == types.Weapon.TYPE.MarksmanCrossbow then
@@ -617,11 +619,11 @@ enchanter.item_supports_cast_on_use = function()
         return false
     end
 
-    if enchanter.item.type == "Book" then
+    if enchanter.item.type == types.Book then
         return false
     end
 
-    if enchanter.item.type == "Weapon" then
+    if enchanter.item.type == types.Weapon then
         local weapon_type = types.Weapon.records[enchanter.item.id].type
         print("Weapon type: ", weapon_type)
 
@@ -633,16 +635,15 @@ enchanter.item_supports_cast_on_use = function()
     return true
 end
 enchanter.item_supports_constant = function()
-
     if enchanter.item.type == nil or enchanter.item.type == 0 then
         return false
     end
 
-    if enchanter.item.type == "Book" then
+    if enchanter.item.type == types.Book then
         return false
     end
 
-    if enchanter.item.type == "Weapon" then
+    if enchanter.item.type == types.Weapon then
         local weapon_type = types.Weapon.records[enchanter.item.id].type
         print("Weapon type: ", weapon_type)
 

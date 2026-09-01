@@ -12,11 +12,11 @@ local types = require('openmw.types')
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
-local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
 local items_ui = require("scripts.enchanting_ui.ui_toolkit.items_ui")
 local souls_ui = require("scripts.enchanting_ui.ui_toolkit.souls_ui")
 local tooltips_text = require("scripts.enchanting_ui.ui.tooltips_text")
-local effect_ui = require("scripts.enchanting_ui.ui.effect_ui")
+local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
+local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
 
 -- TODO: tooltips hovering
 
@@ -160,7 +160,8 @@ local function on_type_clicked(new_type)
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
     -- Update current effects if type changes
-    effect_ui.regen_effect_items()
+    -- TODO: this
+    -- magic_effects_ui.regen_effect_items()
 
     elements.reset_type_buttons_backgrounds()
     elements.root:update()
@@ -257,11 +258,11 @@ enchanting_ui.destroy = function()
     enchanting_ui.hide()
 
     elements.root:destroy()
-    if elements.magic_effects_root.created then
-        elements.magic_effects_root:destroy()
+    if magic_effects_ui.closePopup then
+        magic_effects_ui.closePopup()
     end
-    if elements.effects_root.created then
-        elements.effects_root:destroy()
+    if customize_effect_ui.closePopup then
+        customize_effect_ui.closePopup()
     end
     if elements.items_root.created then
         elements.items_root:destroy()

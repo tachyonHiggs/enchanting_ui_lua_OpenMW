@@ -5,8 +5,6 @@
 ### Vanilla Features
 - Final touches to add effect window
 - Layering issues
-- Ability to drag sliders and scroll bars
-    - And replace yellow bar with actual texture
 - Finish tool tips text to relevant elements
 
 ### Expanded Features
@@ -27,3 +25,4 @@
 ## Known Issues
  - Minimum sized magic effects cause the item to have 0 charge
  - Menus layering issue, !!IMPORTANT!!
+ - Editing effect, then canceling, will cause those values to appear again
