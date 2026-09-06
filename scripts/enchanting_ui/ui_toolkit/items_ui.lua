@@ -108,15 +108,21 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
     -- print("enchant_pts: ", string.format("%.1f", enchant_pts))
     elements.item_input:set_image(icon)
     
-    elements.show_valid_cast_types()
+    local function show_valid_cast_types()
+
+        -- valid_type(elements.cast_once, enchanter.item_supports_cast_once)
+        -- valid_type(elements.cast_on_strike, enchanter.item_supports_cast_on_strike)
+        -- valid_type(elements.cast_on_use, enchanter.item_supports_cast_on_use)
+        -- valid_type(elements.constant, enchanter.item_supports_constant)
+    end
+
+    show_valid_cast_types()
 
     elements.set_stats_charge()
     elements.set_stats_enchantment()
     elements.set_chance()
 
     elements.effects:clear()
-    
-    elements.reset_type_buttons_backgrounds()
     
     elements.root:show()
 

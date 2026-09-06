@@ -106,32 +106,6 @@ elements.set_stats_charge = function()
     elements.stats_num_uses:set_text(string.format("%.0f", uses)) -- round down/ floor value
 end
 
--- TODO: move this into enchanting_ui
-elements.show_valid_cast_types = function()
-
-    local function valid_type(element, check_fnc)
-        if check_fnc() then
-            print("Item has valid type: ", element.name)
-            element:enable()
-        else
-            print("Item does not have valid type: ", element.name)
-            element:disable()
-        end
-    end
-
-    valid_type(elements.cast_once, enchanter.item_supports_cast_once)
-    valid_type(elements.cast_on_strike, enchanter.item_supports_cast_on_strike)
-    valid_type(elements.cast_on_use, enchanter.item_supports_cast_on_use)
-    valid_type(elements.constant, enchanter.item_supports_constant)
-
-end
-function elements.reset_type_buttons_backgrounds()
-    elements.cast_once:reset_button_border()
-    elements.cast_on_strike:reset_button_border()
-    elements.cast_on_use:reset_button_border()
-    elements.constant:reset_button_border()
-end
-
 -- Type
 elements.cast_once = {}
 elements.cast_on_strike = {}
@@ -152,7 +126,6 @@ elements.is_vendor = false
 
 -- lists
 
-elements.root = {}
 elements.effects = {}
 
 -- Root UI constants
@@ -165,10 +138,6 @@ elements.cast_once_size = {105, elements.cast_height}
 elements.cast_on_strike_size = {145, elements.cast_height}
 elements.cast_on_use_size = {120, elements.cast_height}
 elements.constant_size = {155, elements.cast_height}
-
-
--- Header UI constants
-elements.input_image_size = {75, 75}
 
 -- Main Content UI constants
 elements.mc_effects_size = {525, 200}

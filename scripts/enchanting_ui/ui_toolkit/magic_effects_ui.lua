@@ -141,9 +141,6 @@ function magic_effects_ui.show_add_effect_list()
     list:setItems(allItems)
     list.header:toggleColumn('name')
 
-    -- Change and update UI
-    elements.root:hide()
-
     local filter = I.UIToolkit.Components.textEdit {
         width = 250,
         default = '',

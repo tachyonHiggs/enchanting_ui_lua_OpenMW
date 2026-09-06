@@ -1,5 +1,4 @@
 local I = require('openmw.interfaces')
-local auxUi = require("openmw_aux.ui")
 
 local enchanting_ui = require("scripts.enchanting_ui.enchanting_ui")
 
@@ -11,45 +10,20 @@ I.Settings.registerPage ({
     description = 'Enchanting Remastered Description and Settings.',
 })
 
-
-local function show()
-    enchanting_ui.create_ui()   -- Only create, dont render
-    enchanting_ui.reset()       -- Then reset newely created UI elements
-end
-    
-local function hide()
-    enchanting_ui.destroy()
-end
-
-local function onMouseWheel()
-    
-end
-
-local function onFrame()
-    
-end
-
-local function onSave()
-    
-end
-
 local function onLoad(data)
-    -- Register Window and reset
-    I.UI.registerWindow('EnchantingDialog', show, hide)
+    -- Register Window
+    I.UI.registerWindow('EnchantingDialog', function() end, enchanting_ui.hide)
 end
 
 return {
     engineHandlers = {
         onInit = onLoad,
         onLoad = onLoad,
-        onSave = onSave,
-        onMouseWheel = onMouseWheel,
-        onFrame = onFrame,
     },
     eventHandlers = {
         UiModeChanged = function(data)
             print('UiModeChanged from', data.oldMode , 'to', data.newMode, '('..tostring(data.arg)..')')
-            -- TODO: use arg here to make it the soul gem
+
             if data.newMode == 'Enchanting' then
                 -- This handles displaying the actual UI depending on which one is appropiate
                 if data.oldMode == 'Dialogue' then
