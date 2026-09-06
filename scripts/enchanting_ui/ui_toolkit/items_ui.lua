@@ -12,6 +12,7 @@ local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
 
+-- TODO: make popup instead
 
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
@@ -101,15 +102,10 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
     enchanter.item.type = type_text
     enchanter.item.default_enchantment_capacity = enchant_pts
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
-
-    -- print("click on item: ", id)
-    -- print("Icon: ", icon)
-    -- print("Type: ", type_text)
-    -- print("enchant_pts: ", string.format("%.1f", enchant_pts))
     elements.item_input:set_image(icon)
     
     local function show_valid_cast_types()
-
+        -- TODO: this
         -- valid_type(elements.cast_once, enchanter.item_supports_cast_once)
         -- valid_type(elements.cast_on_strike, enchanter.item_supports_cast_on_strike)
         -- valid_type(elements.cast_on_use, enchanter.item_supports_cast_on_use)
@@ -123,8 +119,6 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
     elements.set_chance()
 
     elements.effects:clear()
-    
-    elements.root:show()
 
     elements.items_root:destroy()
 end
@@ -180,7 +174,6 @@ function items_ui.show_items_list()
     list.header:toggleColumn('name')
 
     -- Change and update UI
-    elements.root:hide()
     local props = {
         relativeSize = v2(1, 1),
         relativePosition = v2(0.5, 0.5),

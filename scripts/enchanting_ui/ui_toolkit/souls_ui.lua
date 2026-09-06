@@ -12,6 +12,7 @@ local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
 
+-- TODO: make popup instead
 
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
@@ -88,7 +89,6 @@ function souls_ui.on_soul_clicked(id, object, value, icon)
     -- print("at icon: ", icon)
     -- print("with a soul value of: ", value)
     elements.soul_input:set_image(icon)
-    elements.root:show()
 
     if elements.souls_root.created then -- for external function callers
         elements.souls_root:destroy()
@@ -150,7 +150,6 @@ function souls_ui.show_soul_list()
     list.header:toggleColumn('name')
 
     -- Change and update UI
-    elements.root:hide()
     local props = {
         relativeSize = v2(1, 1),
         relativePosition = v2(0.5, 0.5),

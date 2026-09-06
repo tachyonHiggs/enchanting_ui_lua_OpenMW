@@ -15,7 +15,7 @@ local elements = require("scripts.enchanting_ui.ui.elements")
 local customize_effect_ui = {}
 local rowHeight = 25
 
-function customize_effect_ui.show_customize_effect_ui()
+function customize_effect_ui.show_customize_effect_ui(modify_effect, index_to_modify)
     print("customize_effect_ui.show_customize_effect_ui")
 
     local titleHeight = math.floor(1.5 * rowHeight)
