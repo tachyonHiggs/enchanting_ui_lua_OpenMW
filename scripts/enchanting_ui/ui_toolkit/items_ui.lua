@@ -137,7 +137,7 @@ local function create_enchantable_item(item)
         id = id,
         name = item.type.records[id].name,
         enchant_pts = item.type.records[id].enchantCapacity,
-        type = item.type,
+        type = tostring(item.type), --TODO: this would require proper localisation in the future (use item slot name?)
         count = item.count,
         icon = item.type.records[id].icon,
         item = item,
