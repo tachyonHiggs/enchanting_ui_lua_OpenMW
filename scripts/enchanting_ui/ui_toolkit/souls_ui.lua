@@ -115,6 +115,7 @@ local function create_soul_item(item)
         soul_name = types.Creature.records[soul].name,
         count = count,
         icon = record.icon,
+        item = item,
     }
 end
 
@@ -131,7 +132,8 @@ function souls_ui.make_souls_list()
     return valid_items
 end
 
-function souls_ui.show_soul_list(soul_icon)
+---@param wnd EnchantingHandler
+function souls_ui.show_soul_list(wnd)
     print("souls_ui.show_soul_list")
     local theme = I.UIToolkit.getTheme()
 
@@ -146,6 +148,7 @@ function souls_ui.show_soul_list(soul_icon)
         rowHeight = rowHeight,
         onItemClicked = function(data)
             souls_ui.on_soul_clicked(data.id, data.object, data.value, data.icon)
+            wnd:setSoul(data.item)
         end,
     }
     list:setItems(allItems)
@@ -206,8 +209,6 @@ function souls_ui.show_soul_list(soul_icon)
             list.element,
         }
     }
-
-    souls_ui.soul_icon = soul_icon
 
     souls_ui._closeListPopup = I.UIToolkit.Popups.show {
         body = layout,

@@ -1,3 +1,5 @@
+---@omw-context player
+
 local UI = require('openmw.ui')
 local I = require('openmw.interfaces')
 local Util = require('openmw.util')
@@ -9,11 +11,13 @@ local async = require('openmw.async')
 local core = require('openmw.core')
 local types = require('openmw.types')
 
+
 local Class         = require 'scripts.UIToolkit.class'
 local WindowHandler = require 'scripts.UIToolkit.window_handler'
 local H             = require 'scripts.UIToolkit.helpers'
 local tipUtils      = require 'scripts.UIToolkit.tooltips.utils'
 local T  = I.UIToolkit.Templates
+
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local templates = require("scripts.enchanting_ui.templates")
@@ -25,6 +29,7 @@ local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
 local current_effects_ui = require("scripts.enchanting_ui.ui_toolkit.current_effects_ui")
 
+
 -- TODO: tooltips hovering
 local enchanting_ui = {}
 local windowId = 'enchanting_ui'
@@ -32,43 +37,42 @@ local statsId = 'stats_ui'
 
 local ui_development = true
 
-local input_image_size = {75, 75}
+local input_image_size = v2(76, 76)
 local current_effects_size = {525, 200}
 
----@class Handler: UIToolkit.WindowHandler
+---@class EnchantingHandler: UIToolkit.WindowHandler
 local Handler = Class(WindowHandler)
 
-function Handler:onOpened(wnd, _, saved)
-    
-    -- Inputs
-    local item_icon = {
-        template = I.MWUI.templates.borders,
-        type = UI.TYPE.Image,
-        props = {
-            resource = UI.texture {path = 'black'},
-            size = v2(input_image_size[1], input_image_size[2]),
-        },
-        userData = { colorable = true, },
+local function makeIconLayout()
+    return {
+        template = T.border { padding = 4 },
+        props = { size = input_image_size },
+        content = UI.content { {
+            type = UI.TYPE.Image,
+            props = {
+                resource = nil,
+                relativeSize = v2(1, 1)
+            },
+        } },
     }
+end
+
+function Handler:onOpened(wnd, _, saved)
+    -- Inputs
     local item_icon_input = I.UIToolkit.Interactive.makeInteractive({
-        onClick = function() items_ui.show_items_list(item_icon.props.resource) end,
+        onClick = function() items_ui.show_items_list(self) end,
         tooltip = 'Hello World!',
-    }, item_icon)
+    }, makeIconLayout())
+    self.itemInput = item_icon_input
+
     local item_input = templates.flex({{ template = T.text(), props = { text = 'Item:' } }, item_icon_input}, "item_input", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
     
-    local soul_icon = {
-        template = I.MWUI.templates.borders,
-        type = UI.TYPE.Image,
-        props = {
-            resource = UI.texture {path = 'black'},
-            size = v2(input_image_size[1], input_image_size[2]),
-        },
-        userData = { colorable = true, },
-    }
+
     local soul_icon_input = I.UIToolkit.Interactive.makeInteractive({
-        onClick = function() souls_ui.show_soul_list(soul_icon.props.resource) end,
+        onClick = function() souls_ui.show_soul_list(self) end,
         tooltip = 'Hello World!',
-    }, item_icon)
+    }, makeIconLayout())
+    self.soulInput = soul_icon_input
     local soul_input = templates.flex({{ template = T.text(), props = { text = 'Soul:' } }, soul_icon_input}, "soul_input", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
     
     local name_input = I.UIToolkit.Components.textEdit {
@@ -238,6 +242,20 @@ end
 ---@param inner openmw.util.Vector2
 function Handler:onResized(inner)
 
+end
+
+---@param item openmw.Object
+function Handler:setItem(item)
+    local record = item.type.records[item.recordId]
+    self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
+    I.UIToolkit.queueUpdate(self.itemInput)
+end
+
+---@param item openmw.Object
+function Handler:setSoul(item)
+    local record = item.type.records[item.recordId]
+    self.soulInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
+    I.UIToolkit.queueUpdate(self.soulInput)
 end
 
 I.UIToolkit.WindowManager.register(windowId, {
