@@ -61,7 +61,11 @@ function Handler:onOpened(wnd, _, saved)
     -- Inputs
     local item_icon_input = I.UIToolkit.Interactive.makeInteractive({
         onClick = function() items_ui.show_items_list(self) end,
-        tooltip = 'Hello World!',
+        tooltip = function ()
+            local item = enchanter.item and enchanter.item.object
+            if not item then return 'Select Item' end
+            return {object = item}
+        end,
     }, makeIconLayout())
     self.itemInput = item_icon_input
 
@@ -70,7 +74,11 @@ function Handler:onOpened(wnd, _, saved)
 
     local soul_icon_input = I.UIToolkit.Interactive.makeInteractive({
         onClick = function() souls_ui.show_soul_list(self) end,
-        tooltip = 'Hello World!',
+        tooltip = function ()
+            local soul = enchanter.soul and enchanter.soul.object
+            if not soul then return 'Select Soul Gem' end
+            return {object = soul}
+        end,
     }, makeIconLayout())
     self.soulInput = soul_icon_input
     local soul_input = templates.flex({{ template = T.text(), props = { text = 'Soul:' } }, soul_icon_input}, "soul_input", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)

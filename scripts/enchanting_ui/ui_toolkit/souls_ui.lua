@@ -147,7 +147,7 @@ function souls_ui.show_soul_list(wnd)
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
-            souls_ui.on_soul_clicked(data.id, data.object, data.value, data.icon)
+            souls_ui.on_soul_clicked(data.id, data.item, data.value, data.icon)
             wnd:setSoul(data.item)
         end,
     }
