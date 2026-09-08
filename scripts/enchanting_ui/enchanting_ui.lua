@@ -193,7 +193,7 @@ function Handler:onOpened(wnd, _, saved)
     end
     local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item}
     create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.80,1)})
-    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = enchanting_ui.hide}
+    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function()  I.UI.removeMode('Enchanting') end}
     cancel_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.95,1)})
     local outputs = {
         name = "outputs",
@@ -237,14 +237,6 @@ function Handler:onOpened(wnd, _, saved)
 end
 
 function Handler:onClosed()
-    I.UI.removeMode('EnchantingDialog')
-    print("is_vendor_enchant", enchanting_ui.is_vendor)
-    if not enchanting_ui.is_vendor then
-        I.UI.setMode("Interface")
-    else 
-        -- TODO: this to dialog
-        I.UI.setMode("Dialogue")
-    end
 end
 
 ---@param inner openmw.util.Vector2
