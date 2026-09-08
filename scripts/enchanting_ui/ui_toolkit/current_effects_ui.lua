@@ -44,6 +44,7 @@ current_effects_ui.on_effect_clicked = function(index)
     customize_effect_ui.show_customize_effect_ui(true, index)
 end
 
+-- TODO: add is_vendor
 ---@return CurrentEffectsListData[]
 current_effects_ui.generate_effect_items = function()
 
@@ -68,10 +69,10 @@ current_effects_ui.generate_effect_items = function()
     elements.count_input:set_max_min(enchanter.get_count_max(), nil)
     
     -- Update price
-    if elements.is_vendor then
-        enchanter.calculate_price()
-        elements.set_price()
-    end
+    -- if elements.is_vendor then
+    --     enchanter.calculate_price()
+    --     elements.set_price()
+    -- end
 
 end
 

@@ -12,8 +12,6 @@ local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
 
--- TODO: make popup instead
-
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
 ---@class SoulsListData : UIToolkit.ListData.Column
@@ -83,16 +81,20 @@ function souls_ui.on_soul_clicked(id, object, value, icon)
     elements.set_stats_enchantment()
 
     -- Update count max, but don't show it
-    elements.count_input:set_max_min(enchanter.get_count_max(), nil)
+    -- elements.count_input:set_max_min(enchanter.get_count_max(), nil)
     
     -- print("click on soul: ", id)
     -- print("at icon: ", icon)
     -- print("with a soul value of: ", value)
-    elements.soul_input:set_image(icon)
+    -- elements.soul_input:set_image(icon)
 
-    if elements.souls_root.created then -- for external function callers
-        elements.souls_root:destroy()
-    end
+    souls_ui.closePopup()
+end
+
+function souls_ui.closePopup()
+    if not souls_ui._closeListPopup then return end
+    souls_ui._closeListPopup()
+    souls_ui._closeListPopup = nil
 end
 
 ---@return SoulsListData
@@ -129,7 +131,7 @@ function souls_ui.make_souls_list()
     return valid_items
 end
 
-function souls_ui.show_soul_list()
+function souls_ui.show_soul_list(soul_icon)
     print("souls_ui.show_soul_list")
     local theme = I.UIToolkit.getTheme()
 
@@ -150,12 +152,6 @@ function souls_ui.show_soul_list()
     list.header:toggleColumn('name')
 
     -- Change and update UI
-    local props = {
-        relativeSize = v2(1, 1),
-        relativePosition = v2(0.5, 0.5),
-        anchor = v2(0.5, 0.5),
-        visible = true,
-    }
 
     local filter = I.UIToolkit.Components.textEdit {
         width = 250,
@@ -211,16 +207,11 @@ function souls_ui.show_soul_list()
         }
     }
 
-    elements.souls_root = templates.window.new("souls_window", UI.TYPE.Container,
-        I.UIToolkit.Templates.box { padding = 5, background = 'transparent' }, props, { layout })
-    elements.souls_root:create()
-end
+    souls_ui.soul_icon = soul_icon
 
-function souls_ui.update()
-    if elements.souls_root.created then
-        elements.souls_root:update()
-    end
+    souls_ui._closeListPopup = I.UIToolkit.Popups.show {
+        body = layout,
+    }
 end
-
 
 return souls_ui

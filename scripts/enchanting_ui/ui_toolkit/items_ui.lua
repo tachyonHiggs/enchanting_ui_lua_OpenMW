@@ -12,8 +12,6 @@ local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
 
--- TODO: make popup instead
-
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
 ---@class ItemsListData : UIToolkit.ListData.Column
@@ -85,7 +83,7 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
 
     -- if item == ammo/throwable
     enchanter.item.count = 1
-    elements.count_input:hide()
+    -- elements.count_input:hide()
     if object.type == types.Weapon then
         local weapon_type = object.type.records[id].type
         local is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
@@ -102,7 +100,8 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
     enchanter.item.type = type_text
     enchanter.item.default_enchantment_capacity = enchant_pts
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
-    elements.item_input:set_image(icon)
+
+    items_ui.item_icon = UI.texture {path = icon}
     
     local function show_valid_cast_types()
         -- TODO: this
@@ -118,9 +117,16 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
     elements.set_stats_enchantment()
     elements.set_chance()
 
-    elements.effects:clear()
+    -- TODO: this
+    -- elements.effects:clear()
 
-    elements.items_root:destroy()
+    items_ui.closePopup()
+end
+
+function items_ui.closePopup()
+    if not items_ui._closeListPopup then return end
+    items_ui._closeListPopup()
+    items_ui._closeListPopup = nil
 end
 
 ---@return ItemsListData
@@ -153,7 +159,7 @@ function items_ui.make_enchantable_items_list()
     return valid_items
 end
 
-function items_ui.show_items_list()
+function items_ui.show_items_list(item_icon)
     print("items_ui.show_items_list")
     local theme = I.UIToolkit.getTheme()
 
@@ -174,12 +180,6 @@ function items_ui.show_items_list()
     list.header:toggleColumn('name')
 
     -- Change and update UI
-    local props = {
-        relativeSize = v2(1, 1),
-        relativePosition = v2(0.5, 0.5),
-        anchor = v2(0.5, 0.5),
-        visible = true,
-    }
 
     local filter = I.UIToolkit.Components.textEdit {
         width = 250,
@@ -235,14 +235,11 @@ function items_ui.show_items_list()
         }
     }
 
-    elements.items_root = templates.window.new("items_window", UI.TYPE.Container,
-        I.UIToolkit.Templates.box { padding = 5, background = 'transparent' }, props, { layout })
-    elements.items_root:create()
-end
-function items_ui.update()
-    if elements.items_root.created then
-        elements.items_root:update()
-    end
+    items_ui.item_icon = item_icon
+
+    items_ui._closeListPopup = I.UIToolkit.Popups.show {
+        body = layout,
+    }
 end
 
 return items_ui

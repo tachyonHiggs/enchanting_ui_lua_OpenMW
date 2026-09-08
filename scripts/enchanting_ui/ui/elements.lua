@@ -15,12 +15,7 @@ elements.text_size = 20
 elements.title_text_size = 22
 elements.padding_size = 10
 
-elements.tooltip = templates.tooltips.new("GeneralToolTip")
-
 -- Inputs
-elements.name_input = {}
-elements.soul_input = {}
-elements.item_input = {}
 elements.count_input = {}
 
 -- Stats
@@ -106,12 +101,6 @@ elements.set_stats_charge = function()
     elements.stats_num_uses:set_text(string.format("%.0f", uses)) -- round down/ floor value
 end
 
--- Type
-elements.cast_once = {}
-elements.cast_on_strike = {}
-elements.cast_on_use = {}
-elements.constant = {}
-
 elements.set_price = function()
     print("set_price")
     elements.price:set_text(tostring(enchanter.price))
@@ -122,7 +111,6 @@ elements.set_chance = function()
     elements.chance:set_text(string.format("%.1f", enchanter.chance))
 end
 elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMENT.End, tooltips_text.chance, elements.tooltip)
-elements.is_vendor = false
 
 -- lists
 
@@ -132,23 +120,7 @@ elements.effects = {}
 elements.main_menu_size = {575, 500}
 elements.stats_panel_size = {250, 500}
 
--- Cast type
-elements.cast_height = 30
-elements.cast_once_size = {105, elements.cast_height}
-elements.cast_on_strike_size = {145, elements.cast_height}
-elements.cast_on_use_size = {120, elements.cast_height}
-elements.constant_size = {155, elements.cast_height}
-
--- Main Content UI constants
-elements.mc_effects_size = {525, 200}
-elements.mc_list_gap = 5
-elements.mc_size = {800, 350}
-
--- Footer UI constants
-elements.footer_size = {800, 80}
-
 -- Add Effect UI
-elements.magic_effects_root = {}
 elements.magic_effects_window_size = {620, 600}
 
 -- Effect UI constants
@@ -161,11 +133,5 @@ elements.effect_icon_size = v2(20,20)
 
 elements.skill_select_root = {}
 elements.attribute_select_root = {}
-
--- Souls UI constants
-elements.souls_root = {}
-
--- Items UI constants
-elements.items_root = {}
 
 return elements

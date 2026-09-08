@@ -41,8 +41,36 @@ local Handler = Class(WindowHandler)
 function Handler:onOpened(wnd, _, saved)
     
     -- Inputs
-    local item_input = templates.text_image.new("Item:", v2(input_image_size[1], input_image_size[2]), 10, items_ui.show_items_list, nil, nil, {anchor = v2(0, 0), relativePosition = v2(0.05,0)})
-    local soul_input = templates.text_image.new("Soul:", v2(input_image_size[1], input_image_size[2]), 10, souls_ui.show_soul_list, nil, nil, {anchor = v2(1, 0), relativePosition = v2(0.95,0)})
+    local item_icon = {
+        template = I.MWUI.templates.borders,
+        type = UI.TYPE.Image,
+        props = {
+            resource = UI.texture {path = 'black'},
+            size = v2(input_image_size[1], input_image_size[2]),
+        },
+        userData = { colorable = true, },
+    }
+    local item_icon_input = I.UIToolkit.Interactive.makeInteractive({
+        onClick = function() items_ui.show_items_list(item_icon.props.resource) end,
+        tooltip = 'Hello World!',
+    }, item_icon)
+    local item_input = templates.flex({{ template = T.text(), props = { text = 'Item:' } }, item_icon_input}, "item_input", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
+    
+    local soul_icon = {
+        template = I.MWUI.templates.borders,
+        type = UI.TYPE.Image,
+        props = {
+            resource = UI.texture {path = 'black'},
+            size = v2(input_image_size[1], input_image_size[2]),
+        },
+        userData = { colorable = true, },
+    }
+    local soul_icon_input = I.UIToolkit.Interactive.makeInteractive({
+        onClick = function() souls_ui.show_soul_list(soul_icon.props.resource) end,
+        tooltip = 'Hello World!',
+    }, item_icon)
+    local soul_input = templates.flex({{ template = T.text(), props = { text = 'Soul:' } }, soul_icon_input}, "soul_input", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
+    
     local name_input = I.UIToolkit.Components.textEdit {
         placeholder = 'Enchanted Item Name',
         onValueChanged = function(value) print('Value changed:', value) enchanter.name = value end,
@@ -93,9 +121,9 @@ function Handler:onOpened(wnd, _, saved)
         -- elements.price:show()
     end
 
-    local input_content = {item_input:create(),
+    local input_content = {item_input,
         templates.flex({name_input.element, type_input.element}, "inputs_vert", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 10, 10, nil, v2(0.5, 0.5), v2(0.5, 0.5)), 
-        soul_input:create()
+        soul_input
     }
     local inputs = templates.flex(input_content, "inputs_horz", true, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 10, 10, nil, v2(0.5, 0.5), v2(0.5, 0.5))
 
@@ -129,7 +157,29 @@ function Handler:onOpened(wnd, _, saved)
     local count_input = templates.flex({count_text, count.element}, "count", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0, 1), v2(0.05, 1))
     count_input.props.visible = false
 
-    local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchanting_ui.enchant_item}
+    print("enchant_item")
+
+    ambient.playSound('menu click')
+
+    local function enchant_item()
+        local icons_to_reset = enchanter.enchant_item(enchanting_ui.is_vendor)
+
+        -- Now handle updating UI elements depending on enchanting success
+        if icons_to_reset >= 1 then
+            soul_input:reset_image()
+            -- elements.set_stats_charge()
+        end
+        if icons_to_reset >= 2 then
+            enchanting_ui.reset()
+            -- TODO: clear all inputs and stuff
+           item_input:reset_image()
+           name_input:setValue('')
+           -- clear effects
+           -- clear effect to add
+           enchanter.reset()
+        end
+    end
+    local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item}
     create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.80,1)})
     local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = enchanting_ui.hide}
     cancel_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.95,1)})
@@ -278,25 +328,6 @@ enchanting_ui.hide = function()
     enchanting_ui.destroy()
 end
 
--- enchanting_ui.enchant_item = function()
---     print("enchant_item")
-
---     ambient.playSound('menu click')
-
---     local icons_to_reset = enchanter.enchant_item(elements.is_vendor)
-
---     -- Now handle updating UI elements depending on enchanting success
---     if icons_to_reset >= 1 then
---         elements.soul_input:reset_image()
---         elements.set_stats_charge()
---     end
---     if icons_to_reset >= 2 then
---         enchanting_ui.reset()
---         TODO: clear all inputs and stuff
---     end
-
--- end
-
 enchanting_ui.destroy = function()
     print("enchanting_ui.destroy")
 
@@ -310,12 +341,12 @@ enchanting_ui.destroy = function()
     if customize_effect_ui.closePopup then
         customize_effect_ui.closePopup()
     end
-    -- if elements.items_root.created then
-    --     elements.items_root:destroy()
-    -- end
-    -- if elements.souls_root.created then
-    --     elements.souls_root:destroy()
-    -- end
+    if items_ui.closePopup then
+        items_ui.closePopup()
+    end
+    if souls_ui.closePopup then
+        souls_ui.closePopup()
+    end
     -- if elements.tooltip.visible then
     --     elements.tooltip:destroy()
     -- end
