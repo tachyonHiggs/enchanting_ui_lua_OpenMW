@@ -1,3 +1,5 @@
+---@omw-context player
+
 local UI = require('openmw.ui')
 local I = require('openmw.interfaces')
 local Util = require('openmw.util')
@@ -9,11 +11,13 @@ local async = require('openmw.async')
 local core = require('openmw.core')
 local types = require('openmw.types')
 
+
 local Class         = require 'scripts.UIToolkit.class'
 local WindowHandler = require 'scripts.UIToolkit.window_handler'
 local H             = require 'scripts.UIToolkit.helpers'
 local tipUtils      = require 'scripts.UIToolkit.tooltips.utils'
 local T  = I.UIToolkit.Templates
+
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local templates = require("scripts.enchanting_ui.templates")
@@ -25,6 +29,7 @@ local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
 local current_effects_ui = require("scripts.enchanting_ui.ui_toolkit.current_effects_ui")
 
+
 -- TODO: tooltips hovering
 local enchanting_ui = {}
 local windowId = 'enchanting_ui'
@@ -32,43 +37,50 @@ local statsId = 'stats_ui'
 
 local ui_development = true
 
-local input_image_size = {75, 75}
+local input_image_size = v2(76, 76)
 local current_effects_size = {525, 200}
 
----@class Handler: UIToolkit.WindowHandler
+---@class EnchantingHandler: UIToolkit.WindowHandler
 local Handler = Class(WindowHandler)
 
-function Handler:onOpened(wnd, _, saved)
-    
-    -- Inputs
-    local item_icon = {
-        template = I.MWUI.templates.borders,
-        type = UI.TYPE.Image,
-        props = {
-            resource = UI.texture {path = 'black'},
-            size = v2(input_image_size[1], input_image_size[2]),
-        },
-        userData = { colorable = true, },
+local function makeIconLayout()
+    return {
+        template = T.border { padding = 4 },
+        props = { size = input_image_size },
+        content = UI.content { {
+            type = UI.TYPE.Image,
+            props = {
+                resource = nil,
+                relativeSize = v2(1, 1)
+            },
+        } },
     }
+end
+
+function Handler:onOpened(wnd, _, saved)
+    -- Inputs
     local item_icon_input = I.UIToolkit.Interactive.makeInteractive({
-        onClick = function() items_ui.show_items_list(item_icon.props.resource) end,
-        tooltip = 'Hello World!',
-    }, item_icon)
+        onClick = function() items_ui.show_items_list(self) end,
+        tooltip = function ()
+            local item = enchanter.item and enchanter.item.object
+            if not item then return 'Select Item' end
+            return {object = item}
+        end,
+    }, makeIconLayout())
+    self.itemInput = item_icon_input
+
     local item_input = templates.flex({{ template = T.text(), props = { text = 'Item:' } }, item_icon_input}, "item_input", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
     
-    local soul_icon = {
-        template = I.MWUI.templates.borders,
-        type = UI.TYPE.Image,
-        props = {
-            resource = UI.texture {path = 'black'},
-            size = v2(input_image_size[1], input_image_size[2]),
-        },
-        userData = { colorable = true, },
-    }
+
     local soul_icon_input = I.UIToolkit.Interactive.makeInteractive({
-        onClick = function() souls_ui.show_soul_list(soul_icon.props.resource) end,
-        tooltip = 'Hello World!',
-    }, item_icon)
+        onClick = function() souls_ui.show_soul_list(self) end,
+        tooltip = function ()
+            local soul = enchanter.soul and enchanter.soul.object
+            if not soul then return 'Select Soul Gem' end
+            return {object = soul}
+        end,
+    }, makeIconLayout())
+    self.soulInput = soul_icon_input
     local soul_input = templates.flex({{ template = T.text(), props = { text = 'Soul:' } }, soul_icon_input}, "soul_input", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
     
     local name_input = I.UIToolkit.Components.textEdit {
@@ -181,7 +193,7 @@ function Handler:onOpened(wnd, _, saved)
     end
     local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item}
     create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.80,1)})
-    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = enchanting_ui.hide}
+    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function()  I.UI.removeMode('Enchanting') end}
     cancel_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.95,1)})
     local outputs = {
         name = "outputs",
@@ -225,19 +237,25 @@ function Handler:onOpened(wnd, _, saved)
 end
 
 function Handler:onClosed()
-    I.UI.removeMode('EnchantingDialog')
-    print("is_vendor_enchant", enchanting_ui.is_vendor)
-    if not enchanting_ui.is_vendor then
-        I.UI.setMode("Interface")
-    else 
-        -- TODO: this to dialog
-        I.UI.setMode("Dialogue")
-    end
 end
 
 ---@param inner openmw.util.Vector2
 function Handler:onResized(inner)
 
+end
+
+---@param item openmw.Object
+function Handler:setItem(item)
+    local record = item.type.records[item.recordId]
+    self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
+    I.UIToolkit.queueUpdate(self.itemInput)
+end
+
+---@param item openmw.Object
+function Handler:setSoul(item)
+    local record = item.type.records[item.recordId]
+    self.soulInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
+    I.UIToolkit.queueUpdate(self.soulInput)
 end
 
 I.UIToolkit.WindowManager.register(windowId, {

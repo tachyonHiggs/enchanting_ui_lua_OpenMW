@@ -27,7 +27,7 @@ end
 enchanter.reset_item = function()
     enchanter.item = {
         id = "",
-        object = {},
+        object = nil,
         icon = nil,
         type = 0,
         count = 1,
@@ -39,7 +39,7 @@ end
 enchanter.reset_soul = function()
     enchanter.soul = {
         id = "",
-        object = {},
+        object = nil,
         icon = nil,
         charge = 0
     }

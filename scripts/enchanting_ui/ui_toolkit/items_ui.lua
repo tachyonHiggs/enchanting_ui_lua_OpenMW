@@ -101,8 +101,6 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
     enchanter.item.default_enchantment_capacity = enchant_pts
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
-    items_ui.item_icon = UI.texture {path = icon}
-    
     local function show_valid_cast_types()
         -- TODO: this
         -- valid_type(elements.cast_once, enchanter.item_supports_cast_once)
@@ -139,7 +137,7 @@ local function create_enchantable_item(item)
         id = id,
         name = item.type.records[id].name,
         enchant_pts = item.type.records[id].enchantCapacity,
-        type = item.type,
+        type = tostring(item.type), --TODO: this would require proper localisation in the future (use item slot name?)
         count = item.count,
         icon = item.type.records[id].icon,
         item = item,
@@ -159,7 +157,8 @@ function items_ui.make_enchantable_items_list()
     return valid_items
 end
 
-function items_ui.show_items_list(item_icon)
+---@param wnd EnchantingHandler
+function items_ui.show_items_list(wnd)
     print("items_ui.show_items_list")
     local theme = I.UIToolkit.getTheme()
 
@@ -173,7 +172,9 @@ function items_ui.show_items_list(item_icon)
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
+            print('---', 'ITEMS CLICKED')
             items_ui.on_item_clicked(data.id, data.item, data.icon, data.enchant_pts, data.type)
+            wnd:setItem(data.item)
         end,
     }
     list:setItems(allItems)
@@ -234,8 +235,6 @@ function items_ui.show_items_list(item_icon)
             list.element,
         }
     }
-
-    items_ui.item_icon = item_icon
 
     items_ui._closeListPopup = I.UIToolkit.Popups.show {
         body = layout,
