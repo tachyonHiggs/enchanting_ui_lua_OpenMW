@@ -29,15 +29,11 @@ local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
 local current_effects_ui = require("scripts.enchanting_ui.ui_toolkit.current_effects_ui")
 
-
--- TODO: tooltips hovering
 local enchanting_ui = {}
 local windowId = 'enchanting_ui'
 local statsId = 'stats_ui'
 
-local ui_development = true
-
-local input_image_size = v2(76, 76)
+local input_image_size = v2(50, 50)
 local current_effects_size = {525, 200}
 
 ---@class EnchantingHandler: UIToolkit.WindowHandler
@@ -59,6 +55,7 @@ end
 
 function Handler:onOpened(wnd, _, saved)
     -- Inputs
+    self.type_input = {}
     local item_icon_input = I.UIToolkit.Interactive.makeInteractive({
         onClick = function() items_ui.show_items_list(self) end,
         tooltip = function ()
@@ -103,19 +100,17 @@ function Handler:onOpened(wnd, _, saved)
         -- Update current effects if type changes
         -- TODO: this
         -- magic_effects_ui.regen_effect_items()
-
-        -- elements.root:update()
     end
-    local type_input = I.UIToolkit.Components.dropbox {
-        items = {
+    self.type_input = I.UIToolkit.Components.dropbox { -- Default is this guys is disabled
+        items = { -- These will be overwritten once an item is selected
             { id = core.magic.ENCHANTMENT_TYPE.CastOnce,        text = "Cast Once" },
             { id = core.magic.ENCHANTMENT_TYPE.CastOnStrike,    text = "Cast on Strike" },
             { id = core.magic.ENCHANTMENT_TYPE.CastOnUse,       text = "Cast on Use" },
             { id = core.magic.ENCHANTMENT_TYPE.ConstantEffect,  text = "Constant Effect" },
         },
         onItemSelected = function(item, index)
-            print('Difficulty:', item.text, 'Index:', index)
-            on_type_clicked(index)
+            print('Type:', item.text, 'Index:', index)
+            on_type_clicked( index)
         end,
     }
 
@@ -134,7 +129,7 @@ function Handler:onOpened(wnd, _, saved)
     end
 
     local input_content = {item_input,
-        templates.flex({name_input.element, type_input.element}, "inputs_vert", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 10, 10, nil, v2(0.5, 0.5), v2(0.5, 0.5)), 
+        templates.flex({name_input.element, self.type_input.element}, "inputs_vert", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 10, 10, nil, v2(0.5, 0.5), v2(0.5, 0.5)), 
         soul_input
     }
     local inputs = templates.flex(input_content, "inputs_horz", true, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 10, 10, nil, v2(0.5, 0.5), v2(0.5, 0.5))
@@ -231,7 +226,7 @@ function Handler:onOpened(wnd, _, saved)
         }
     })
 
-    type_input:setDisabled(true)
+    self.type_input:setDisabled(true)
 
     Handler:onResized(wnd:getInnerSize())
 end
@@ -248,6 +243,25 @@ end
 function Handler:setItem(item)
     local record = item.type.records[item.recordId]
     self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
+    
+    self.type_input:setDisabled(false) -- Enable type input
+
+    local types_supported = {}
+    if enchanter.item_supports_cast_once() then
+        print("Item supports case once")
+        table.insert(types_supported, { id = core.magic.ENCHANTMENT_TYPE.CastOnce, text = "Cast Once" })
+    end
+    if enchanter.item_supports_cast_on_strike() then
+        table.insert(types_supported, { id = core.magic.ENCHANTMENT_TYPE.CastOnStrike,    text = "Cast on Strike" })
+    end
+    if enchanter.item_supports_cast_on_use() then
+        table.insert(types_supported, { id = core.magic.ENCHANTMENT_TYPE.CastOnUse,       text = "Cast on Use" })
+    end
+    if enchanter.item_supports_constant() then
+        table.insert(types_supported, { id = core.magic.ENCHANTMENT_TYPE.ConstantEffect,  text = "Constant Effect" })
+    end
+    self.type_input:setItems(types_supported)
+
     I.UIToolkit.queueUpdate(self.itemInput)
 end
 
@@ -274,9 +288,6 @@ I.UIToolkit.WindowManager.register(statsId, {
     position = v2(1000, 1000),
     minSize = v2(250, 100),
 })
-if ui_development then
-    -- TODO: reset window sizes and positions
-end
 
 enchanting_ui.create = function() 
 

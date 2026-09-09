@@ -101,19 +101,9 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
     enchanter.item.default_enchantment_capacity = enchant_pts
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
-    local function show_valid_cast_types()
-        -- TODO: this
-        -- valid_type(elements.cast_once, enchanter.item_supports_cast_once)
-        -- valid_type(elements.cast_on_strike, enchanter.item_supports_cast_on_strike)
-        -- valid_type(elements.cast_on_use, enchanter.item_supports_cast_on_use)
-        -- valid_type(elements.constant, enchanter.item_supports_constant)
-    end
-
-    show_valid_cast_types()
-
-    elements.set_stats_charge()
-    elements.set_stats_enchantment()
-    elements.set_chance()
+    -- elements.set_stats_charge()
+    -- elements.set_stats_enchantment()
+    -- elements.set_chance()
 
     -- TODO: this
     -- elements.effects:clear()
