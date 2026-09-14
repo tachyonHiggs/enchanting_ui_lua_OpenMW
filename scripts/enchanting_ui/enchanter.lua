@@ -233,7 +233,7 @@ enchanter.get_effect_to_add_cost = function ()
     end 
 
     -- TODO: convert this into a constant for easier modification
-    if storage.globalSection("effect_cost_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
+    if storage.globalSection("effects_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
         print("make_fortify_skill_interactions_costlier is TRUE")
         if enchanter.effect_to_add.affectedSkill == "Armorer" or enchanter.effect_to_add.affectedSkill == "Enchant" or enchanter.effect_to_add.affectedSkill == "Alchemy" or enchanter.effect_to_add.affectedSkill == "Mercantile" or enchanter.effect_to_add.affectedSkill == "Speechcraft" then
             print("affectedSkill is: ", enchanter.effect_to_add.affectedSkill)
@@ -247,7 +247,7 @@ end
 enchanter.get_effects_total_base_cost = function()
     local sum = 0
 
-    if storage.globalSection("effect_cost_enchanting_ui"):get("remove_compound_effect_cost") then
+    if storage.globalSection("effects_enchanting_ui"):get("remove_compound_effect_cost") then
         for _, effect in ipairs(enchanter.effects_with_params) do
             sum = sum + effect.cost
         end

@@ -82,7 +82,7 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'effect_cost_enchanting_ui',
+    key = 'effects_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Effect Cost Options',
@@ -105,6 +105,16 @@ I.Settings.registerGroup {
             renderer = 'checkbox',
             name = 'Make Fortify Skill Interactions Costlier',
             description = 'When enabled, forces interaction based fortify skill effects to have a significantly higher enchanting cost. IE alchemy, speechcraft, mercantile, enchant, and armorer. This is to discourage the creation of "Fortify Speechcraft 100 points for 1 second" type effects',
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
+            key = 'allow_duplicate_effects',
+            renderer = 'checkbox',
+            name = 'Allow Duplicate Effects',
+            description = 'When enabled, effects can be added multiple times to the same enchantment',
             default = false,
 			argument = {
                 disabled = false,

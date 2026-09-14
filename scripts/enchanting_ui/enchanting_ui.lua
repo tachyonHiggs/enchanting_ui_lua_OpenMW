@@ -109,8 +109,8 @@ function Handler:onOpened(wnd, _, saved)
             { id = core.magic.ENCHANTMENT_TYPE.ConstantEffect,  text = "Constant Effect" },
         },
         onItemSelected = function(item, index)
-            print('Type:', item.text, 'Index:', index)
-            on_type_clicked( index)
+            print('Type:', item.text, 'Id:', item.id)
+            on_type_clicked( item.id)
         end,
     }
 
@@ -145,7 +145,7 @@ function Handler:onOpened(wnd, _, saved)
             relativePosition = v2(0.5, 0)
         },
         content = UI.content {
-            current_effects_ui.create_effect_ui()
+            current_effects_ui.create_effect_ui(self)
         }
     }
 
@@ -265,6 +265,31 @@ function Handler:setItem(item)
     I.UIToolkit.queueUpdate(self.itemInput)
 end
 
+function Handler:updateUI()
+    print("wnd:updateUI")
+    
+    -- -- Update base cost
+    -- enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
+    -- elements.set_stats_enchantment()
+    
+    -- -- Udpate chance since base_cost changed
+    -- enchanter.chance = enchanter.get_success_rate()
+    -- elements.set_chance()
+
+    -- -- Update effective cost
+    -- enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
+    -- elements.set_stats_charge()
+    
+    -- -- Update count max, but don't show it
+    -- elements.count_input:set_max_min(enchanter.get_count_max(), nil)
+    
+    -- -- Update price
+    -- if elements.is_vendor then
+    --     enchanter.calculate_price()
+    --     elements.set_price()
+    -- end
+end
+
 ---@param item openmw.Object
 function Handler:setSoul(item)
     local record = item.type.records[item.recordId]
@@ -286,7 +311,7 @@ I.UIToolkit.WindowManager.register(statsId, {
     draggable = true,
     resizing = true,
     position = v2(1000, 1000),
-    minSize = v2(250, 100),
+    minSize = v2(250, 500),
 })
 
 enchanting_ui.create = function() 

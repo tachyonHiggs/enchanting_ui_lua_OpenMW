@@ -38,53 +38,39 @@ provider:init({
     { id = 'cost', render = ColumnItem.renderText, arg = { textAlignH = ui.ALIGNMENT.End }, align = ui.ALIGNMENT.End, width = 1.5 * rowHeight },
 }, rowHeight)
 
--- TODO: move this to be in enchanting_UI or subscript
-current_effects_ui.on_effect_clicked = function(index)
-    print("On current effect clicked: ", id)
-    customize_effect_ui.show_customize_effect_ui(true, index)
+current_effects_ui.add_effect = function()
+    print("add_effect")
 end
 
--- TODO: add is_vendor
----@return CurrentEffectsListData[]
-current_effects_ui.generate_effect_items = function()
+current_effects_ui.clear_effects = function(effects_list)
+    print("clear_effects")
+    enchanter.reset_effect_to_add()
+    
+    effects_list:setItems({})
+end
 
+current_effects_ui.regen_effects = function(effects_list)
+    print("regen effects")
+    
+    local new_effect_elements = {}
     for index, effect in ipairs(enchanter.effects_with_params) do
-        local effect_element = customize_effect_ui.create_effect_item(effect)
-        -- elements.effects:update_item(index, effect_element)
+        local effect_element = customize_effect_ui.generate_effect_item(effect)
+        table.insert(new_effect_elements, effect_element)
     end
-        
-    -- Update base cost
-    enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
-    elements.set_stats_enchantment()
     
-    -- Udpate chance since base_cost changed
-    enchanter.chance = enchanter.get_success_rate()
-    elements.set_chance()
-
-    -- Update effective cost
-    enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
-    elements.set_stats_charge()
+    effects_list:setItems()
     
-    -- Update count max, but don't show it
-    elements.count_input:set_max_min(enchanter.get_count_max(), nil)
-    
-    -- Update price
-    -- if elements.is_vendor then
-    --     enchanter.calculate_price()
-    --     elements.set_price()
-    -- end
-
 end
 
-current_effects_ui.create_effect_ui = function()
+---@param wnd EnchantingHandler
+current_effects_ui.create_effect_ui = function(wnd)
     local theme = I.UIToolkit.getTheme()
 
     local add_effect_btn = I.UIToolkit.Components.textButton { text = "Add Effect", scrollWidth = 1, slimScroll = true, onClick = function()
-        magic_effects_ui.show_add_effect_list()
+        magic_effects_ui.show_add_effect_list(wnd)
     end}
     add_effect_btn:updateProps{
-        anchor = v2(1, 0),
-        relativePosition = v2(1, 0),
+        anchor = v2(1, 0),      relativePosition = v2(1, 0),
     }
 
     local effects_list_title = ui.create { template = T.text(), props = { text = 'Effects', textSize = textSize+5, anchor = v2(0,0), relativePosition = v2(0,0)} }
@@ -92,7 +78,8 @@ current_effects_ui.create_effect_ui = function()
         size = v2(current_effects_ui_size[1], current_effects_ui_size[2] - (textSize+8)),
         provider = provider,
         onItemClicked = function(data)
-            current_effects_ui.on_effect_clicked(data.id)
+            print("On current effect clicked: ", data.id)
+            customize_effect_ui.show_customize_effect_ui(wnd, data.id, true, data.index)
         end,
     }
     effects_list:updateProps{

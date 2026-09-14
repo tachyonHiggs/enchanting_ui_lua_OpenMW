@@ -13,6 +13,7 @@ local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 
+local window_size = {620, 600}
 
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
@@ -60,7 +61,8 @@ local columns = {
 
 local magic_effects_ui = {}
 
-magic_effects_ui.on_magic_effect_clicked = function(id)
+---@param wnd EnchantingHandler
+magic_effects_ui.on_magic_effect_clicked = function(wnd, id)
     print("On magic effect clicked: ", id)
 
     ambient.playSound('menu click')
@@ -70,14 +72,10 @@ magic_effects_ui.on_magic_effect_clicked = function(id)
         return
     end
 
-    enchanter.reset_effect_to_add()
-    enchanter.effect_to_add.id = id
-    enchanter.effect_to_modify = false
-
     -- Close this popup
     magic_effects_ui.closePopup()
     -- create customize_effect_ui popup
-    customize_effect_ui.show_customize_effect_ui()
+    customize_effect_ui.show_customize_effect_ui(wnd, id, false)
 end
 
 function magic_effects_ui.closePopup()
@@ -121,7 +119,8 @@ function magic_effects_ui.make_magic_effects_list()
     return items or {} -- return the list or just an empty one
 end
 
-function magic_effects_ui.show_add_effect_list()
+---@param wnd EnchantingHandler
+function magic_effects_ui.show_add_effect_list(wnd)
     print("magic_effects_ui.show_add_effect_list")
     local theme = I.UIToolkit.getTheme()
 
@@ -131,11 +130,11 @@ function magic_effects_ui.show_add_effect_list()
     local allItems = magic_effects_ui.make_magic_effects_list()
 
     local list = I.UIToolkit.Components.sortedList {
-        size = v2(elements.magic_effects_window_size[1], elements.magic_effects_window_size[2] - titleHeight),
+        size = v2(window_size[1], window_size[2] - titleHeight),
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
-            magic_effects_ui.on_magic_effect_clicked(data.id)
+            magic_effects_ui.on_magic_effect_clicked(wnd, data.id)
         end,
     }
     list:setItems(allItems)
@@ -177,7 +176,7 @@ function magic_effects_ui.show_add_effect_list()
         content = UI.content {
             {
                 props = {
-                    size = v2(elements.magic_effects_window_size[1], titleHeight),
+                    size = v2(window_size[1], titleHeight),
                 },
                 content = ui.content {
                     {

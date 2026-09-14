@@ -113,7 +113,4 @@ elements.count_input = {}
 
 elements.effects = {}
 
--- Add Effect UI
-elements.magic_effects_window_size = {620, 600}
-
 return elements

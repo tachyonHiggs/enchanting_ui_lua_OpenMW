@@ -90,8 +90,8 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
         if is_ammo then
             enchanter.item.count = object.count
             print("Projectile item selected with a total of: ", enchanter.item.count)
-            elements.count_input:set_max_min(enchanter.get_count_max(), nil)
-            elements.count_input:show()
+            -- elements.count_input:set_max_min(enchanter.get_count_max(), nil)
+            -- elements.count_input:show()
         end
     end
     enchanter.item.id = id
