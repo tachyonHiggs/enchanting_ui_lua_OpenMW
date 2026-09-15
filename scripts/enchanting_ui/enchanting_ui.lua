@@ -265,8 +265,10 @@ function Handler:setItem(item)
     I.UIToolkit.queueUpdate(self.itemInput)
 end
 
-function Handler:updateUI()
+function Handler:updateUI(wnd)
     print("wnd:updateUI")
+
+    wnd.effects_list:setItems(wnd.effects_list:getItems())
     
     -- -- Update base cost
     -- enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
@@ -288,6 +290,8 @@ function Handler:updateUI()
     --     enchanter.calculate_price()
     --     elements.set_price()
     -- end
+
+    print("wnd:updateUI DONE")
 end
 
 ---@param item openmw.Object
@@ -303,7 +307,7 @@ I.UIToolkit.WindowManager.register(windowId, {
     draggable = true,
     resizing = true,
     position = v2(10, 10),
-    minSize = v2(575, 500),
+    minSize = v2(575, 450),
 })
 I.UIToolkit.WindowManager.register(statsId, {
     title = 'Statistics',
@@ -311,48 +315,11 @@ I.UIToolkit.WindowManager.register(statsId, {
     draggable = true,
     resizing = true,
     position = v2(1000, 1000),
-    minSize = v2(250, 500),
+    minSize = v2(250, 450),
 })
-
-enchanting_ui.create = function() 
-
-    print("create_ui")
-
-    -- local stats_panel = {
-    --     name = "stats_panel",
-    --     type = UI.TYPE.Widget,
-    --     props = {
-    --         size = v2(elements.stats_panel_size[1], elements.stats_panel_size[2])
-    --     },
-    --     content = UI.content {
-    --         templates.make_border(v2(elements.stats_panel_size[1], elements.stats_panel_size[2]), 1),
-    --         templates.flex({
-    --         {
-    --             name = "title",
-    --             type = UI.TYPE.Text,
-    --             template = I.MWUI.templates.textNormal,
-    --             props = {
-    --                 text = "Statistics",
-    --                 textSize = elements.title_text_size,
-    --                 size = v2(elements.stats_panel_size[1],elements.title_text_size),
-    --                 autoSize = false,
-    --                 textAlignH = UI.ALIGNMENT.Center,
-    --                 textAlignV = UI.ALIGNMENT.Start,
-    --             },
-    --         },
-    --         elements.create_stats(),
-    --         }, "stats_flex", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Start, 10, 10, nil, v2(0.5, 0), v2(0.5, 0)),
-    --     }
-    -- }
-
-
-    print("Created UI")
-end
 
 -- -- All Effects
 -- elements.count_input = templates.slider.new("Count", 1, 1, 1, function() if elements.root.created then elements.root:update() end end, function(value) print("setting item count to: ", value) enchanter.item.count = value end, function() end, 55, 30, 140, v2(0,1), v2(0.05,1))
-
--- Helper functions
 
 enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     print("Menu Show")
@@ -369,7 +336,6 @@ enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     windows.open(windowId)
 end
 
--- TODO: fix this
 enchanting_ui.hide = function()
     print("Menu Hide")
 

@@ -35,9 +35,6 @@ local function generate_slider(name, text_width, scrollBar_element)
     
 end
 
-function customize_effect_ui.generate_effect_item(effect_to_add)
-end
-
 ---@param wnd EnchantingHandler
 function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_effect, index_to_modify)
     print("customize_effect_ui.show_customize_effect_ui")
@@ -123,23 +120,14 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             end
         end
 
-        -- if enchanter.effect_to_add.index > #enchanter.effects_with_params then
-        --     print("ERROR: tried to delete effect outside of effects_with_params")
-        --     return
-        -- end
-
-        -- TODO: this fnc
-        -- local effect_to_add_element = generate_effect_item(enchanter.effect_to_add)
+        -- print("wnd.effects_list: ", wnd.effects_list)
+        if enchanter.effect_to_modify then
+            wnd:modify_effect(index_to_modify)
+        else
+            wnd:add_effect()
+        end
         
-        -- if enchanter.effect_to_modify then 
-        --     enchanter.effects_with_params[enchanter.effect_to_add.index] = enchanter.effect_to_add -- replace existing entry
-        --     elements.effects:update_item(enchanter.effect_to_add.index, effect_to_add_ui)
-        -- else
-        --     table.insert(enchanter.effects_with_params, enchanter.effect_to_add)
-        --     elements.effects:add_item(effect_to_add_ui)
-        -- end
-        
-        wnd:updateUI()
+        wnd:updateUI(wnd)
 
         customize_effect_ui.closePopup()
 
@@ -158,7 +146,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         -- Remove from enchanter effects
         -- Remove from UI effects 
         
-        wnd:updateUI()
+        wnd:updateUI(wnd)
 
         customize_effect_ui.closePopup()
     end}
@@ -182,6 +170,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     if core.magic.effects.records[enchanter.effect_to_add.id].onTouch and not is_constant_effect then
         table.insert(valid_ranges, { id = core.magic.RANGE.Touch,      text = "Touch" })
     end
+    enchanter.effect_to_add.range = valid_ranges[1]
     local range_input = I.UIToolkit.Components.dropbox { -- Default is this guys is disabled
         items = valid_ranges,
         onItemSelected = function(item, index)
