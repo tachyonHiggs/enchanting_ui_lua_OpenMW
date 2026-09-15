@@ -40,7 +40,7 @@ provider:init({
 }, rowHeight)
 
 
-function current_effects_ui.generate_effect_item(wnd, effect_to_add, index)
+function current_effects_ui.generate_effect_item(effect_to_add, index)
     print("current_effects_ui for effect: ", effect_to_add.id)
 
     local icon = core.magic.effects.records[effect_to_add.id].icon
@@ -111,7 +111,7 @@ current_effects_ui.regen_effects = function(effects_list)
     
     local new_effect_elements = {}
     for index, effect in ipairs(enchanter.effects_with_params) do
-        local effect_element = current_effects_ui.generate_effect_item(wnd, effect, index)
+        local effect_element = current_effects_ui.generate_effect_item(effect, index)
         table.insert(new_effect_elements, effect_element)
     end
     
@@ -127,7 +127,7 @@ current_effects_ui.create_effect_ui = function(wnd)
     function wnd:add_effect()
         print("wnd:add_effect, adding", enchanter.effect_to_add.id )
 
-        local effect_element = current_effects_ui.generate_effect_item(wnd, enchanter.effect_to_add, #enchanter.effects_with_params + 1)
+        local effect_element = current_effects_ui.generate_effect_item(enchanter.effect_to_add, #enchanter.effects_with_params + 1)
 
         local current_effect_elements = wnd.effects_list:getItems()
         table.insert(current_effect_elements, effect_element)
@@ -140,13 +140,14 @@ current_effects_ui.create_effect_ui = function(wnd)
         print("wnd:modify_effect, modifying", enchanter.effect_to_add.id )
         print("index: ", index)
 
-        local effect_element = current_effects_ui.generate_effect_item(wnd, enchanter.effect_to_add, index)
+        local effect_element = current_effects_ui.generate_effect_item(enchanter.effect_to_add, index)
 
         local current_effect_elements = wnd.effects_list:getItems()
         current_effect_elements[index] = effect_element
         wnd.effects_list:setItems(current_effect_elements)
+        provider:refreshColumns(effect_element, "cost", "text")
 
-         enchanter.effects_with_params[index] = enchanter.effect_to_add -- replace existing entry
+        enchanter.effects_with_params[index] = enchanter.effect_to_add -- replace existing entry
     end
 
     local add_effect_btn = I.UIToolkit.Components.textButton { text = "Add Effect", scrollWidth = 1, slimScroll = true, onClick = function()

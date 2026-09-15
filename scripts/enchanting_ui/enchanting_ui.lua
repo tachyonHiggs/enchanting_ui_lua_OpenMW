@@ -239,6 +239,13 @@ function Handler:onResized(inner)
 
 end
 
+-- These will be overwritten by the current_effect_UI
+function Handler:add_effect()
+end
+function Handler:modify_effect()
+end
+Handler.effects_list = {}
+
 ---@param item openmw.Object
 function Handler:setItem(item)
     local record = item.type.records[item.recordId]

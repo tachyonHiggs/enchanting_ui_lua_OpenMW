@@ -43,6 +43,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     enchanter.reset_effect_to_add()
     enchanter.effect_to_add.id = effect_id
     enchanter.effect_to_modify = modify_effect
+    enchanter.effect_to_add.index = index_to_modify
 
     local titleHeight = math.floor(1.5 * rowHeight)
     local theme = I.UIToolkit.getTheme()
@@ -122,7 +123,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
 
         -- print("wnd.effects_list: ", wnd.effects_list)
         if enchanter.effect_to_modify then
-            wnd:modify_effect(index_to_modify)
+            wnd:modify_effect(enchanter.effect_to_add.index)
         else
             wnd:add_effect()
         end
