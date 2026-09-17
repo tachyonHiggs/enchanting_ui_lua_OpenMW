@@ -242,7 +242,7 @@ end
 -- These will be overwritten by the current_effect_UI
 function Handler:add_effect()
 end
-function Handler:modify_effect()
+function Handler:modify_effect(index)
 end
 Handler.effects_list = {}
 
@@ -269,13 +269,27 @@ function Handler:setItem(item)
     end
     self.type_input:setItems(types_supported)
 
+    self.effects_list:setItems({}) -- enchanter effects cleared in items_ui file
+
+    self:updateUI()
+
     I.UIToolkit.queueUpdate(self.itemInput)
 end
 
-function Handler:updateUI(wnd)
+---@param item openmw.Object
+function Handler:setSoul(item)
+    local record = item.type.records[item.recordId]
+    self.soulInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
+    
+    self:updateUI()
+
+    I.UIToolkit.queueUpdate(self.soulInput)
+end
+
+function Handler:updateUI()
     print("wnd:updateUI")
 
-    wnd.effects_list:setItems(wnd.effects_list:getItems())
+    self.effects_list:setItems(self.effects_list:getItems())
     
     -- -- Update base cost
     -- enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
@@ -298,14 +312,7 @@ function Handler:updateUI(wnd)
     --     elements.set_price()
     -- end
 
-    print("wnd:updateUI DONE")
-end
-
----@param item openmw.Object
-function Handler:setSoul(item)
-    local record = item.type.records[item.recordId]
-    self.soulInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
-    I.UIToolkit.queueUpdate(self.soulInput)
+    print("Handler:updateUI DONE")
 end
 
 I.UIToolkit.WindowManager.register(windowId, {

@@ -24,5 +24,4 @@
 
 ## Known Issues
  - Minimum sized magic effects cause the item to have 0 charge
- - Menus layering issue, !!IMPORTANT!!
- - Editing effect, then canceling, will cause those values to appear again
+ - Error message about "failed to open image: Resource:" then lists effect id instead of icon path

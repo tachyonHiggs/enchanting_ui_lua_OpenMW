@@ -75,18 +75,7 @@ function souls_ui.on_soul_clicked(id, object, value, icon)
     enchanter.soul.object = object
     enchanter.soul.icon = icon
     enchanter.soul.charge = value
-    elements.set_stats_charge()
-
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
-    elements.set_stats_enchantment()
-
-    -- Update count max, but don't show it
-    -- elements.count_input:set_max_min(enchanter.get_count_max(), nil)
-    
-    -- print("click on soul: ", id)
-    -- print("at icon: ", icon)
-    -- print("with a soul value of: ", value)
-    -- elements.soul_input:set_image(icon)
 
     souls_ui.closePopup()
 end

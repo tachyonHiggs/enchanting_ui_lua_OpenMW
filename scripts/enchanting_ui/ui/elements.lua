@@ -109,8 +109,4 @@ elements.count_input = {}
 -- end
 -- elements.chance = templates.text_output.new("Chance:", 100, 10, "0", UI.ALIGNMENT.End, tooltips_text.chance, elements.tooltip)
 
--- lists
-
-elements.effects = {}
-
 return elements

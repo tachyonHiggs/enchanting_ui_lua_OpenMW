@@ -18,8 +18,15 @@ local rowHeight = 25
 local window_size = {400, 600}
 local effect_icon_size = v2(20,20)
 
-local function generate_slider(name, text_width, scrollBar_element)
+-- TODO: this for slider values, is there a better option?
+local function generate_slider_value(default_value)
+    local element = I.UIToolkit.Components.textButton { text = default_value, width = 35, canClick = false, style = 'thin', thickness = 0}
+    return element
+end
+
+local function generate_slider(name, value_element, scrollBar_element)
     local theme = I.UIToolkit.getTheme()
+    local text_width = 129
 
     local text_element = {
         type = UI.TYPE.Text,
@@ -30,9 +37,8 @@ local function generate_slider(name, text_width, scrollBar_element)
             size = v2(text_width, theme.Sizes.textNormal),
             autoSize = false
         }
-    }   
-    return templates.flex({text_element, scrollBar_element}, name.."_slider", true, UI.ALIGNMENT.End, UI.ALIGNMENT.End, 5, 5)
-    
+    }
+    return templates.flex({text_element, value_element, scrollBar_element}, name.."_slider", true, UI.ALIGNMENT.End, UI.ALIGNMENT.End, 1, 5)
 end
 
 ---@param wnd EnchantingHandler
@@ -41,8 +47,15 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
 
     -- First reset this guy
     enchanter.reset_effect_to_add()
-    enchanter.effect_to_add.id = effect_id
     enchanter.effect_to_modify = modify_effect
+    if enchanter.effect_to_modify then
+        if index_to_modify > #enchanter.effects_with_params then
+            print("CRITICAL ERROR: attempting to modify effect outside of existing ones")
+            return
+        end
+        enchanter.effect_to_add = enchanter.effects_with_params[index_to_modify]
+    end
+    enchanter.effect_to_add.id = effect_id
     enchanter.effect_to_add.index = index_to_modify
 
     local titleHeight = math.floor(1.5 * rowHeight)
@@ -171,7 +184,12 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     if core.magic.effects.records[enchanter.effect_to_add.id].onTouch and not is_constant_effect then
         table.insert(valid_ranges, { id = core.magic.RANGE.Touch,      text = "Touch" })
     end
-    enchanter.effect_to_add.range = valid_ranges[1]
+
+    if not enchanter.effect_to_modify then
+        enchanter.effect_to_add.range = valid_ranges[1].id
+        print("Range defaulting to: ", valid_ranges[1].id)
+    end
+
     local range_input = I.UIToolkit.Components.dropbox { -- Default is this guys is disabled
         items = valid_ranges,
         onItemSelected = function(item, index)
@@ -203,78 +221,87 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     local valid_sliders = {}
     local force_no_duration = false
     local force_no_area = false
-    -- however, if constant effect only self is allowed
+
+    -- If constant effect only self is allowed
     if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         print("Constant Effect")
         force_no_duration = true
         force_no_area = true
     end
-    
+
+    local magnitudeMin_value = generate_slider_value(tostring(enchanter.effect_to_add.magnitudeMin))
     local magnitudeMin_scrollbar = I.UIToolkit.Components.scrollBar{
-            horizontal = true,
-            length = 250,
-            handleSize = 20,
-            scrollStep = 2,
-            maxScroll = 198,
-            onScroll = function(position)
-                local value = math.floor(position / 2) + 1
-                print('Value:', value)
-                -- TODO: handle mag specific things
-                enchanter.effect_to_add.magnitudeMin = value
-                update_effect_to_add_cost()
-            end,
-        }
+        horizontal = true,
+        length = 250,
+        handleSize = 20,
+        scrollStep = 2,
+        maxScroll = 198,
+        onScroll = function(position)
+            local value = math.floor(position / 2) + 1
+            print('Value:', value)
+            -- TODO: handle mag specific things
+            enchanter.effect_to_add.magnitudeMin = value
+            magnitudeMin_value:setText(tostring(value))
+            update_effect_to_add_cost()
+        end,
+    }
     local magnitudeMin = generate_slider(
         "Magnitude Min:",
-        125,
+        magnitudeMin_value.element,
         magnitudeMin_scrollbar.element
     )
+
+    local magnitudeMax_value = generate_slider_value(tostring(enchanter.effect_to_add.magnitudeMax))
     local magnitudeMax_scrollbar = I.UIToolkit.Components.scrollBar{
-            horizontal = true,
-            length = 250,
-            handleSize = 20,
-            scrollStep = 2,
-            maxScroll = 198,
-            onScroll = function(position)
-                local value = math.floor(position / 2) + 1
-                print('Value:', value)
-                -- TODO: handle mag specific things
-                enchanter.effect_to_add.magnitudeMax = value
-                update_effect_to_add_cost()
-            end,
-        }
+        horizontal = true,
+        length = 250,
+        handleSize = 20,
+        scrollStep = 2,
+        maxScroll = 198,
+        onScroll = function(position)
+            local value = math.floor(position / 2) + 1
+            print('Value:', value)
+            -- TODO: handle mag specific things
+            enchanter.effect_to_add.magnitudeMax = value
+            magnitudeMax_value:setText(tostring(value))
+            update_effect_to_add_cost()
+        end,
+    }
     local magnitudeMax = generate_slider(
         "Magnitude Max:",
-        125,
+        magnitudeMax_value.element,
         magnitudeMax_scrollbar.element
     )
     if core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude then
         table.insert(valid_sliders, magnitudeMin)
         table.insert(valid_sliders, magnitudeMax)
     end
-
+    local duration_value = generate_slider_value(tostring(enchanter.effect_to_add.duration))
     local duration_scrollbar = I.UIToolkit.Components.scrollBar{
-            horizontal = true,
-            length = 250,
-            handleSize = 15,
-            scrollStep = 1,
-            maxScroll = 1439,
-            onScroll = function(position)
-                local value = math.floor(position) + 1
-                print('Value:', value)
-                enchanter.effect_to_add.duration = value
-                update_effect_to_add_cost()
-            end,
+        horizontal = true,
+        length = 250,
+        handleSize = 15,
+        scrollStep = 1,
+        maxScroll = 1439,
+        onScroll = function(position)
+            local value = math.floor(position) + 1
+            print('Value:', value)
+            enchanter.effect_to_add.duration = value
+            duration_value:setText(tostring(value))
+
+            update_effect_to_add_cost()
+        end,
     }
     local duration = generate_slider(
         "Duration:",
-        125,
+        duration_value.element,
         duration_scrollbar.element
     )
     if core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and not force_no_duration then
         table.insert(valid_sliders, duration)
     end
     
+    local area_value = generate_slider_value(tostring(enchanter.effect_to_add.area))
     area_scrollbar = I.UIToolkit.Components.scrollBar{
         horizontal = true,
         length = 250,
@@ -284,25 +311,38 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         onScroll = function(position)
             local value = math.floor(position/2) + 1
             print('Value:', value)
-            enchanter.effect_to_add.duration = value
+            enchanter.effect_to_add.area = value
+            area_value:setText(tostring(value))
+
             update_effect_to_add_cost()
         end,
     }
     local area = generate_slider(
         "Area:",
-        125,
+        area_value.element,
         area_scrollbar.element
     )
+    if enchanter.effect_to_add.range == core.magic.RANGE.Self then
+        print("disabling area")
+        area_scrollbar:setDisabled(true)
+    else
+        area_scrollbar:setDisabled(false)
+    end
     if not force_no_area then -- Will handle enchanter.effect_to_add.range ~= core.magic.RANGE.Self on range change
         table.insert(valid_sliders, area)
     end
     
+    if enchanter.effect_to_modify then
+        print("setting range: ", enchanter.effect_to_add.range)
+        range_input:selectById(enchanter.effect_to_add.range)
+        magnitudeMin_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMin*2 - 1, 0))
+        magnitudeMax_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMax*2 - 1, 0))
+        duration_scrollbar:setPosition(math.max(enchanter.effect_to_add.duration - 1, 1))
+        area_scrollbar:setPosition(math.max(enchanter.effect_to_add.area*2 - 1, 1))
+    end
+    
     local sliders = templates.flex(valid_sliders, "customize_effect_sliders", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
     
-    if modify_effect then
-        -- TODO: load current values to sliders/range
-    end
-
     ambient.playSound('menu click')
 
     local layout = {

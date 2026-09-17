@@ -101,13 +101,6 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
     enchanter.item.default_enchantment_capacity = enchant_pts
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
-    -- elements.set_stats_charge()
-    -- elements.set_stats_enchantment()
-    -- elements.set_chance()
-
-    -- TODO: this
-    -- elements.effects:clear()
-
     items_ui.closePopup()
 end
 
