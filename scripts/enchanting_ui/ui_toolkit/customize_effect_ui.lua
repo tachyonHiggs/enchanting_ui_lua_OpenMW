@@ -109,16 +109,11 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         }
     }
     local function update_effect_to_add_cost()
-        local cost = enchanter.get_effect_to_add_cost()
+        local cost = enchanter.get_effect_cost(enchanter.effect_to_add)
         enchanter.effect_to_add.cost = cost
         effect_cost.props.text = "Effect Cost: " .. string.format("%.1f", cost)
         print("effect cost: ", cost)
         -- TODO: how to update display text?
-    end
-
-    local constant_effect_constant_magnitude = false
-    if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") then
-        constant_effect_constant_magnitude = true
     end
 
     local okay_btn = I.UIToolkit.Components.textButton { text = "Okay", onClick = function() print("Okay!") 
@@ -229,6 +224,23 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         force_no_area = true
     end
 
+
+    local function on_effect_mag_slider_clicked(other_slider, other_value, position, value, is_max_slider)
+
+        print("Setting slider mag values: ", position, value)
+        print("is_max_slider", is_max_slider)
+        if is_max_slider and position < other_slider:getPosition() then
+            other_slider:setPosition(position)
+            other_value:setText(tostring(value))
+        elseif not is_max_slider and other_slider:getPosition() < position then
+            other_slider:setPosition(position)
+            other_value:setText(tostring(value))
+        end
+    end
+
+    local magnitudeMax_value = {}
+    local magnitudeMax_scrollbar = {}
+
     local magnitudeMin_value = generate_slider_value(tostring(enchanter.effect_to_add.magnitudeMin))
     local magnitudeMin_scrollbar = I.UIToolkit.Components.scrollBar{
         horizontal = true,
@@ -242,6 +254,9 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             -- TODO: handle mag specific things
             enchanter.effect_to_add.magnitudeMin = value
             magnitudeMin_value:setText(tostring(value))
+
+            on_effect_mag_slider_clicked(magnitudeMax_scrollbar, magnitudeMax_value, position, value, false)
+
             update_effect_to_add_cost()
         end,
     }
@@ -251,8 +266,8 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         magnitudeMin_scrollbar.element
     )
 
-    local magnitudeMax_value = generate_slider_value(tostring(enchanter.effect_to_add.magnitudeMax))
-    local magnitudeMax_scrollbar = I.UIToolkit.Components.scrollBar{
+    magnitudeMax_value = generate_slider_value(tostring(enchanter.effect_to_add.magnitudeMax))
+    magnitudeMax_scrollbar = I.UIToolkit.Components.scrollBar{
         horizontal = true,
         length = 250,
         handleSize = 20,
@@ -264,6 +279,9 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             -- TODO: handle mag specific things
             enchanter.effect_to_add.magnitudeMax = value
             magnitudeMax_value:setText(tostring(value))
+            
+            on_effect_mag_slider_clicked(magnitudeMin_scrollbar, magnitudeMin_value, position, value, true)
+
             update_effect_to_add_cost()
         end,
     }
@@ -272,10 +290,39 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         magnitudeMax_value.element,
         magnitudeMax_scrollbar.element
     )
+
+    local magnitude_value = generate_slider_value(tostring(enchanter.effect_to_add.magnitudeMin))
+    local magnitude_scrollbar = I.UIToolkit.Components.scrollBar{
+        horizontal = true,
+        length = 250,
+        handleSize = 20,
+        scrollStep = 2,
+        maxScroll = 198,
+        onScroll = function(position)
+            local value = math.floor(position / 2) + 1
+            print('Value:', value)
+            enchanter.effect_to_add.magnitudeMin = value
+            enchanter.effect_to_add.magnitudeMax = value
+            magnitude_value:setText(tostring(value))
+            update_effect_to_add_cost()
+        end,
+    }
+    local magnitude = generate_slider(
+        "Magnitude:",
+        magnitude_value.element,
+        magnitude_scrollbar.element
+    )
+    local constant_effect_constant_magnitude = false
     if core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude then
-        table.insert(valid_sliders, magnitudeMin)
-        table.insert(valid_sliders, magnitudeMax)
+        if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+            constant_effect_constant_magnitude = true
+            table.insert(valid_sliders, magnitude)
+        else
+            table.insert(valid_sliders, magnitudeMin)
+            table.insert(valid_sliders, magnitudeMax)
+        end
     end
+
     local duration_value = generate_slider_value(tostring(enchanter.effect_to_add.duration))
     local duration_scrollbar = I.UIToolkit.Components.scrollBar{
         horizontal = true,
@@ -335,9 +382,16 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     if enchanter.effect_to_modify then
         print("setting range: ", enchanter.effect_to_add.range)
         range_input:selectById(enchanter.effect_to_add.range)
-        magnitudeMin_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMin*2 - 1, 0))
-        magnitudeMax_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMax*2 - 1, 0))
-        duration_scrollbar:setPosition(math.max(enchanter.effect_to_add.duration - 1, 1))
+        if constant_effect_constant_magnitude then
+            magnitude_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMin*2 - 1, 0))
+        else
+            print("enchanter.effect_to_add.magnitudeMax: ", enchanter.effect_to_add.magnitudeMax)
+            print("enchanter.effect_to_add.magnitudeMin: ", enchanter.effect_to_add.magnitudeMin)
+            magnitudeMax_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMax*2 - 1, 0))
+            magnitudeMin_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMin*2 - 1, 0)) -- MAX must be set before min, to avoid min overriding the max
+        end
+        print("effect_to_add.duration: ", enchanter.effect_to_add.duration)
+        duration_scrollbar:setPosition(math.max(enchanter.effect_to_add.duration - 1, 0))
         area_scrollbar:setPosition(math.max(enchanter.effect_to_add.area*2 - 1, 1))
     end
     

@@ -97,10 +97,9 @@ function Handler:onOpened(wnd, _, saved)
         -- This includes a check if the type is constant effect    
         enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
-        -- Update current effects if type changes
-        -- TODO: this
-        -- magic_effects_ui.regen_effect_items()
+        current_effects_ui.regen_effects(self)
     end
+
     self.type_input = I.UIToolkit.Components.dropbox { -- Default is this guys is disabled
         items = { -- These will be overwritten once an item is selected
             { id = core.magic.ENCHANTMENT_TYPE.CastOnce,        text = "Cast Once" },

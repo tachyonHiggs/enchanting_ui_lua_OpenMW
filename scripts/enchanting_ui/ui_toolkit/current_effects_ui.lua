@@ -6,6 +6,7 @@ local ui = require("openmw.ui")
 local ambient = require('openmw.ambient')
 local core = require('openmw.core')
 local async = require('openmw.async')
+local storage = require('openmw.storage')
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local elements = require("scripts.enchanting_ui.ui.elements")
@@ -63,7 +64,11 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
     end
 
     if core.magic.effects.records[effect_to_add.id].hasMagnitude then
-        table.insert(parts, ("%d to %d"):format(effect_to_add.magnitudeMin, effect_to_add.magnitudeMax))
+        if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+            table.insert(parts, ("%d"):format(effect_to_add.magnitudeMin))
+        else
+            table.insert(parts, ("%d to %d"):format(effect_to_add.magnitudeMin, effect_to_add.magnitudeMax))
+        end
     end
 
     if core.magic.effects.records[effect_to_add.id].hasDuration and enchanter.enchantment.type ~= core.magic.ENCHANTMENT_TYPE.ConstantEffect then
@@ -99,23 +104,22 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
 end
 
 
-current_effects_ui.clear_effects = function(effects_list)
-    print("clear_effects")
-    enchanter.reset_effect_to_add()
-    
-    effects_list:setItems({})
-end
-
-current_effects_ui.regen_effects = function(effects_list)
+current_effects_ui.regen_effects = function(wnd)
     print("regen effects")
     
     local new_effect_elements = {}
     for index, effect in ipairs(enchanter.effects_with_params) do
+        effect.cost = enchanter.get_effect_cost(effect)
         local effect_element = current_effects_ui.generate_effect_item(effect, index)
         table.insert(new_effect_elements, effect_element)
     end
     
-    effects_list:setItems()
+    wnd.effects_list:setItems(new_effect_elements)
+
+    -- Now refresh text and cost elements
+    for index, effect in ipairs(enchanter.effects_with_params) do
+        provider:refreshColumns(new_effect_elements[index], "cost", "text")
+    end
     
 end
 

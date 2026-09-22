@@ -214,29 +214,29 @@ enchanter.check_price = function()
     return false
 end
 
-enchanter.get_effect_to_add_cost = function ()
+enchanter.get_effect_cost = function (effect)
 
-    print("enchanter.get_effect_to_add_cost")
+    print("enchanter.get_effect_cost")
     local cost = 0
 
     local constant_effect_bool = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect
-    local base_cost = core.magic.effects.records[enchanter.effect_to_add.id].baseCost
-    local min_plus_max = enchanter.effect_to_add.magnitudeMin + enchanter.effect_to_add.magnitudeMax
+    local base_cost = core.magic.effects.records[effect.id].baseCost
+    local min_plus_max = effect.magnitudeMin + effect.magnitudeMax
 
     if constant_effect_bool then
         local fEnchantmentConstantDurationMult = core.getGMST('fEnchantmentConstantDurationMult')
-        cost = base_cost * (min_plus_max*fEnchantmentConstantDurationMult + enchanter.effect_to_add.area) / 40
-    elseif enchanter.effect_to_add.range == core.magic.RANGE.Self or enchanter.effect_to_add.range == core.magic.RANGE.Touch then
-        cost = base_cost * (min_plus_max*enchanter.effect_to_add.duration + enchanter.effect_to_add.area) / 40
-    elseif enchanter.effect_to_add.range == core.magic.RANGE.Target then
-        cost = 1.5 * base_cost * (min_plus_max*enchanter.effect_to_add.duration + enchanter.effect_to_add.area) / 40
+        cost = base_cost * (min_plus_max*fEnchantmentConstantDurationMult + effect.area) / 40
+    elseif effect.range == core.magic.RANGE.Self or effect.range == core.magic.RANGE.Touch then
+        cost = base_cost * (min_plus_max*effect.duration + effect.area) / 40
+    elseif effect.range == core.magic.RANGE.Target then
+        cost = 1.5 * base_cost * (min_plus_max*effect.duration + effect.area) / 40
     end 
 
     -- TODO: convert this into a constant for easier modification
     if storage.globalSection("effects_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
         print("make_fortify_skill_interactions_costlier is TRUE")
-        if enchanter.effect_to_add.affectedSkill == "Armorer" or enchanter.effect_to_add.affectedSkill == "Enchant" or enchanter.effect_to_add.affectedSkill == "Alchemy" or enchanter.effect_to_add.affectedSkill == "Mercantile" or enchanter.effect_to_add.affectedSkill == "Speechcraft" then
-            print("affectedSkill is: ", enchanter.effect_to_add.affectedSkill)
+        if effect.affectedSkill == "Armorer" or effect.affectedSkill == "Enchant" or effect.affectedSkill == "Alchemy" or effect.affectedSkill == "Mercantile" or effect.affectedSkill == "Speechcraft" then
+            print("affectedSkill is: ", effect.affectedSkill)
             cost = cost * 100
         end
     end

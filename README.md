@@ -25,3 +25,4 @@
 ## Known Issues
  - Minimum sized magic effects cause the item to have 0 charge
  - Error message about "failed to open image: Resource:" then lists effect id instead of icon path
+ - Reflect and some effects are usually in percentage instead of magnitude
