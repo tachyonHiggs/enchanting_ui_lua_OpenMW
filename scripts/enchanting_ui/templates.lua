@@ -49,6 +49,21 @@ templates.padding = function(x, y, x_r, y_r)
     }
 end
 
+function templates.deepCopy(original)
+    if type(original) ~= "table" then
+        return original
+    end
+
+    local copy = {}
+
+    for key, value in pairs(original) do
+        copy[templates.deepCopy(key)] = templates.deepCopy(value)
+    end
+
+    return copy
+end
+
+
 ---@param items table
 ---@param name string
 ---@param horizontal boolean

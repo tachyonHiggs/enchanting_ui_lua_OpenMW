@@ -38,7 +38,24 @@ local function generate_slider(name, value_element, scrollBar_element)
             autoSize = false
         }
     }
-    return templates.flex({text_element, value_element, scrollBar_element}, name.."_slider", true, UI.ALIGNMENT.End, UI.ALIGNMENT.End, 1, 5)
+    return templates.flex({text_element, value_element, scrollBar_element}, name.."_slider", true, UI.ALIGNMENT.Center, UI.ALIGNMENT.End, 5, 5)
+end
+
+local function generate_select(name, dropdown_element)
+    local theme = I.UIToolkit.getTheme()
+    local text_width = 129
+
+    local text_element = {
+        type = UI.TYPE.Text,
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = name,
+            textSize = theme.Sizes.textNormal,
+            size = v2(text_width, theme.Sizes.textNormal),
+            autoSize = false
+        }
+    }
+    return templates.flex({text_element, dropdown_element}, name.."_dropdown", true, UI.ALIGNMENT.Center, UI.ALIGNMENT.End, 5, 5)
 end
 
 ---@param wnd EnchantingHandler
@@ -53,7 +70,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             print("CRITICAL ERROR: attempting to modify effect outside of existing ones")
             return
         end
-        enchanter.effect_to_add = enchanter.effects_with_params[index_to_modify]
+        enchanter.effect_to_add = templates.deepCopy(enchanter.effects_with_params[index_to_modify])
     end
     enchanter.effect_to_add.id = effect_id
     enchanter.effect_to_add.index = index_to_modify
@@ -222,6 +239,36 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         print("Constant Effect")
         force_no_duration = true
         force_no_area = true
+    end
+
+    local attributes = {}
+    for _, record in ipairs(core.stats.Attribute.records) do
+        print(record.name)
+            table.insert(attributes, { id = record.id, text = record.name })
+    end
+    local attribute_select = I.UIToolkit.Components.dropbox {
+        items = attributes,
+        onItemSelected = function(item, index)
+            enchanter.effect_to_add.affectedAttribute = item.id
+        end,
+    }
+    if core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute then
+        table.insert(valid_sliders, generate_select("Attribute: ", attribute_select.element))
+    end
+    
+    local skills = {}
+    for _, record in ipairs(core.stats.Skill.records) do
+            table.insert(skills, { id = record.id, text = record.name })
+    end
+    local skill_select = I.UIToolkit.Components.dropbox {
+        items = skills,
+        onItemSelected = function(item, index)
+            print('Type:', item.text, 'Id:', item.id)
+            enchanter.effect_to_add.affectedSkill = item.id
+        end,
+    }
+    if core.magic.effects.records[enchanter.effect_to_add.id].hasSkill then
+        table.insert(valid_sliders, generate_select("Skill: ", skill_select.element))
     end
 
 
@@ -393,6 +440,9 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         print("effect_to_add.duration: ", enchanter.effect_to_add.duration)
         duration_scrollbar:setPosition(math.max(enchanter.effect_to_add.duration - 1, 0))
         area_scrollbar:setPosition(math.max(enchanter.effect_to_add.area*2 - 1, 1))
+
+        attribute_select:selectById(enchanter.effect_to_add.affectedAttribute)
+        skill_select:selectById(enchanter.effect_to_add.affectedSkill)
     end
     
     local sliders = templates.flex(valid_sliders, "customize_effect_sliders", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
