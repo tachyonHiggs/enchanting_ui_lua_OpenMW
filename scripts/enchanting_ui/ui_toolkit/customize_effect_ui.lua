@@ -153,7 +153,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             wnd:add_effect()
         end
         
-        wnd:updateUI(wnd)
+        wnd:updateUI()
 
         customize_effect_ui.closePopup()
 
@@ -163,16 +163,16 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     cancel_btn:updateProps({})
     local delete_btn = I.UIToolkit.Components.textButton { text = "Delete", onClick = function() print("Delete!") 
         
-        -- TODO: 
-        -- if enchanter.effect_to_add.index > #enchanter.effects_with_params then
-        --     print("ERROR: tried to delete effect outside of effects_with_params")
-        --     return
-        -- end
-
-        -- Remove from enchanter effects
-        -- Remove from UI effects 
+        print("Removing effect at index: ", enchanter.effect_to_add.index)
+        if enchanter.effect_to_add.index > #enchanter.effects_with_params then
+            print("ERROR: tried to delete effect outside of eith_params")
+            return
+        end
         
-        wnd:updateUI(wnd)
+        -- Remove from UI effects 
+        wnd:remove_effect(enchanter.effect_to_add.index)
+        
+        wnd:updateUI()
 
         customize_effect_ui.closePopup()
     end}

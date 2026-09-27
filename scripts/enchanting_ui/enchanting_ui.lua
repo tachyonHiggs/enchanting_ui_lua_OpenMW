@@ -172,18 +172,20 @@ function Handler:onOpened(wnd, _, saved)
 
         -- Now handle updating UI elements depending on enchanting success
         if icons_to_reset >= 1 then
-            soul_input:reset_image()
-            -- elements.set_stats_charge()
+            self.soulInput.layout.content[1].props.resource = I.UIToolkit.texture("black")
+            I.UIToolkit.queueUpdate(self.soulInput)
         end
         if icons_to_reset >= 2 then
-            enchanting_ui.reset()
-            -- TODO: clear all inputs and stuff
-           item_input:reset_image()
+           self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture("black")
+            I.UIToolkit.queueUpdate(self.itemInput)
            name_input:setValue('')
            -- clear effects
-           -- clear effect to add
+
            enchanter.reset()
+           current_effects_ui.regen_effects(self)
         end
+        
+        wnd:updateUI()
     end
     local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item}
     create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.80,1)})
@@ -243,6 +245,8 @@ function Handler:add_effect()
 end
 function Handler:modify_effect(index)
 end
+function Handler:remove_effect(index)
+end
 Handler.effects_list = {}
 
 ---@param item openmw.Object
@@ -267,6 +271,12 @@ function Handler:setItem(item)
         table.insert(types_supported, { id = core.magic.ENCHANTMENT_TYPE.ConstantEffect,  text = "Constant Effect" })
     end
     self.type_input:setItems(types_supported)
+
+    if #types_supported <= 0 then
+        print("CRITICAL ERROR: no valid enchantment types for this item")
+        return
+    end
+    enchanter.enchantment.type = types_supported[1].id
 
     self.effects_list:setItems({}) -- enchanter effects cleared in items_ui file
 

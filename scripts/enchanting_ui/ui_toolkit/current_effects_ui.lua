@@ -118,7 +118,7 @@ current_effects_ui.regen_effects = function(wnd)
 
     -- Now refresh text and cost elements
     for index, effect in ipairs(enchanter.effects_with_params) do
-        provider:refreshColumns(new_effect_elements[index], "cost", "text")
+        provider:refreshColumns(new_effect_elements[index], "icon", "cost", "text", "effect_id")
     end
     
 end
@@ -142,7 +142,7 @@ current_effects_ui.create_effect_ui = function(wnd)
 
     function wnd:modify_effect(index)
         print("wnd:modify_effect, modifying", enchanter.effect_to_add.id )
-        print("index: ", index)
+        print("at index: ", index)
 
         local effect_element = current_effects_ui.generate_effect_item(enchanter.effect_to_add, index)
 
@@ -152,6 +152,22 @@ current_effects_ui.create_effect_ui = function(wnd)
         provider:refreshColumns(effect_element, "cost", "text")
 
         enchanter.effects_with_params[index] = enchanter.effect_to_add -- replace existing entry
+    end
+
+    function wnd:remove_effect(index)
+        print("wnd:remove_effect, removing", index )
+        print("at index: ", index)
+        
+        -- Remove from enchanter effects
+        table.remove(enchanter.effects_with_params, enchanter.effect_to_add.index)
+
+        -- Redo indexes
+        for index, effect in ipairs(enchanter.effects_with_params) do
+           effect.index = index
+        end
+
+        -- Regen effects to update indexes
+        current_effects_ui.regen_effects(self)
     end
 
     local add_effect_btn = I.UIToolkit.Components.textButton { text = "Add Effect", scrollWidth = 1, slimScroll = true, onClick = function()
