@@ -53,6 +53,16 @@ local function makeIconLayout()
     }
 end
 
+local function reset_type_input(type_input)
+    type_input:setItems { -- These will be overwritten once an item is selected
+        { id = core.magic.ENCHANTMENT_TYPE.CastOnce,        text = "Cast Once" },
+        { id = core.magic.ENCHANTMENT_TYPE.CastOnStrike,    text = "Cast on Strike" },
+        { id = core.magic.ENCHANTMENT_TYPE.CastOnUse,       text = "Cast on Use" },
+        { id = core.magic.ENCHANTMENT_TYPE.ConstantEffect,  text = "Constant Effect" },
+    }
+    type_input:setDisabled(true)
+end
+
 function Handler:onOpened(wnd, _, saved)
     -- Inputs
     self.type_input = {}
@@ -146,22 +156,24 @@ function Handler:onOpened(wnd, _, saved)
         content = UI.content {
             current_effects_ui.create_effect_ui(self)
         }
-    }
-
-    local count = I.UIToolkit.Components.scrollBar {
+   }
+    
+    self.count_value = I.UIToolkit.Components.textButton { text = "0", width = 35, canClick = false, style = 'thin', thickness = 0}
+    self.count = I.UIToolkit.Components.scrollBar {
         horizontal = true,
-        length = 250,
-        handleSize = 20,
-        scrollStep = 2,
-        maxScroll = 198,
+        length = 150,
+        scrollStep = 1,
+        maxScroll = 99,
         onScroll = function(position)
-            local value = math.floor(position / 2) + 1
+            local value = math.floor(position) + 1
             print('Value:', value)
+            self.count_value:setText(tostring(value))
         end,
     }
-    local count_text = { template = T.text(), props = { text = 'Count' } }
-    local count_input = templates.flex({count_text, count.element}, "count", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0, 1), v2(0.05, 1))
-    count_input.props.visible = false
+    local count_text = { template = T.text(), props = { text = 'Count: ' } }
+    local count_input = templates.flex({count_text, self.count_value.element, self.count.element}, "count", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0, 1), v2(0.05, 1))
+    
+    self.count:setDisabled(true)
 
     print("enchant_item")
 
@@ -176,13 +188,15 @@ function Handler:onOpened(wnd, _, saved)
             I.UIToolkit.queueUpdate(self.soulInput)
         end
         if icons_to_reset >= 2 then
-           self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture("black")
+            self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture("black")
             I.UIToolkit.queueUpdate(self.itemInput)
-           name_input:setValue('')
-           -- clear effects
+            name_input:setValue('')
+           
+            -- clear effects
+            enchanter.reset()
+            current_effects_ui.regen_effects(self)
 
-           enchanter.reset()
-           current_effects_ui.regen_effects(self)
+            reset_type_input(self)
         end
         
         wnd:updateUI()
@@ -253,6 +267,19 @@ Handler.effects_list = {}
 function Handler:setItem(item)
     local record = item.type.records[item.recordId]
     self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
+
+    self.count_value:setText("1")
+    if enchanter.item.count > 1 then
+        print("Showing item count")
+        self.count:setDisabled(false)
+        -- update count slider range
+        local max = enchanter.get_count_max()
+        self.count:setMaxScroll(max)
+    else
+        self.count:setDisabled(true)
+    end
+    self.count:setProgress(0)
+    
     
     self.type_input:setDisabled(false) -- Enable type input
 
@@ -300,20 +327,19 @@ function Handler:updateUI()
 
     self.effects_list:setItems(self.effects_list:getItems())
     
-    -- -- Update base cost
-    -- enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
-    -- elements.set_stats_enchantment()
+    -- -- Update base/effective cost
+    enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
+    enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
+    -- TODO: update ui element
     
-    -- -- Udpate chance since base_cost changed
-    -- enchanter.chance = enchanter.get_success_rate()
+    -- Udpate chance since base_cost changed
+    enchanter.chance = enchanter.get_success_rate()
     -- elements.set_chance()
-
-    -- -- Update effective cost
-    -- enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
-    -- elements.set_stats_charge()
     
-    -- -- Update count max, but don't show it
-    -- elements.count_input:set_max_min(enchanter.get_count_max(), nil)
+    -- -- Update count max, but don't show enable it
+    local max = enchanter.get_count_max()
+    self.count_value:setText(tostring(max))
+    self.count:setMaxScroll(max)
     
     -- -- Update price
     -- if elements.is_vendor then
@@ -340,9 +366,6 @@ I.UIToolkit.WindowManager.register(statsId, {
     position = v2(1000, 1000),
     minSize = v2(250, 450),
 })
-
--- -- All Effects
--- elements.count_input = templates.slider.new("Count", 1, 1, 1, function() if elements.root.created then elements.root:update() end end, function(value) print("setting item count to: ", value) enchanter.item.count = value end, function() end, 55, 30, 140, v2(0,1), v2(0.05,1))
 
 enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     print("Menu Show")

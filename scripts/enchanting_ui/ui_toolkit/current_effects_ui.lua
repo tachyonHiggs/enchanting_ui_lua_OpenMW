@@ -113,6 +113,8 @@ current_effects_ui.regen_effects = function(wnd)
         local effect_element = current_effects_ui.generate_effect_item(effect, index)
         table.insert(new_effect_elements, effect_element)
     end
+    enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
+    enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
     
     wnd.effects_list:setItems(new_effect_elements)
 

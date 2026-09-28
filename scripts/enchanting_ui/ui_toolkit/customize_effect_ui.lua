@@ -243,8 +243,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
 
     local attributes = {}
     for _, record in ipairs(core.stats.Attribute.records) do
-        print(record.name)
-            table.insert(attributes, { id = record.id, text = record.name })
+        table.insert(attributes, { id = record.id, text = record.name })
     end
     local attribute_select = I.UIToolkit.Components.dropbox {
         items = attributes,
@@ -439,11 +438,12 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         end
         print("effect_to_add.duration: ", enchanter.effect_to_add.duration)
         duration_scrollbar:setPosition(math.max(enchanter.effect_to_add.duration - 1, 0))
-        area_scrollbar:setPosition(math.max(enchanter.effect_to_add.area*2 - 1, 1))
+        area_scrollbar:setPosition(math.max(enchanter.effect_to_add.area*2 - 1, 0))
 
         attribute_select:selectById(enchanter.effect_to_add.affectedAttribute)
         skill_select:selectById(enchanter.effect_to_add.affectedSkill)
     end
+    update_effect_to_add_cost()
     
     local sliders = templates.flex(valid_sliders, "customize_effect_sliders", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
     
