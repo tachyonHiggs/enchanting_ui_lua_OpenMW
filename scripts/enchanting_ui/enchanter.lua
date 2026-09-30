@@ -59,7 +59,7 @@ enchanter.reset_enchantment = function()
     enchanter.enchantment.type = -1
     enchanter.enchantment.base_cost = 0
     enchanter.enchantment.effective_cost = 0
-    enchanter.enchantment.has_area = false -- Added for ease
+    enchanter.enchantment.count_to_enchant = 1 -- Could set this to 0, but run the risk of count slider doing 0 - 1
 end
 
 enchanter.reset = function()
@@ -77,16 +77,15 @@ enchanter.get_count_max = function()
         local is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
 
         -- if other items entered
-        if enchanter.soul and enchanter.enchantment and is_ammo then
-            print("HERE")
-            print("enchanter.soul.charge: ", enchanter.soul.charge)
-            print("enchanter.enchantment.base_cost: ", enchanter.enchantment.base_cost)
-            if enchanter.soul.charge and enchanter.enchantment.base_cost > 0 then
+        if is_ammo then
+            if enchanter.soul.object and enchanter.enchantment.base_cost > 0 then
+                
                 local projectiles_enchant_multiplier = storage.globalSection("options_enchanting_ui"):get("projectiles_enchant_multiplier")
                 local max_per_enchantment = math.floor(enchanter.soul.charge * projectiles_enchant_multiplier / enchanter.enchantment.base_cost)
-                print("max_per_enchantment: ", max_per_enchantment)
-                print("enchanter.enchantment.base_cost: ", enchanter.enchantment.base_cost)
                 count_max = math.min(max_per_enchantment, enchanter.item.object.count)
+                
+            else 
+                count_max = enchanter.item.object.count
             end
         end
     end
@@ -221,7 +220,6 @@ end
 
 enchanter.get_effect_cost = function (effect)
 
-    print("enchanter.get_effect_cost")
     local cost = 0
 
     local constant_effect_bool = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect
@@ -236,8 +234,6 @@ enchanter.get_effect_cost = function (effect)
     elseif effect.range == core.magic.RANGE.Target then
         cost = 1.5 * base_cost * (min_plus_max*effect.duration + effect.area) / 40
     end
-    print("effect.duration: ", effect.duration)
-    print("effect.duration: ", effect.area)
 
     -- TODO: convert this into a constant for easier modification
     if storage.globalSection("effects_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
@@ -255,7 +251,7 @@ enchanter.get_effects_total_base_cost = function()
     local sum = 0
 
     if storage.globalSection("effects_enchanting_ui"):get("remove_compound_effect_cost") then
-        for _, effect in ipairs(enchanter.effects_with_params) do
+        for index, effect in ipairs(enchanter.effects_with_params) do
             sum = sum + effect.cost
         end
 
@@ -263,12 +259,8 @@ enchanter.get_effects_total_base_cost = function()
         local total_num_effects = #enchanter.effects_with_params
         for index, effect in ipairs(enchanter.effects_with_params) do
             sum = sum + (effect.cost * (total_num_effects - index + 1))
-            print("enchanter.get_effects_total_base_cost current sum: ", sum)
-            print("effect.cost: ", effect.cost)
         end
     end
-
-    print("enchanter.get_effects_total_base_cost sum: ", sum)
     
     return sum
 end

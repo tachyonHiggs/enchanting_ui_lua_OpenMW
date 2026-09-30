@@ -109,7 +109,7 @@ current_effects_ui.regen_effects = function(wnd)
     
     local new_effect_elements = {}
     for index, effect in ipairs(enchanter.effects_with_params) do
-        effect.cost = enchanter.get_effect_cost(effect)
+        effect.cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(effect)))
         local effect_element = current_effects_ui.generate_effect_item(effect, index)
         table.insert(new_effect_elements, effect_element)
     end
@@ -140,6 +140,8 @@ current_effects_ui.create_effect_ui = function(wnd)
         wnd.effects_list:setItems(current_effect_elements)
 
         table.insert(enchanter.effects_with_params, enchanter.effect_to_add)
+        
+        provider:refreshColumns(effect_element, "icon", "cost", "text", "effect_id")
     end
 
     function wnd:modify_effect(index)

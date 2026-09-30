@@ -43,7 +43,7 @@ end
 
 local function generate_select(name, dropdown_element)
     local theme = I.UIToolkit.getTheme()
-    local text_width = 129
+    local text_width = 165
 
     local text_element = {
         type = UI.TYPE.Text,
@@ -114,23 +114,13 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         }
     }
 
-    local effect_cost = {
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = "Effect Cost: 0",
-            textSize = theme.Sizes.textNormal,
-            size = v2(125, titleHeight),
-            autoSize = false,
-            position = v2(300, 10),
-        }
-    }
+    local effect_cost = I.UIToolkit.Components.textButton { text = "Effect Cost: 0", canClick = false, style = 'thin', thickness = 0}
+    effect_cost:updateProps({position = v2(250, 10)})
+
     local function update_effect_to_add_cost()
-        local cost = enchanter.get_effect_cost(enchanter.effect_to_add)
+        local cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(enchanter.effect_to_add)))
         enchanter.effect_to_add.cost = cost
-        effect_cost.props.text = "Effect Cost: " .. string.format("%.1f", cost)
-        print("effect cost: ", cost)
-        -- TODO: how to update display text?
+        effect_cost:setText("Effect Cost: " .. string.format("%.1f", cost))
     end
 
     local okay_btn = I.UIToolkit.Components.textButton { text = "Okay", onClick = function() print("Okay!") 
@@ -204,6 +194,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
 
     local range_input = I.UIToolkit.Components.dropbox { -- Default is this guys is disabled
         items = valid_ranges,
+        width = 150,
         onItemSelected = function(item, index)
             print('Type:', item.text, 'Id:', item.id)
             enchanter.effect_to_add.range = item.id
@@ -224,7 +215,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         props = {
             text = " Range: ",
             textSize = theme.Sizes.textNormal,
-            size = v2(125, theme.Sizes.textNormal),
+            size = v2(170, theme.Sizes.textNormal),
             autoSize = false,
         }
     }
@@ -247,11 +238,15 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     end
     local attribute_select = I.UIToolkit.Components.dropbox {
         items = attributes,
+        width = 150,
         onItemSelected = function(item, index)
             enchanter.effect_to_add.affectedAttribute = item.id
         end,
     }
     if core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute then
+        if not modify_effect then
+            enchanter.effect_to_add.affectedAttribute = attributes[1].id
+        end
         table.insert(valid_sliders, generate_select("Attribute: ", attribute_select.element))
     end
     
@@ -261,12 +256,16 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     end
     local skill_select = I.UIToolkit.Components.dropbox {
         items = skills,
+        width = 150,
         onItemSelected = function(item, index)
             print('Type:', item.text, 'Id:', item.id)
             enchanter.effect_to_add.affectedSkill = item.id
         end,
     }
     if core.magic.effects.records[enchanter.effect_to_add.id].hasSkill then
+        if not modify_effect then
+            enchanter.effect_to_add.affectedSkill = skills[1].id
+        end
         table.insert(valid_sliders, generate_select("Skill: ", skill_select.element))
     end
 
@@ -443,7 +442,8 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         attribute_select:selectById(enchanter.effect_to_add.affectedAttribute)
         skill_select:selectById(enchanter.effect_to_add.affectedSkill)
     end
-    update_effect_to_add_cost()
+
+    update_effect_to_add_cost() -- run this once to set the current cost
     
     local sliders = templates.flex(valid_sliders, "customize_effect_sliders", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
     
@@ -469,7 +469,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
                             position = v2(5, 5),
                         },
                     },
-                    effect_cost
+                    effect_cost.element
                 },
             },
             effect_icon_element,

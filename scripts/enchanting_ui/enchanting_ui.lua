@@ -161,19 +161,23 @@ function Handler:onOpened(wnd, _, saved)
     self.count_value = I.UIToolkit.Components.textButton { text = "0", width = 35, canClick = false, style = 'thin', thickness = 0}
     self.count = I.UIToolkit.Components.scrollBar {
         horizontal = true,
-        length = 150,
+        length = 100,
         scrollStep = 1,
-        maxScroll = 99,
+        maxScroll = 0,
         onScroll = function(position)
+            print("SELF.COUNT ON SCROLL")
             local value = math.floor(position) + 1
-            print('Value:', value)
+            print("Postion: ", position, " Value: ", value)
             self.count_value:setText(tostring(value))
+            enchanter.enchantment.count_to_enchant = value
         end,
     }
     local count_text = { template = T.text(), props = { text = 'Count: ' } }
-    local count_input = templates.flex({count_text, self.count_value.element, self.count.element}, "count", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 10, 10, nil, v2(0, 1), v2(0.05, 1))
+    local count_input = templates.flex({count_text, self.count_value.element, self.count.element}, "count", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 10, nil, v2(0, 1), v2(0.05, 1))
     
+    -- Reset count slider
     self.count:setDisabled(true)
+    self.count_value:setText("0")
 
     print("enchant_item")
 
@@ -196,10 +200,17 @@ function Handler:onOpened(wnd, _, saved)
             enchanter.reset()
             current_effects_ui.regen_effects(self)
 
-            reset_type_input(self)
+            reset_type_input(self.type_input)
         end
         
-        wnd:updateUI()
+        self:updateUI()
+
+        if icons_to_reset >= 2 then
+            -- Reset count slider
+            self.count:setDisabled(true)
+            self.count_value:setText("0")
+        end
+        
     end
     local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item}
     create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.80,1)})
@@ -268,19 +279,9 @@ function Handler:setItem(item)
     local record = item.type.records[item.recordId]
     self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
 
-    self.count_value:setText("1")
-    if enchanter.item.count > 1 then
-        print("Showing item count")
-        self.count:setDisabled(false)
-        -- update count slider range
-        local max = enchanter.get_count_max()
-        self.count:setMaxScroll(max)
-    else
-        self.count:setDisabled(true)
-    end
-    self.count:setProgress(0)
-    
-    
+    print("Showing item count, only used by ammo")
+    self.count:setDisabled(false)
+     
     self.type_input:setDisabled(false) -- Enable type input
 
     local types_supported = {}
@@ -338,8 +339,14 @@ function Handler:updateUI()
     
     -- -- Update count max, but don't show enable it
     local max = enchanter.get_count_max()
-    self.count_value:setText(tostring(max))
-    self.count:setMaxScroll(max)
+    self.count:setMaxScroll((max-1))
+
+    -- Make sure count_to_enchant is below/equal to max count
+    enchanter.enchantment.count_to_enchant = math.min(max, enchanter.enchantment.count_to_enchant)
+    
+    -- Update count text to max value
+    self.count:setPosition((enchanter.enchantment.count_to_enchant-1), true) -- Seems that setPosition does not call on scroll?
+    self.count_value:setText(tostring(enchanter.enchantment.count_to_enchant))
     
     -- -- Update price
     -- if elements.is_vendor then

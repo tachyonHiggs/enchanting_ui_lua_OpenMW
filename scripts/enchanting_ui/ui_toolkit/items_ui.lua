@@ -83,7 +83,7 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
 
     -- if item == ammo/throwable
     enchanter.item.count = 1
-    -- elements.count_input:hide()
+    enchanter.enchantment.count_to_enchant = 1
     if object.type == types.Weapon then
         local weapon_type = object.type.records[id].type
         local is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown

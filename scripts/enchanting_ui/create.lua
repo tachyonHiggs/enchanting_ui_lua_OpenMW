@@ -71,8 +71,8 @@ local function create_enchantment_and_item(data)
     end
     local new_item = world.createRecord(new_item_draft)
 
-    print("creating x", item.count)
-    local new_item_instance = world.createObject(new_item.id, item.count)
+    print("creating x", enchantment.count_to_enchant)
+    local new_item_instance = world.createObject(new_item.id, enchantment.count_to_enchant)
 
     -- Move to player inventory
     new_item_instance:moveInto(world.players[1])
