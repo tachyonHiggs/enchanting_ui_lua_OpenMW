@@ -11,7 +11,6 @@ local storage = require('openmw.storage')
 
 local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
-local elements = require("scripts.enchanting_ui.ui.elements")
 
 local customize_effect_ui = {}
 local rowHeight = 25

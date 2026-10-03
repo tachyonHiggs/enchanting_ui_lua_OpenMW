@@ -8,9 +8,7 @@ local ui = require("openmw.ui")
 local ambient = require('openmw.ambient')
 local types = require('openmw.types')
 
-local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
-local elements = require("scripts.enchanting_ui.ui.elements")
 
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 

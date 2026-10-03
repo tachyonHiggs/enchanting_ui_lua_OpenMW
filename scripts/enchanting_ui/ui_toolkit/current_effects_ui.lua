@@ -9,8 +9,6 @@ local async = require('openmw.async')
 local storage = require('openmw.storage')
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
-local elements = require("scripts.enchanting_ui.ui.elements")
-local templates = require("scripts.enchanting_ui.templates") -- only for padding rn
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
 
@@ -103,7 +101,7 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
     }
 end
 
-
+---@param wnd EnchantingHandler
 current_effects_ui.regen_effects = function(wnd)
     print("regen effects")
     

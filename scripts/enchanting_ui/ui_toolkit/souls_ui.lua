@@ -8,15 +8,13 @@ local ui = require("openmw.ui")
 local ambient = require('openmw.ambient')
 local types = require('openmw.types')
 
-local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
-local elements = require("scripts.enchanting_ui.ui.elements")
 
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
 ---@class SoulsListData : UIToolkit.ListData.Column
 ---@field name string
----@field value number
+---@field charge number
 ---@field soul_name string
 ---@field count number
 
@@ -39,8 +37,8 @@ local columns = {
 
     },
     {
-        id = 'value',
-        name = 'Value', --TODO: add L10N
+        id = 'charge',
+        name = 'Charge', --TODO: add L10N
         auto = 3,
         sort = { numeric = true },
         render = ColumnItem.renderText,
@@ -67,14 +65,15 @@ local columns = {
 
 local souls_ui = {}
 
-function souls_ui.on_soul_clicked(id, object, value, icon)
+function souls_ui.on_soul_clicked(id, object, charge, icon)
 
     ambient.playSound('Item Misc Up')
 
     enchanter.soul.id = id
     enchanter.soul.object = object
+    print("Icon: ", icon)
     enchanter.soul.icon = icon
-    enchanter.soul.charge = value
+    enchanter.soul.charge = charge
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
     souls_ui.closePopup()
@@ -100,7 +99,7 @@ local function create_soul_item(item)
     {
         id = item.id,
         name = record.name,
-        value = types.Creature.records[soul].soulValue,
+        charge = types.Creature.records[soul].soulValue,
         soul_name = types.Creature.records[soul].name,
         count = count,
         icon = record.icon,
@@ -136,7 +135,7 @@ function souls_ui.show_soul_list(wnd)
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
-            souls_ui.on_soul_clicked(data.id, data.item, data.value, data.icon)
+            souls_ui.on_soul_clicked(data.id, data.item, data.charge, data.icon)
             wnd:setSoul(data.item)
         end,
     }

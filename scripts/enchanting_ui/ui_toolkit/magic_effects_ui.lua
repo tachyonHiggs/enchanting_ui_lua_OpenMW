@@ -8,9 +8,7 @@ local ui = require("openmw.ui")
 local ambient = require('openmw.ambient')
 local core = require('openmw.core')
 
-local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
-local elements = require("scripts.enchanting_ui.ui.elements")
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 
 local window_size = {620, 600}

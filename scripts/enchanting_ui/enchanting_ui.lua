@@ -21,7 +21,6 @@ local T  = I.UIToolkit.Templates
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local templates = require("scripts.enchanting_ui.templates")
--- local elements = require("scripts.enchanting_ui.ui.elements")
 local items_ui = require("scripts.enchanting_ui.ui_toolkit.items_ui")
 local souls_ui = require("scripts.enchanting_ui.ui_toolkit.souls_ui")
 
@@ -31,10 +30,11 @@ local current_effects_ui = require("scripts.enchanting_ui.ui_toolkit.current_eff
 
 local enchanting_ui = {}
 local windowId = 'enchanting_ui'
-local statsId = 'stats_ui'
 
 local input_image_size = v2(50, 50)
 local current_effects_size = {525, 200}
+local stats_width = 125
+local window_height = 325
 
 ---@class EnchantingHandler: UIToolkit.WindowHandler
 local Handler = Class(WindowHandler)
@@ -123,19 +123,71 @@ function Handler:onOpened(wnd, _, saved)
         end,
     }
 
-    if not enchanting_ui.is_vendor then
-        -- elements.price:hide()
-        -- elements.chance:show()
+    local valid_outputs = {} -- TODO: will add enchantment points, soul charge, skill bonus, etc here
 
-        -- -- set player selected soul gem
-        -- local soul = types.Item.itemData(used_soul_gem).soul
-        -- local soul_charge = types.Creature.records[soul].soulValue
-        -- local icon = used_soul_gem.type.records[used_soul_gem.recordId].icon
-        -- souls_ui.on_soul_clicked(used_soul_gem.recordId, used_soul_gem, soul_charge, icon)
+    if not enchanting_ui.is_vendor then
+        print("Not vendor enchanting, showing chance")
+        self.price_or_chance_stat_text = "Chance: "
+        self.price_or_chance_stat_value = enchanter.chance
+        self.price_or_chance_stat_tooltip = function() return 'Chance' end
+
+        local soul = types.Item.itemData(enchanter.used_soul_gem).soul
+        local soul_charge = types.Creature.records[soul].soulValue
+        local icon = enchanter.used_soul_gem.type.records[enchanter.used_soul_gem.recordId].icon
+
+        souls_ui.on_soul_clicked(enchanter.used_soul_gem.recordId, enchanter.used_soul_gem, soul_charge, icon)
+        -- self:setSoul(enchanter.used_soul_gem)
+        self.soulInput.layout.content[1].props.resource = I.UIToolkit.texture(icon)
+
     else
-        -- elements.chance:hide()
-        -- elements.price:show()
+        print("Is vendor enchanting, showing cost")
+        self.price_or_chance_stat_text = "Cost: "
+        self.price_or_chance_stat_value = enchanter.price
+        self.price_or_chance_stat_tooltip = function() return 'Cost' end
+        
     end
+
+    self.price_or_chance_stat = I.UIToolkit.Interactive.makeInteractive({
+            tooltip = self.price_or_chance_stat_tooltip,
+        }, {
+            template = I.MWUI.templates.textNormal,
+            props = {
+                text = self.price_or_chance_stat_text..self.price_or_chance_stat_value,
+                textAlignH = UI.ALIGNMENT.Start,
+                anchor = v2(0,1),
+                relativePosition = v2(0,1)
+            },
+          userData = { colorable = true, },
+        })
+
+    local stats = {
+        name = "stats_widget",
+        type = UI.TYPE.Widget,
+        props = {
+            size = v2(stats_width, window_height),
+        },
+        content = UI.content {
+            -- {
+            --     name = "stats_flex",
+            --     type = UI.TYPE.Flex,
+            --     props = {
+            --         horizontal = false,
+            --         arrange = UI.ALIGNMENT.Start,
+            --         align = UI.ALIGNMENT.Start,
+            --         autoSize = true,
+            --         anchor = v2(0, 0),
+            --         relativePosition = v2(0, 0),
+            --         visible = true,
+            --     },
+            --     content = UI.content {
+            --         table.unpack(valid_outputs)
+            --     }
+            -- },
+            self.price_or_chance_stat
+        }
+    }
+    -- TODO: add other stats here:
+    -- table.insert(valid_outputs, self.price_or_chance_stat)
 
     local input_content = {item_input,
         templates.flex({name_input.element, self.type_input.element}, "inputs_vert", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 10, 10, nil, v2(0.5, 0.5), v2(0.5, 0.5)), 
@@ -236,18 +288,33 @@ function Handler:onOpened(wnd, _, saved)
             name = "main_flex",
             type = UI.TYPE.Flex,
             props = {
-                horizontal = false,
-                arrange = UI.ALIGNMENT.Center,
-                align = UI.ALIGNMENT.Center,
+                horizontal = true,
+                arrange = UI.ALIGNMENT.Start,
+                align = UI.ALIGNMENT.Start,
                 autoSize = true,
-                anchor = v2(0.5, 0),
-                relativePosition = v2(0.5, 0),
+                anchor = v2(0, 0),
+                relativePosition = v2(0, 0),
                 visible = true,
             },
             content = UI.content {
-                inputs,
-                effects,
-                outputs,
+                {
+                    type = UI.TYPE.Flex,
+                    props = {
+                        horizontal = false,
+                        arrange = UI.ALIGNMENT.Center,
+                        align = UI.ALIGNMENT.Center,
+                        autoSize = true,
+                        anchor = v2(0.5, 0),
+                        relativePosition = v2(0.5, 0),
+                        visible = true,
+                    },
+                    content = UI.content {
+                        inputs,
+                        effects,
+                        outputs,
+                    }
+                },
+                stats
             }
         }
     })
@@ -328,31 +395,27 @@ function Handler:updateUI()
 
     self.effects_list:setItems(self.effects_list:getItems())
     
-    -- -- Update base/effective cost
+    -- Base/effective cost
     enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
     enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
-    -- TODO: update ui element
-    
-    -- Udpate chance since base_cost changed
-    enchanter.chance = enchanter.get_success_rate()
-    -- elements.set_chance()
-    
-    -- -- Update count max, but don't show enable it
+
+    -- Item count
     local max = enchanter.get_count_max()
     self.count:setMaxScroll((max-1))
-
-    -- Make sure count_to_enchant is below/equal to max count
     enchanter.enchantment.count_to_enchant = math.min(max, enchanter.enchantment.count_to_enchant)
-    
-    -- Update count text to max value
     self.count:setPosition((enchanter.enchantment.count_to_enchant-1), true) -- Seems that setPosition does not call on scroll?
     self.count_value:setText(tostring(enchanter.enchantment.count_to_enchant))
     
-    -- -- Update price
-    -- if elements.is_vendor then
-    --     enchanter.calculate_price()
-    --     elements.set_price()
-    -- end
+    -- Update price or Chance
+    if enchanting_ui.is_vendor then
+        enchanter.price = enchanter.calculate_price()
+        self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.price)
+        I.UIToolkit.queueUpdate(self.price_or_chance_stat)
+    else
+        enchanter.chance = enchanter.get_success_rate()
+        self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.chance)
+        I.UIToolkit.queueUpdate(self.price_or_chance_stat)
+    end
 
     print("Handler:updateUI DONE")
 end
@@ -361,17 +424,9 @@ I.UIToolkit.WindowManager.register(windowId, {
     title = 'Enchanting',
     handler = Handler,
     draggable = true,
-    resizing = true,
-    position = v2(10, 10),
-    minSize = v2(575, 450),
-})
-I.UIToolkit.WindowManager.register(statsId, {
-    title = 'Statistics',
-    handler = Handler,
-    draggable = true,
-    resizing = true,
-    position = v2(1000, 1000),
-    minSize = v2(250, 450),
+    resizing = false,
+    position = v2(10, 10), -- TODO: this value
+    minSize = v2(575+stats_width, window_height),
 })
 
 enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
@@ -382,10 +437,11 @@ enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     print("is_vendor_enchant", enchanting_ui.is_vendor)
     if is_vendor then
         enchanter.vendor = vendor
+    else
+        enchanter.used_soul_gem = used_soul_gem
     end
 
     local windows = I.UIToolkit.WindowManager
-    -- windows.open(statsId)
     windows.open(windowId)
 end
 
@@ -420,15 +476,6 @@ enchanting_ui.destroy = function()
     if souls_ui.closePopup then
         souls_ui.closePopup()
     end
-    -- if elements.tooltip.visible then
-    --     elements.tooltip:destroy()
-    -- end
-    -- if elements.skill_select_root.created then
-    --     elements.skill_select_root:destroy()
-    -- end
-    -- if elements.attribute_select_root.created then
-    --     elements.attribute_select_root:destroy()
-    -- end
 end
 
 return enchanting_ui

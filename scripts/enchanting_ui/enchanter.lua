@@ -194,14 +194,13 @@ enchanter.calculate_price = function()
     local item_cost = enchanter.calculate_vanilla_price() 
     print("item costs: ", item_cost)
 
-    enchanter.price = getBarterOffer(enchanter.vendor, item_cost, true)
-    print("With bartering: ", enchanter.price)
+    return getBarterOffer(enchanter.vendor, item_cost, true)
 end
 
 enchanter.check_price = function()
     print("check_price")
 
-    enchanter.calculate_price()
+    enchanter.price = enchanter.calculate_price()
 
     -- Compare with Player gold
     local player_gold = types.Actor.inventory(self):countOf('Gold_001')
