@@ -10,6 +10,7 @@ local self = require('openmw.self')
 local async = require('openmw.async')
 local core = require('openmw.core')
 local types = require('openmw.types')
+local storage = require('openmw.storage')
 
 
 local Class         = require 'scripts.UIToolkit.class'
@@ -33,8 +34,10 @@ local windowId = 'enchanting_ui'
 
 local input_image_size = v2(50, 50)
 local current_effects_size = {525, 200}
-local stats_width = 125
-local window_height = 325
+local stats_width = 150
+local window_height = 425
+
+local player = {}
 
 ---@class EnchantingHandler: UIToolkit.WindowHandler
 local Handler = Class(WindowHandler)
@@ -108,6 +111,7 @@ function Handler:onOpened(wnd, _, saved)
         enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
 
         current_effects_ui.regen_effects(self)
+        self:updateUI()
     end
 
     self.type_input = I.UIToolkit.Components.dropbox { -- Default is this guys is disabled
@@ -123,13 +127,11 @@ function Handler:onOpened(wnd, _, saved)
         end,
     }
 
-    local valid_outputs = {} -- TODO: will add enchantment points, soul charge, skill bonus, etc here
-
     if not enchanting_ui.is_vendor then
         print("Not vendor enchanting, showing chance")
         self.price_or_chance_stat_text = "Chance: "
-        self.price_or_chance_stat_value = enchanter.chance
-        self.price_or_chance_stat_tooltip = function() return 'Chance' end
+        self.price_or_chance_stat_value = enchanter.chance .. " %"
+        self.price_or_chance_stat_tooltip = function() return 'The Chance the item is successfully enchanted' end
 
         local soul = types.Item.itemData(enchanter.used_soul_gem).soul
         local soul_charge = types.Creature.records[soul].soulValue
@@ -143,22 +145,77 @@ function Handler:onOpened(wnd, _, saved)
         print("Is vendor enchanting, showing cost")
         self.price_or_chance_stat_text = "Cost: "
         self.price_or_chance_stat_value = enchanter.price
-        self.price_or_chance_stat_tooltip = function() return 'Cost' end
+        self.price_or_chance_stat_tooltip = function() return 'The Cost of the enchantment service' end
         
     end
 
     self.price_or_chance_stat = I.UIToolkit.Interactive.makeInteractive({
-            tooltip = self.price_or_chance_stat_tooltip,
+        tooltip = self.price_or_chance_stat_tooltip,
+    }, {
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = self.price_or_chance_stat_text..self.price_or_chance_stat_value,
+            textAlignH = UI.ALIGNMENT.Start,
+            anchor = v2(0,1),
+            relativePosition = v2(0,0.9)
+        },
+        userData = { colorable = true, },
+    })
+    
+    self.enchantment_pts_stat = I.UIToolkit.Interactive.makeInteractive({
+        tooltip = 'Determines the max enchantment an item can hold. Stronger effects require more points.',
+    }, {
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = "    In Use: "..(string.format("%.1f", enchanter.enchantment.base_cost)),
+            textAlignH = UI.ALIGNMENT.Start,
+            anchor = v2(0,1),
+        },
+        userData = { colorable = true, },
+    })
+
+    self.soul_charge_stat = I.UIToolkit.Interactive.makeInteractive({
+        tooltip = 'The Charge of the selected Soul Gem. This determines the max possible base enchantment and the number of uses a user can get out of the item.',
+    }, {
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = "    Charge: 0",
+            textAlignH = UI.ALIGNMENT.Start,
+            anchor = v2(0,1),
+        },
+        userData = { colorable = true, },
+    })
+    self.soul_uses_stat = I.UIToolkit.Interactive.makeInteractive({
+        tooltip = "The number of uses the user can get out of this item and enchantment. This is based on the soul gem's charge, the user's skill, and the enchantment's base skill.",
+    }, {
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = "    Uses: 0",
+            textAlignH = UI.ALIGNMENT.Start,
+            anchor = v2(0,1),
+        },
+        userData = { colorable = true, },
+    })
+
+    -- TODO: if Skyrim like enchanting enabled
+    self.enchanting_skill_stat = {}
+    self.skyrim_like_enchanting = storage.globalSection("options_enchanting_ui"):get("skyrim_like_enchanting")
+    if self.skyrim_like_enchanting then
+        self.enchanting_skill_mod_stat = I.UIToolkit.Interactive.makeInteractive({
+            tooltip = "",
         }, {
             template = I.MWUI.templates.textNormal,
             props = {
-                text = self.price_or_chance_stat_text..self.price_or_chance_stat_value,
+                text = "Modifier: +0%",
                 textAlignH = UI.ALIGNMENT.Start,
                 anchor = v2(0,1),
-                relativePosition = v2(0,1)
             },
-          userData = { colorable = true, },
+            userData = { colorable = true, },
         })
+        table.insert(self.enchanting_skill_stat, { template = T.header(),    props = { text = 'Enchantment Skill' } })
+        table.insert(self.enchanting_skill_stat, self.enchanting_skill_mod_stat)
+        
+    end
 
     local stats = {
         name = "stats_widget",
@@ -167,27 +224,34 @@ function Handler:onOpened(wnd, _, saved)
             size = v2(stats_width, window_height),
         },
         content = UI.content {
-            -- {
-            --     name = "stats_flex",
-            --     type = UI.TYPE.Flex,
-            --     props = {
-            --         horizontal = false,
-            --         arrange = UI.ALIGNMENT.Start,
-            --         align = UI.ALIGNMENT.Start,
-            --         autoSize = true,
-            --         anchor = v2(0, 0),
-            --         relativePosition = v2(0, 0),
-            --         visible = true,
-            --     },
-            --     content = UI.content {
-            --         table.unpack(valid_outputs)
-            --     }
-            -- },
+            {
+                name = "stats_flex",
+                type = UI.TYPE.Flex,
+                props = {
+                    horizontal = false,
+                    arrange = UI.ALIGNMENT.Start,
+                    align = UI.ALIGNMENT.Start,
+                    autoSize = true,
+                    anchor = v2(0, 0),
+                    relativePosition = v2(0, 0),
+                    visible = true,
+                },
+                content = UI.content {
+                    { template = T.header(),    props = { text = 'Enchantment Points' } },
+                    self.enchantment_pts_stat,
+                    { template = T.text(),    props = { text = '' } },
+
+                    { template = T.header(),    props = { text = 'Soul Charge' } },
+                    self.soul_charge_stat,
+                    self.soul_uses_stat,
+                    { template = T.text(),    props = { text = '' } },
+
+                    table.unpack(self.enchanting_skill_stat)
+                }
+            },
             self.price_or_chance_stat
         }
     }
-    -- TODO: add other stats here:
-    -- table.insert(valid_outputs, self.price_or_chance_stat)
 
     local input_content = {item_input,
         templates.flex({name_input.element, self.type_input.element}, "inputs_vert", false, UI.ALIGNMENT.Center, UI.ALIGNMENT.Center, 10, 10, nil, v2(0.5, 0.5), v2(0.5, 0.5)), 
@@ -272,9 +336,9 @@ function Handler:onOpened(wnd, _, saved)
         name = "outputs",
         type = UI.TYPE.Widget,
         props = {
-            size = v2(current_effects_size[1], 35),
-            anchor = v2(0.5, 0),
-            relativePosition = v2(0.5, 0)
+            size = v2(current_effects_size[1], 50),
+            anchor = v2(0.5, 1),
+            relativePosition = v2(0.5, 1)
         },
         content = UI.content {
             count_input,
@@ -320,6 +384,8 @@ function Handler:onOpened(wnd, _, saved)
     })
 
     self.type_input:setDisabled(true)
+
+    self:updateUI()
 
     Handler:onResized(wnd:getInnerSize())
 end
@@ -412,9 +478,38 @@ function Handler:updateUI()
         self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.price)
         I.UIToolkit.queueUpdate(self.price_or_chance_stat)
     else
-        enchanter.chance = enchanter.get_success_rate()
-        self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.chance)
+        enchance = enchanter.get_success_rate()
+        self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.chance).." %"
         I.UIToolkit.queueUpdate(self.price_or_chance_stat)
+    end
+
+    self.enchantment_pts_stat.layout.props.text = " In Use: "..(string.format("%.1f", enchanter.enchantment.base_cost))
+    I.UIToolkit.queueUpdate(self.enchantment_pts_stat)
+
+    -- Soul gem stats
+    self.soul_charge_stat.layout.props.text = " In Use: "..(string.format("%.1f", enchanter.soul.charge))
+    I.UIToolkit.queueUpdate(self.soul_charge_stat)
+
+    local uses = 0
+    if enchanter.enchantment.effective_cost ~= 0 then -- Some effects are in. To avoid infinite
+        uses = enchanter.soul.charge/enchanter.enchantment.effective_cost
+        uses = (string.format("%.0f", uses))
+    end
+    if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnce then
+        uses = "1"
+    elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        uses = "Constant"
+    end
+    self.soul_uses_stat.layout.props.text = "   Uses: "..uses
+    I.UIToolkit.queueUpdate(self.soul_uses_stat)
+
+    if self.skyrim_like_enchanting then
+        local base_skill = types.Player.stats["skills"]["enchant"](player.object).base
+        print("Base skill: ", base_skill)
+        local modified_skill = types.Player.stats["skills"]["enchant"](player.object).modified
+        local modifier = base_skill + (modified_skill-base_skill)*0.25 -- TODO: this number as param or something
+        self.enchanting_skill_mod_stat.layout.props.text = "Modifier: +"..(string.format("%.0f", modifier)).."%"
+        I.UIToolkit.queueUpdate(self.enchanting_skill_mod_stat)
     end
 
     print("Handler:updateUI DONE")
@@ -440,6 +535,8 @@ enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     else
         enchanter.used_soul_gem = used_soul_gem
     end
+    
+    player = self -- For later getting player skill
 
     local windows = I.UIToolkit.WindowManager
     windows.open(windowId)
