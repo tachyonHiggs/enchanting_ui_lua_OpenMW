@@ -36,7 +36,7 @@ local input_image_size = v2(50, 50)
 local main_width = 575
 local outputs_width = 525
 local stats_width = 150
-local window_height = 450
+local window_height = 430
 
 local player = {}
 
@@ -318,8 +318,24 @@ function Handler:onOpened(wnd, _, saved)
         end,
     }
     local count_text = { template = T.text(), props = { text = 'Count: ' } }
-    local count_input = templates.flex({count_text, self.count_value.element, self.count.element}, "count", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 1, 10, nil, v2(0, 1), v2(0.05, 1))
-    
+    local count_input = {
+        type = UI.TYPE.Flex,
+        props = {
+            horizontal = true,
+            anchor = v2(0, 0.5),
+            relativePosition = v2(0.05, 0.75),
+            arrange = UI.ALIGNMENT.End,
+            align = UI.ALIGNMENT.End,
+            autoSize = true,
+            visible = true,
+        },
+        content = UI.content {
+            count_text,
+            self.count_value.element, 
+            self.count.element
+        }
+    }
+
     -- Reset count slider
     self.count:setDisabled(true)
     self.count_value:setText("0")
@@ -414,11 +430,12 @@ function Handler:onOpened(wnd, _, saved)
                     content = UI.content {
                         { template = T.header(),    props = { text = 'Statistics' } },
                         {
-                            template = T.box { style = 'thin', padding = 5, background = 'transparent' },
+                            template = T.box { style = 'thin', padding = 5, background = 'tranent' },
                             content = UI.content {
                                 stats
                             },
-                        }
+                        },
+                        {template = T.padding(5)},
                     }
                 },
             }
@@ -521,7 +538,7 @@ function Handler:updateUI()
         self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.price)
         I.UIToolkit.queueUpdate(self.price_or_chance_stat)
     else
-        enchance = enchanter.get_success_rate()
+        enchanter.chance = enchanter.get_success_rate()
         self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.chance).." %"
         I.UIToolkit.queueUpdate(self.price_or_chance_stat)
     end
@@ -566,7 +583,7 @@ I.UIToolkit.WindowManager.register(windowId, {
     title = 'Enchanting',
     handler = Handler,
     draggable = true,
-    resizing = false,
+    resizing = true,
     position = v2(10, 10), -- TODO: this value
     minSize = v2(main_width+stats_width, window_height),
 })

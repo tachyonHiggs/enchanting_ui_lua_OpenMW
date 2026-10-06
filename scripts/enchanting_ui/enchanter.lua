@@ -244,8 +244,8 @@ enchanter.get_effect_cost = function (effect, index)
     -- TODO: convert this into a constant for easier modification
     if storage.globalSection("effects_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
         print("make_fortify_skill_interactions_costlier is TRUE")
-        if effect.affectedSkill == "Armorer" or effect.affectedSkill == "Enchant" or effect.affectedSkill == "Alchemy" or effect.affectedSkill == "Mercantile" or effect.affectedSkill == "Speechcraft" then
-            print("affectedSkill is: ", effect.affectedSkill)
+        if effect.affectedSkill.text == "Armorer" or effect.affectedSkill.text == "Enchant" or effect.affectedSkill.text == "Alchemy" or effect.affectedSkill.text == "Mercantile" or effect.affectedSkill.text == "Speechcraft" then
+            print("affectedSkill is: ", effect.affectedSkill.text)
             cost = cost * 100
         end
     end

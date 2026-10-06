@@ -240,12 +240,12 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         width = 150,
         onItemSelected = function(item, index)
             print('Type:', item.text, 'Id:', item.id)
-            enchanter.effect_to_add.affectedAttribute = item.id
+            enchanter.effect_to_add.affectedAttribute = item
         end,
     }
     if core.magic.effects.records[enchanter.effect_to_add.id].hasAttribute then
         if not modify_effect then
-            enchanter.effect_to_add.affectedAttribute = attributes[1].id
+            enchanter.effect_to_add.affectedAttribute = attributes[1]
         end
         table.insert(valid_sliders, generate_select("Attribute: ", attribute_select.element))
     end
@@ -259,12 +259,12 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         width = 150,
         onItemSelected = function(item, index)
             print('Type:', item.text, 'Id:', item.id)
-            enchanter.effect_to_add.affectedSkill = item.id
+            enchanter.effect_to_add.affectedSkill = item
         end,
     }
     if core.magic.effects.records[enchanter.effect_to_add.id].hasSkill then
         if not modify_effect then
-            enchanter.effect_to_add.affectedSkill = skills[1].id
+            enchanter.effect_to_add.affectedSkill = skills[1]
         end
         table.insert(valid_sliders, generate_select("Skill: ", skill_select.element))
     end
@@ -439,8 +439,12 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         duration_scrollbar:setPosition(math.max(enchanter.effect_to_add.duration - 1, 0))
         area_scrollbar:setPosition(math.max(enchanter.effect_to_add.area*2 - 1, 0))
 
-        attribute_select:selectById(enchanter.effect_to_add.affectedAttribute)
-        skill_select:selectById(enchanter.effect_to_add.affectedSkill)
+        if enchanter.effect_to_add.affectedAttribute then
+            attribute_select:selectById(enchanter.effect_to_add.affectedAttribute.id)
+        end
+        if enchanter.effect_to_add.affectedSkill then
+            skill_select:selectById(enchanter.effect_to_add.affectedSkill.id)
+        end
     end
 
     update_effect_to_add_cost() -- run this once to set the current cost

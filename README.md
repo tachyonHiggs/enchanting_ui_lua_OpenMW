@@ -3,8 +3,7 @@
 ## TODO
 
 ### Vanilla Features
-- Add info side window/area
-- Finish tool tips text to relevant elements
+- Add enchant skill increases to enchanting success/failure
 
 ### Expanded Features
 - TBD add the ability use vendor's soul gems while enchanting
@@ -25,3 +24,4 @@
  - Minimum sized magic effects cause the item to have 0 charge
  - Error message about "failed to open image: Resource:" then lists effect id instead of icon path
  - Reflect and some effects are usually in percentage instead of magnitude
+ - Dragging multiple soul gems causes all to be consumed on enchant

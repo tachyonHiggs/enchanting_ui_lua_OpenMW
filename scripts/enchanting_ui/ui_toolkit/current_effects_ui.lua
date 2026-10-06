@@ -54,11 +54,11 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
     local parts = { name }
 
     if core.magic.effects.records[effect_to_add.id].hasSkill then
-        table.insert(parts, effect_to_add.affectedSkill)
+        table.insert(parts, effect_to_add.affectedSkill.text)
     end
 
     if core.magic.effects.records[effect_to_add.id].hasAttribute then
-        table.insert(parts, effect_to_add.affectedAttribute)
+        table.insert(parts, effect_to_add.affectedAttribute.text)
     end
 
     if core.magic.effects.records[effect_to_add.id].hasMagnitude then

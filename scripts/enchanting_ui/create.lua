@@ -18,10 +18,10 @@ local function create_enchantment_and_item(data)
     -- for each effect in effects
     for _, effect in ipairs(effects) do
         if effect.affectedAttribute then
-            effect.affectedAttribute = string.lower(effect.affectedAttribute)
+            effect.affectedAttribute = effect.affectedAttribute.id
         end
         if effect.affectedSkill then
-            effect.affectedSkill = string.lower(effect.affectedSkill) 
+            effect.affectedSkill = effect.affectedSkill.id
         end
     end
 
