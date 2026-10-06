@@ -25,8 +25,8 @@ I.Settings.registerGroup {
         {
             key = 'skyrim_like_enchanting',
             renderer = 'checkbox',
-            name = 'Skyrim Like Enchating',
-            description = "NOT FINISHED, WILL NOT WORK AS EXPECTED. When enabled, all new enchantments will always suceed but there potency will be reduced by a fraction of the player's skill",
+            name = 'Skyrim/Oblivion Like Enchanting',
+            description = "NOT FINISHED, WILL NOT WORK AS EXPECTED. When enabled, all new enchantments will always suceed but their potency will be reduced by a fraction of the player's skill",
             default = false,
 			argument = {
                 disabled = false,
@@ -114,7 +114,7 @@ I.Settings.registerGroup {
             key = 'make_fortify_skill_interactions_costlier',
             renderer = 'checkbox',
             name = 'Make Fortify Skill Interactions Costlier',
-            description = 'When enabled, forces interaction based fortify skill effects to have a significantly higher enchanting cost. IE alchemy, speechcraft, mercantile, enchant, and armorer. This is to discourage the creation of "Fortify Speechcraft 100 points for 1 second" type effects',
+            description = 'When enabled, forces interaction based fortify skill effects to have a significantly higher enchanting cost, 100x the base cost. IE alchemy, speechcraft, mercantile, enchant, and armorer. This is to discourage the creation of "Fortify Speechcraft 100 points for 1 second" type effects.',
             default = false,
 			argument = {
                 disabled = false,
