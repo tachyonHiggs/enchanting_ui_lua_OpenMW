@@ -127,7 +127,7 @@ function Handler:onOpened(wnd, _, saved)
         end,
     }
 
-    if not enchanting_ui.is_vendor then
+    if not enchanter.is_vendor then
         print("Not vendor enchanting, showing chance")
         self.price_or_chance_stat_text = "Chance: "
         self.price_or_chance_stat_value = enchanter.chance .. " %"
@@ -210,8 +210,8 @@ function Handler:onOpened(wnd, _, saved)
 
     -- TODO: if Skyrim like enchanting enabled
     self.enchanting_skill_stat = {}
-    self.skyrim_like_enchanting = storage.globalSection("options_enchanting_ui"):get("skyrim_like_enchanting")
-    if self.skyrim_like_enchanting then
+    enchanter.skyrim_like_enchanting = storage.globalSection("options_enchanting_ui"):get("skyrim_like_enchanting")
+    if enchanter.skyrim_like_enchanting then
         self.enchanting_skill_mod_stat = I.UIToolkit.Interactive.makeInteractive({
             tooltip = {body = "The percentage the magnitude, duration, and/or area the output enchantment will actually be. This is determined off user enchanting skill, and enchant skill modifiers only contribute 1/4 as much as the base skill."},
         }, {
@@ -345,7 +345,7 @@ function Handler:onOpened(wnd, _, saved)
     ambient.playSound('menu click')
 
     local function enchant_item()
-        local icons_to_reset = enchanter.enchant_item(enchanting_ui.is_vendor)
+        local icons_to_reset = enchanter.enchant_item(enchanter.is_vendor, enchanter.skyrim_like_enchanting)
 
         -- Now handle updating UI elements depending on enchanting success
         if icons_to_reset >= 1 then
@@ -362,9 +362,9 @@ function Handler:onOpened(wnd, _, saved)
 
             reset_type_input(self.type_input)
             
-            enchanter.give_player_xp(enchanting_ui.is_vendor, true) -- give player xp on enchant success
-        else
-            enchanter.give_player_xp(enchanting_ui.is_vendor, false) -- if setting, give player xp on enchant fail
+            enchanter.give_player_xp(enchanter.is_vendor, true) -- give player xp on enchant success
+        elseif icons_to_reset >= 1 then
+            enchanter.give_player_xp(enchanter.is_vendor, false) -- if setting, give player xp on enchant fail
         end
         
         self:updateUI()
@@ -537,12 +537,17 @@ function Handler:updateUI()
     self.count_value:setText(tostring(enchanter.enchantment.count_to_enchant))
     
     -- Update price or Chance
-    if enchanting_ui.is_vendor then
+    if enchanter.is_vendor then
         enchanter.price = enchanter.calculate_price()
         self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.price)
         I.UIToolkit.queueUpdate(self.price_or_chance_stat)
     else
-        enchanter.chance = enchanter.get_success_rate()
+        if enchanter.skyrim_like_enchanting then
+            enchanter.chance = 100
+        else
+            enchanter.chance = enchanter.get_success_rate()
+        end
+        
         self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.chance).." %"
         I.UIToolkit.queueUpdate(self.price_or_chance_stat)
     end
@@ -573,7 +578,7 @@ function Handler:updateUI()
     self.soul_uses_stat.layout.props.text = " Uses: "..uses
     I.UIToolkit.queueUpdate(self.soul_uses_stat)
 
-    if self.skyrim_like_enchanting then
+    if enchanter.skyrim_like_enchanting then
         self.enchanting_skill_mod_stat.layout.props.text = " Modifier: +"..(string.format("%.0f", enchanter.get_enchant_skill_modifier())).."%"
         I.UIToolkit.queueUpdate(self.enchanting_skill_mod_stat)
     end
@@ -596,8 +601,8 @@ enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     print("Menu Show")
     enchanter.reset()
 
-    enchanting_ui.is_vendor = is_vendor
-    print("is_vendor_enchant", enchanting_ui.is_vendor)
+    enchanter.is_vendor = is_vendor
+    print("is_vendor_enchant", enchanter.is_vendor)
     if is_vendor then
         enchanter.vendor = vendor
     else

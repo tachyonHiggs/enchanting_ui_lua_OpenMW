@@ -4,6 +4,7 @@ player->addspell "Fleabite"
 player->addspell "Drain Block"
 player->addspell "Fleabite"
 player->addspell "Restore Agility"
+player->addspell "divine intervention"
 
 Player->addsoulgem"golden saint""misc_soulgem_grand" 
 Player->addsoulgem"golden saint""misc_soulgem_grand" 

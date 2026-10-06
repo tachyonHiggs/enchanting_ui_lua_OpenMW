@@ -61,7 +61,7 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
         table.insert(parts, effect_to_add.affectedAttribute.text)
     end
 
-    if core.magic.effects.records[effect_to_add.id].hasMagnitude then
+    if enchanter.get_hasMag(effect_to_add.id) then
         if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
             table.insert(parts, ("%d"):format(effect_to_add.magnitudeMin))
         else
@@ -69,7 +69,7 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
         end
     end
 
-    if core.magic.effects.records[effect_to_add.id].hasDuration and enchanter.enchantment.type ~= core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+    if enchanter.get_hasDuration(effect_to_add.id, enchanter.enchantment.type) then
         table.insert(parts, ("for %d sec"):format(effect_to_add.duration))
     end
     
@@ -105,12 +105,26 @@ end
 current_effects_ui.regen_effects = function(wnd)
     print("regen effects")
     
+    if enchanter.skyrim_like_enchanting then -- Remove uncastable effects
+        for index, effect in ipairs(enchanter.effects_with_params) do
+            effect.cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(effect, index)))
+            print("Checking effect: " .. tostring(effect.id))
+            if not enchanter.check_can_use_effect(effect) then
+                print("REMOVING effect: " .. tostring(effect.id))
+                table.remove(enchanter.effects_with_params, index)
+                local record = core.magic.effects.records[effect.id]
+                UI.showMessage("You do not have the skill required for ".. record.name)
+            end
+        end
+    end
+
+    -- regen items and indices now
     local new_effect_elements = {}
     for index, effect in ipairs(enchanter.effects_with_params) do
-        effect.cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(effect, index)))
         local effect_element = current_effects_ui.generate_effect_item(effect, index)
         table.insert(new_effect_elements, effect_element)
     end
+
     enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
     enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
     

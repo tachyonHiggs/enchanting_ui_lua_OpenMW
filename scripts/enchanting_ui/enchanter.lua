@@ -5,6 +5,7 @@ local UI = require('openmw.ui')
 local I = require('openmw.interfaces')
 local storage = require('openmw.storage')
 local ambient = require('openmw.ambient')
+local templates = require("scripts.enchanting_ui.templates")
 
 -- Main object
 local enchanter = {}
@@ -67,6 +68,38 @@ enchanter.reset = function()
     enchanter.reset_enchantment()
     enchanter.reset_soul()
     enchanter.reset_item()
+
+    -- DO NOT RESET is_vendor and skyrim_like_enchanting, those are updating on show UI
+end
+
+enchanter.get_hasDuration = function(effect_id, type)
+    if core.magic.effects.records[effect_id].hasDuration and type ~= core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        return true
+    else 
+        return false
+    end
+end
+
+enchanter.get_hasMag = function(effect_id)
+    if core.magic.effects.records[effect_id].hasMagnitude then
+        return true
+    else 
+        return false
+    end
+end
+
+enchanter.check_can_use_effect = function(effect)
+    if enchanter.skyrim_like_enchanting and not enchanter.is_vendor then
+        local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
+        local has_mag = enchanter.get_hasMag(effect.id)
+        if not has_mag and not has_duration then
+            if effect.cost/3 >= enchanter.get_enchant_skill_modifier() then
+                return false
+            end
+            
+        end
+    end
+    return true
 end
 
 enchanter.get_enchant_skill_modifier = function()
@@ -251,13 +284,15 @@ enchanter.get_effect_cost = function (effect, index)
     local base_cost = core.magic.effects.records[effect.id].baseCost
     local min_plus_max = effect.magnitudeMin + effect.magnitudeMax
 
+    local area = math.max(effect.area, 1) -- others are default to 1
+
     if constant_effect_bool then
         local fEnchantmentConstantDurationMult = core.getGMST('fEnchantmentConstantDurationMult')
-        cost = base_cost * (min_plus_max*fEnchantmentConstantDurationMult + effect.area) / 40
+        cost = base_cost * (min_plus_max*fEnchantmentConstantDurationMult + area) / 40
     elseif effect.range == core.magic.RANGE.Self or effect.range == core.magic.RANGE.Touch then
-        cost = base_cost * (min_plus_max*effect.duration + effect.area) / 40
+        cost = base_cost * (min_plus_max*effect.duration + area) / 40
     elseif effect.range == core.magic.RANGE.Target then
-        cost = 1.5 * base_cost * (min_plus_max*effect.duration + effect.area) / 40
+        cost = 1.5 * base_cost * (min_plus_max*effect.duration + area) / 40
     end
 
     -- TODO: convert this into a constant for easier modification
@@ -507,18 +542,43 @@ enchanter.get_enchant_success = function()
 end
 
 -- This fnc assumes passed in values have already been verified as valid
-enchanter.create_item = function()
+enchanter.create_item = function(modify_effect_potency)
     print("create_item")
-    local item_copy = enchanter.item
+    local item_copy = templates.deepCopy(enchanter.item)
+    local effects_copy = templates.deepCopy(enchanter.effects_with_params)
+
+    if modify_effect_potency then
+        -- reduce all effects
+        for index, effect in ipairs(effects_copy) do
+            -- if effect has duration/mag/area
+            local modifier = enchanter.get_enchant_skill_modifier()/100
+
+            local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
+            local has_mag = enchanter.get_hasMag(effect.id)
+            if has_mag then
+                effect.magnitudeMin = math.max(effect.magnitudeMin * modifier, 1)
+                effect.magnitudeMax = math.max(effect.magnitudeMax * modifier, 1)
+            end
+            if has_duration then
+                effect.duration = math.max(effect.duration * modifier, 1)
+            end
+            
+            -- else no params, like divine intervention and constant summon
+            if not has_mag and not has_duration then
+                print("ERROR: Effect has no params, should have already tested user is qualified to use it")
+            end
+        end
+    end
     item_copy.type = tostring(enchanter.item.type) -- Copy string version of type over
-    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item = item_copy, soul = enchanter.soul, enchantment = enchanter.enchantment, effects = enchanter.effects_with_params})
+    core.sendGlobalEvent('create_enchantment_and_item', {name=enchanter.name, item = item_copy, soul = enchanter.soul, enchantment = enchanter.enchantment, effects = effects_copy})
 end
 
 local reset_nothing = 0
 local reset_soulgem_icon = 1
 local reset_soulgem_and_item_icon = 2
-enchanter.enchant_item = function(is_vendor_enchant)
+enchanter.enchant_item = function(is_vendor_enchant, skyrim_like_enchanting)
     print("enchant_item")
+    local modify_effect_potency = skyrim_like_enchanting and not is_vendor_enchant
 
     if enchanter.check_requirements(is_vendor_enchant) == false then
         return reset_nothing
@@ -533,12 +593,13 @@ enchanter.enchant_item = function(is_vendor_enchant)
         core.sendGlobalEvent('move_into_player', { id = "misc_soulgem_azura", count = 1 })
     end
 
-    if not is_vendor_enchant then 
+    if not is_vendor_enchant and not skyrim_like_enchanting then 
         if enchanter.get_enchant_success() == false then
             enchanter.reset_soul()
             return reset_soulgem_icon
         end
-    else 
+    end
+    if is_vendor_enchant then
         -- Take money from player
         local current_gold = types.Actor.inventory(self):countOf('Gold_001')
         core.sendGlobalEvent('set_actor_gold', {actor = self, count = enchanter.price, is_player = true})
@@ -548,7 +609,7 @@ enchanter.enchant_item = function(is_vendor_enchant)
         core.sendGlobalEvent('set_actor_gold', {actor = enchanter.vendor, count = current_gold + enchanter.price,  is_player = false})
     end
 
-    enchanter.create_item()
+    enchanter.create_item(modify_effect_potency)
 
     -- Remove unenchanted item
     if not storage.globalSection("cheats_enchanting_ui"):get("dont_consume_item_and_soul") then

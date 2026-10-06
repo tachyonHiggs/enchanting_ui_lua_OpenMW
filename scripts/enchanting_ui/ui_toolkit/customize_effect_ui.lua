@@ -135,6 +135,12 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             end
         end
 
+        if not enchanter.check_can_use_effect(enchanter.effect_to_add) then
+            local record = core.magic.effects.records[enchanter.effect_to_add.id]
+            UI.showMessage("You do not have the skill required for ".. record.name)
+            return
+        end
+
         -- print("wnd.effects_list: ", wnd.effects_list)
         if enchanter.effect_to_modify then
             wnd:modify_effect(enchanter.effect_to_add.index)
@@ -221,13 +227,14 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     local range = templates.flex({range_text_element, range_input.element}, "range", true, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
 
     local valid_sliders = {}
-    local force_no_duration = false
     local force_no_area = false
 
     -- If constant effect only self is allowed
     if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         print("Constant Effect")
-        force_no_duration = true
+        force_no_area = true
+    end
+    if #valid_ranges == 1 and valid_ranges[1].id == core.magic.RANGE.Self then
         force_no_area = true
     end
 
@@ -358,7 +365,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         magnitude_scrollbar.element
     )
     local constant_effect_constant_magnitude = false
-    if core.magic.effects.records[enchanter.effect_to_add.id].hasMagnitude then
+    if enchanter.get_hasMag(enchanter.effect_to_add.id) then
         if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
             constant_effect_constant_magnitude = true
             table.insert(valid_sliders, magnitude)
@@ -389,7 +396,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         duration_value.element,
         duration_scrollbar.element
     )
-    if core.magic.effects.records[enchanter.effect_to_add.id].hasDuration and not force_no_duration then
+    if enchanter.get_hasDuration(enchanter.effect_to_add.id, enchanter.enchantment.type) then
         table.insert(valid_sliders, duration)
     end
     
