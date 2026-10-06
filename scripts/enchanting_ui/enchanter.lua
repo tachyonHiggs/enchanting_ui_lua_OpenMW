@@ -2,6 +2,7 @@ local core = require('openmw.core')
 local types = require('openmw.types')
 local self = require('openmw.self')
 local UI = require('openmw.ui')
+local I = require('openmw.interfaces')
 local storage = require('openmw.storage')
 local ambient = require('openmw.ambient')
 
@@ -143,6 +144,24 @@ enchanter.calculate_vanilla_price = function()
     return price
 end
 
+enchanter.give_player_xp = function(is_vendor_enchant, enchant_success)
+    if not is_vendor_enchant then
+        print("Giving player xp!")
+        if enchant_success then
+            I.SkillProgression.skillUsed(
+                'enchant',
+                {useType = I.SkillProgression.SKILL_USE_TYPES.Enchant_CreateMagicItem}
+            )
+        else
+            if storage.globalSection("options_enchanting_ui"):get("enchant_fail_gives_xp") then
+                I.SkillProgression.skillUsed(
+                    'enchant',
+                    {useType = I.SkillProgression.SKILL_USE_TYPES.Enchant_Recharge}
+                )
+            end
+        end
+    end 
+end
 
 -- FROM: https://gitlab.com/OpenMW/openmw/-/merge_requests/5396/diffs#c09212161591c36efefeae4c9bfecd2764cc1fab
 local function getFatigueTerm(actor)

@@ -26,7 +26,17 @@ I.Settings.registerGroup {
             key = 'skyrim_like_enchanting',
             renderer = 'checkbox',
             name = 'Skyrim Like Enchating',
-            description = "When enabled, all new enchantments will always suceed",
+            description = "NOT FINISHED, WILL NOT WORK AS EXPECTED. When enabled, all new enchantments will always suceed but there potency will be reduced by a fraction of the player's skill",
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
+            key = 'enchant_fail_gives_xp',
+            renderer = 'checkbox',
+            name = 'Enchant Fail gives XP',
+            description = "When enabled, failed enchantments will give some experience (the same experience as recharging an enchanted item)",
             default = false,
 			argument = {
                 disabled = false,

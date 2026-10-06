@@ -361,6 +361,10 @@ function Handler:onOpened(wnd, _, saved)
             enchanter.reset()
 
             reset_type_input(self.type_input)
+            
+            enchanter.give_player_xp(enchanting_ui.is_vendor, true) -- give player xp on enchant success
+        else
+            enchanter.give_player_xp(enchanting_ui.is_vendor, false) -- if setting, give player xp on enchant fail
         end
         
         self:updateUI()
