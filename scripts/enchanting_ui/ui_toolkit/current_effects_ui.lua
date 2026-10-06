@@ -15,7 +15,7 @@ local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects
 local T  = I.UIToolkit.Templates
 
 local current_effects_ui = {}
-local current_effects_ui_size = {500, 200}
+local current_effects_ui_size = {500, 250}
 local rowHeight = 25
 local effects_padding = 5
 
@@ -107,7 +107,7 @@ current_effects_ui.regen_effects = function(wnd)
     
     local new_effect_elements = {}
     for index, effect in ipairs(enchanter.effects_with_params) do
-        effect.cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(effect)))
+        effect.cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(effect, index)))
         local effect_element = current_effects_ui.generate_effect_item(effect, index)
         table.insert(new_effect_elements, effect_element)
     end
@@ -168,8 +168,7 @@ current_effects_ui.create_effect_ui = function(wnd)
            effect.index = index
         end
 
-        -- Regen effects to update indexes
-        current_effects_ui.regen_effects(self)
+        -- Will regen effects in update UI
     end
 
     local add_effect_btn = I.UIToolkit.Components.textButton { text = "Add Effect", scrollWidth = 1, slimScroll = true, onClick = function()

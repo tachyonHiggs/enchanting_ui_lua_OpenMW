@@ -68,6 +68,14 @@ enchanter.reset = function()
     enchanter.reset_item()
 end
 
+enchanter.get_enchant_skill_modifier = function()
+    local base_skill = types.Player.stats["skills"]["enchant"](self.object).base
+    print("Base skill: ", base_skill)
+    local modified_skill = types.Player.stats["skills"]["enchant"](self.object).modified
+    local modifier = base_skill + (modified_skill-base_skill)*0.25 -- TODO: this number as param or something
+    return modifier
+end
+
 enchanter.get_count_max = function()
     local count_max = 1
 
@@ -106,7 +114,6 @@ enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
     local soul_charge_scales_item_enchant_cap_constant_effect_only = soul_charge_scales_item_enchant_cap or storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_scales_item_enchant_cap_constant_effect_only")
 
     if enchanter.item.id ~= "" and enchanter.soul.id ~= "" then -- if valid item and soul gem,
-        print(" ---------------------------------- ")
 
         local soul_charge_to_enchant_cap_factor = storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_to_enchant_cap_factor")
 
@@ -217,7 +224,7 @@ enchanter.check_price = function()
     return false
 end
 
-enchanter.get_effect_cost = function (effect)
+enchanter.get_effect_cost = function (effect, index)
 
     local cost = 0
 
@@ -241,6 +248,10 @@ enchanter.get_effect_cost = function (effect)
             print("affectedSkill is: ", effect.affectedSkill)
             cost = cost * 100
         end
+    end
+
+    if not storage.globalSection("effects_enchanting_ui"):get("remove_compound_effect_cost") and index then
+        cost = cost * (#enchanter.effects_with_params - index + 1)
     end
 
     return cost

@@ -239,6 +239,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         items = attributes,
         width = 150,
         onItemSelected = function(item, index)
+            print('Type:', item.text, 'Id:', item.id)
             enchanter.effect_to_add.affectedAttribute = item.id
         end,
     }
