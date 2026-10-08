@@ -136,8 +136,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         end
 
         if not enchanter.check_can_use_effect(enchanter.effect_to_add) then
-            local record = core.magic.effects.records[enchanter.effect_to_add.id]
-            UI.showMessage("You do not have the skill required for ".. record.name)
+            enchanter.show_cant_use_effect(enchanter.effect_to_add)
             return
         end
 

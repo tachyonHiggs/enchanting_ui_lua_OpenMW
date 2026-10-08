@@ -26,7 +26,7 @@ I.Settings.registerGroup {
             key = 'skyrim_like_enchanting',
             renderer = 'checkbox',
             name = 'Skyrim/Oblivion Like Enchanting',
-            description = "NOT FINISHED, WILL NOT WORK AS EXPECTED. When enabled, all new enchantments will always suceed but their potency will be reduced by a fraction of the player's skill",
+            description = "When enabled, all new enchantments will always suceed but their potency will be reduced by a fraction of the player's skill",
             default = false,
 			argument = {
                 disabled = false,

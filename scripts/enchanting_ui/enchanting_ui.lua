@@ -4,10 +4,8 @@ local UI = require('openmw.ui')
 local I = require('openmw.interfaces')
 local Util = require('openmw.util')
 local v2 = Util.vector2
-local auxUi = require("openmw_aux.ui")
 local ambient = require('openmw.ambient')
 local self = require('openmw.self')
-local async = require('openmw.async')
 local core = require('openmw.core')
 local types = require('openmw.types')
 local storage = require('openmw.storage')
@@ -15,8 +13,6 @@ local storage = require('openmw.storage')
 
 local Class         = require 'scripts.UIToolkit.class'
 local WindowHandler = require 'scripts.UIToolkit.window_handler'
-local H             = require 'scripts.UIToolkit.helpers'
-local tipUtils      = require 'scripts.UIToolkit.tooltips.utils'
 local T  = I.UIToolkit.Templates
 
 
@@ -37,8 +33,6 @@ local main_width = 575
 local outputs_width = 525
 local stats_width = 150
 local window_height = 430
-
-local player = {}
 
 ---@class EnchantingHandler: UIToolkit.WindowHandler
 local Handler = Class(WindowHandler)
@@ -96,7 +90,7 @@ function Handler:onOpened(wnd, _, saved)
     
     local name_input = I.UIToolkit.Components.textEdit {
         placeholder = 'Enchanted Item Name',
-        onValueChanged = function(value) print('Value changed:', value) enchanter.name = value end,
+        onValueChanged = function(value) enchanter.name = value end,
         showClearButton = true,
         width = 300,
     }
@@ -104,7 +98,7 @@ function Handler:onOpened(wnd, _, saved)
     local function on_type_clicked(new_type)
 
         if new_type == enchanter.enchantment.type then
-            print("New type is current tyep")
+            print("New type is current type")
             return
         end
         enchanter.enchantment.type = new_type
@@ -128,7 +122,6 @@ function Handler:onOpened(wnd, _, saved)
     }
 
     if not enchanter.is_vendor then
-        print("Not vendor enchanting, showing chance")
         self.price_or_chance_stat_text = "Chance: "
         self.price_or_chance_stat_value = enchanter.chance .. " %"
         self.price_or_chance_stat_tooltip = {body = 'The success rate of the Enchantment in percentage.'}
@@ -142,7 +135,6 @@ function Handler:onOpened(wnd, _, saved)
         self.soulInput.layout.content[1].props.resource = I.UIToolkit.texture(icon)
 
     else
-        print("Is vendor enchanting, showing cost")
         self.price_or_chance_stat_text = "Cost: "
         self.price_or_chance_stat_value = enchanter.price
         self.price_or_chance_stat_tooltip = {body = 'The Cost of the Enchantment service'}
@@ -157,7 +149,8 @@ function Handler:onOpened(wnd, _, saved)
             text = self.price_or_chance_stat_text..self.price_or_chance_stat_value,
             textAlignH = UI.ALIGNMENT.Start,
             anchor = v2(0,1),
-            relativePosition = v2(0,0.99)
+            relativePosition = v2(0,1),
+            position = v2(0,-5),
         },
         userData = { colorable = true, },
     })
@@ -310,9 +303,7 @@ function Handler:onOpened(wnd, _, saved)
         scrollStep = 1,
         maxScroll = 0,
         onScroll = function(position)
-            print("SELF.COUNT ON SCROLL")
             local value = math.floor(position) + 1
-            print("Postion: ", position, " Value: ", value)
             self.count_value:setText(tostring(value))
             enchanter.enchantment.count_to_enchant = value
         end,
@@ -339,8 +330,6 @@ function Handler:onOpened(wnd, _, saved)
     -- Reset count slider
     self.count:setDisabled(true)
     self.count_value:setText("0")
-
-    print("enchant_item")
 
     ambient.playSound('menu click')
 
@@ -425,7 +414,9 @@ function Handler:onOpened(wnd, _, saved)
                         outputs,
                     }
                 },
+                
                 {template = T.padding(3)},
+                
                 {
                     type = UI.TYPE.Flex,
                     props = {
@@ -476,14 +467,12 @@ function Handler:setItem(item)
     local record = item.type.records[item.recordId]
     self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
 
-    print("Showing item count, only used by ammo")
-    self.count:setDisabled(false)
+    self.count:setDisabled(false) -- only used if item type is weapon ammo
      
     self.type_input:setDisabled(false) -- Enable type input
 
     local types_supported = {}
     if enchanter.item_supports_cast_once() then
-        print("Item supports case once")
         table.insert(types_supported, { id = core.magic.ENCHANTMENT_TYPE.CastOnce, text = "Cast Once" })
     end
     if enchanter.item_supports_cast_on_strike() then
@@ -521,7 +510,6 @@ function Handler:setSoul(item)
 end
 
 function Handler:updateUI()
-    print("wnd:updateUI")
 
     self.effects_list:setItems(self.effects_list:getItems())
     
@@ -584,8 +572,6 @@ function Handler:updateUI()
     end
     
     current_effects_ui.regen_effects(self) -- To update effect cost by index or any other changes
-
-    print("Handler:updateUI DONE")
 end
 
 I.UIToolkit.WindowManager.register(windowId, {
@@ -593,7 +579,7 @@ I.UIToolkit.WindowManager.register(windowId, {
     handler = Handler,
     draggable = true,
     resizing = true,
-    position = v2(10, 10), -- TODO: this value
+    position = v2(600, 600), -- TODO: this value
     minSize = v2(main_width+stats_width, window_height),
 })
 
@@ -608,8 +594,6 @@ enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     else
         enchanter.used_soul_gem = used_soul_gem
     end
-    
-    player = self -- For later getting player skill
 
     local windows = I.UIToolkit.WindowManager
     windows.open(windowId)
@@ -628,10 +612,8 @@ enchanting_ui.hide = function()
 end
 
 enchanting_ui.destroy = function()
-    print("enchanting_ui.destroy")
 
     local windows = I.UIToolkit.WindowManager
-    -- windows.close(statsId)
     windows.close(windowId)
 
     if magic_effects_ui.closePopup then

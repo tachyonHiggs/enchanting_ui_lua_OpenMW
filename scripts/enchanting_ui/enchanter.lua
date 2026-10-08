@@ -10,6 +10,8 @@ local templates = require("scripts.enchanting_ui.templates")
 -- Main object
 local enchanter = {}
 
+local skyrim_like_enchanting_constant = 3 -- effect.cost / skyrim_like_enchanting_constant
+
 enchanter.reset_effect_to_add = function()
     enchanter.effect_to_modify = false
     enchanter.effect_to_add = {
@@ -93,13 +95,19 @@ enchanter.check_can_use_effect = function(effect)
         local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
         local has_mag = enchanter.get_hasMag(effect.id)
         if not has_mag and not has_duration then
-            if effect.cost/3 >= enchanter.get_enchant_skill_modifier() then
+            if effect.cost/skyrim_like_enchanting_constant >= enchanter.get_enchant_skill_modifier() then
+
                 return false
             end
             
         end
     end
     return true
+end
+
+enchanter.show_cant_use_effect = function(effect)
+    local record = core.magic.effects.records[effect.id]
+    UI.showMessage("You do not have the skill required for " .. record.name.. ". Your Enchanting skill is short by " .. string.format("%.1f", effect.cost/skyrim_like_enchanting_constant-enchanter.get_enchant_skill_modifier()))
 end
 
 enchanter.get_enchant_skill_modifier = function()
@@ -243,7 +251,6 @@ local function getBarterOffer(merchant, basePrice, buying)
     local offerPrice = math.floor(basePrice * (buying and buyTerm or sellTerm))
     return math.max(1, offerPrice)
 end
-
 
 enchanter.calculate_price = function()
     print("check_price")

@@ -103,17 +103,14 @@ end
 
 ---@param wnd EnchantingHandler
 current_effects_ui.regen_effects = function(wnd)
-    print("regen effects")
     
     if enchanter.skyrim_like_enchanting then -- Remove uncastable effects
         for index, effect in ipairs(enchanter.effects_with_params) do
             effect.cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(effect, index)))
-            print("Checking effect: " .. tostring(effect.id))
             if not enchanter.check_can_use_effect(effect) then
                 print("REMOVING effect: " .. tostring(effect.id))
                 table.remove(enchanter.effects_with_params, index)
-                local record = core.magic.effects.records[effect.id]
-                UI.showMessage("You do not have the skill required for ".. record.name)
+                enchanter.show_cant_use_effect(effect)
             end
         end
     end
