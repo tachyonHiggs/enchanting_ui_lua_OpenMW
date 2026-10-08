@@ -150,7 +150,7 @@ function Handler:onOpened(wnd, _, saved)
             textAlignH = UI.ALIGNMENT.Start,
             anchor = v2(0,1),
             relativePosition = v2(0,1),
-            position = v2(0,-5),
+            position = v2(0,0),
         },
         userData = { colorable = true, },
     })
@@ -313,8 +313,9 @@ function Handler:onOpened(wnd, _, saved)
         type = UI.TYPE.Flex,
         props = {
             horizontal = true,
-            anchor = v2(0, 0.5),
-            relativePosition = v2(0.05, 0.75),
+            anchor = v2(0, 1),
+            relativePosition = v2(0, 1),
+            position = v2(20, -3),
             arrange = UI.ALIGNMENT.End,
             align = UI.ALIGNMENT.End,
             autoSize = true,
@@ -366,9 +367,9 @@ function Handler:onOpened(wnd, _, saved)
         
     end
     local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item}
-    create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.80,0.99)})
+    create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(1,1), position = v2(-100, 1)})
     local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function()  I.UI.removeMode('Enchanting') end}
-    cancel_btn:updateProps({anchor = v2(1,1), relativePosition = v2(0.95,0.99)})
+    cancel_btn:updateProps({anchor = v2(1,1),  relativePosition = v2(1,1), position = v2(-25, 1)})
     local outputs = {
         name = "outputs",
         type = UI.TYPE.Widget,
