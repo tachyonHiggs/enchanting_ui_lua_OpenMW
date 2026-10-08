@@ -80,7 +80,6 @@ local function create_enchantment_and_item(data)
 end
 
 local function remove_object(data)
-    print("remove_object")
     local count = data.count
     local object = data.object
     local type = data.type

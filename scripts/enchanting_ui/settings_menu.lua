@@ -10,10 +10,30 @@ I.Settings.registerGroup {
     order = 1,
     settings = {
         {
+            key = 'skyrim_like_enchanting',
+            renderer = 'checkbox',
+            name = 'Skyrim/Oblivion Like Enchanting',
+            description = "When enabled, all new enchantments will always suceed but their potency will be reduced by a fraction of the player's skill.",
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
+            key = 'enchant_fail_gives_xp',
+            renderer = 'checkbox',
+            name = 'Enchanting Failure gives XP',
+            description = "When enabled, failed enchantments will give some experience (the same experience as recharging an enchanted item).",
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
             key = 'projectiles_enchant_multiplier',
             renderer = 'number',
             name = 'Projectiles Enchant Multiplier',
-            description = 'Similar to Vanilla OpenMW, sets how many projectiles can be enchanted with one soul gem. When set to 0, only a maximum of one item can be enchanted. At 1, Soul Charge / Enchantment Points can be enchanted at once. Follows: Max Count of projectiles = Minimum of either ((Soul Charge / Enchantment Points) * Projectiles Enchant Multiplier) OR Projectile Count.',
+            description = 'Similar to Vanilla OpenMW, sets how many projectiles can be enchanted with one Soul Gem. When set to 0, only a maximum of one item can be enchanted. At 1, Soul Charge / Enchantment Points can be enchanted at once. Follows: Max Count of projectiles = Minimum of either ((Soul Charge / Enchantment Points) * Projectiles Enchant Multiplier) OR Projectile Count.',
             default = 1,
 			argument = {
                 disabled = false,
@@ -23,20 +43,10 @@ I.Settings.registerGroup {
             }
         },
         {
-            key = 'skyrim_like_enchanting',
+            key = 'allow_enchant_multiple_books',
             renderer = 'checkbox',
-            name = 'Skyrim/Oblivion Like Enchanting',
-            description = "When enabled, all new enchantments will always suceed but their potency will be reduced by a fraction of the player's skill",
-            default = false,
-			argument = {
-                disabled = false,
-            }
-        },
-        {
-            key = 'enchant_fail_gives_xp',
-            renderer = 'checkbox',
-            name = 'Enchant Fail gives XP',
-            description = "When enabled, failed enchantments will give some experience (the same experience as recharging an enchanted item)",
+            name = 'Enchant Multiple Books/Scrolls at once',
+            description = "When enabled, will allow multiples of the same books or scrolls to be enchanted by one Soul Gem. This functions the same as Projectile Enchanting, and uses 'Projectiles Enchant Multiplier'. However, it is instead limited to 'Cast Once' Enchantment types.",
             default = false,
 			argument = {
                 disabled = false,

@@ -140,6 +140,19 @@ enchanter.get_count_max = function()
         end
     end
 
+    if storage.globalSection("options_enchanting_ui"):get("allow_enchant_multiple_books") then
+        if enchanter.item.type == "Book" then
+            if enchanter.soul.object and enchanter.enchantment.base_cost > 0 then
+                
+                local projectiles_enchant_multiplier = storage.globalSection("options_enchanting_ui"):get("projectiles_enchant_multiplier")
+                local max_per_enchantment = math.floor(enchanter.soul.charge * projectiles_enchant_multiplier / enchanter.enchantment.base_cost)
+                count_max = math.min(max_per_enchantment, enchanter.item.object.count)
+            else 
+                count_max = enchanter.item.object.count
+            end
+        end
+    end
+
     -- Check max is in valid range
     if count_max < 1 or count_max ~= count_max then
         count_max = 1
@@ -620,7 +633,7 @@ enchanter.enchant_item = function(is_vendor_enchant, skyrim_like_enchanting)
 
     -- Remove unenchanted item
     if not storage.globalSection("cheats_enchanting_ui"):get("dont_consume_item_and_soul") then
-        core.sendGlobalEvent('remove_object', {object = enchanter.item.object, count = 1, type = "item"})
+        core.sendGlobalEvent('remove_object', {object = enchanter.item.object, count = enchanter.enchantment.count_to_enchant, type = "item"})
     end
 
     -- Clean up enchanter
