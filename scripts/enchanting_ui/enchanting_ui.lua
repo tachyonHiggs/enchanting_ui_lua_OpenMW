@@ -296,7 +296,7 @@ function Handler:onOpened(wnd, _, saved)
         }
    }
     
-    self.count_value = I.UIToolkit.Components.textButton { text = "0", width = 35, canClick = false, style = 'thin', thickness = 0}
+    self.count_value = I.UIToolkit.Components.textButton { text = "0", width = 35, canClick = false, style = 'thin', thickness = 0, background = 'transparent'}
     self.count = I.UIToolkit.Components.scrollBar {
         horizontal = true,
         length = 100,
@@ -366,9 +366,9 @@ function Handler:onOpened(wnd, _, saved)
         end
         
     end
-    local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item}
+    local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item, background = 'transparent'}
     create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(1,1), position = v2(-100, 1)})
-    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function()  I.UI.removeMode('Enchanting') end}
+    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function()  I.UI.removeMode('Enchanting') end, background = 'transparent'}
     cancel_btn:updateProps({anchor = v2(1,1),  relativePosition = v2(1,1), position = v2(-25, 1)})
     local outputs = {
         name = "outputs",
@@ -512,19 +512,22 @@ end
 
 function Handler:updateUI()
 
+    -- first get and regen effects
     self.effects_list:setItems(self.effects_list:getItems())
+    current_effects_ui.regen_effects(self) -- To update effect cost by index or any other changes
     
-    -- Base/effective cost
+    -- Then Base/effective cost
     enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
     enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
 
-    -- Item count
+    -- Then Item count
     local max = enchanter.get_count_max()
     self.count:setMaxScroll((max-1))
     enchanter.enchantment.count_to_enchant = math.min(max, enchanter.enchantment.count_to_enchant)
     self.count:setPosition((enchanter.enchantment.count_to_enchant-1), true) -- Seems that setPosition does not call on scroll?
     self.count_value:setText(tostring(enchanter.enchantment.count_to_enchant))
     
+    -- Now update UI
     -- Update price or Chance
     if enchanter.is_vendor then
         enchanter.price = enchanter.calculate_price()
@@ -571,8 +574,6 @@ function Handler:updateUI()
         self.enchanting_skill_mod_stat.layout.props.text = " Modifier: +"..(string.format("%.0f", enchanter.get_enchant_skill_modifier())).."%"
         I.UIToolkit.queueUpdate(self.enchanting_skill_mod_stat)
     end
-    
-    current_effects_ui.regen_effects(self) -- To update effect cost by index or any other changes
 end
 
 I.UIToolkit.WindowManager.register(windowId, {

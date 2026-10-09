@@ -7,6 +7,7 @@ local v2 = Util.vector2
 local ui = require("openmw.ui")
 local ambient = require('openmw.ambient')
 local types = require('openmw.types')
+local storage = require('openmw.storage')
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
 
@@ -110,12 +111,14 @@ end
 local function create_enchantable_item(item)
     local id = item.recordId
 
+    local multipler = storage.globalSection("options_enchanting_ui"):get("enchant_cap_multiplier")
+
     ---@type ItemsListData
     return
     {
         id = id,
         name = item.type.records[id].name,
-        enchant_pts = item.type.records[id].enchantCapacity,
+        enchant_pts = multipler * item.type.records[id].enchantCapacity,
         type = tostring(item.type), --TODO: this would require proper localisation in the future (use item slot name?)
         count = item.count,
         icon = item.type.records[id].icon,

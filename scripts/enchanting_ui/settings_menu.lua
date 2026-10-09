@@ -30,6 +30,19 @@ I.Settings.registerGroup {
             }
         },
         {
+            key = 'enchant_cap_multiplier',
+            renderer = 'number',
+            name = 'Enchantment Capacity Multiplier',
+            description = 'Determines the selected Item Enchantment Capacity. A default of 1 means no change to Capacity, 2 means double, and 0.5 means half.',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+        {
             key = 'projectiles_enchant_multiplier',
             renderer = 'number',
             name = 'Projectiles Enchant Multiplier',

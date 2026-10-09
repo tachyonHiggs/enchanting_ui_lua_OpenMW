@@ -317,9 +317,9 @@ enchanter.get_effect_cost = function (effect, index)
 
     -- TODO: convert this into a constant for easier modification
     if storage.globalSection("effects_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
-        print("make_fortify_skill_interactions_costlier is TRUE")
         if effect.affectedSkill then
             if effect.affectedSkill.text == "Armorer" or effect.affectedSkill.text == "Enchant" or effect.affectedSkill.text == "Alchemy" or effect.affectedSkill.text == "Mercantile" or effect.affectedSkill.text == "Speechcraft" then
+                print("make_fortify_skill_interactions_costlier is TRUE")
                 print("affectedSkill is: ", effect.affectedSkill.text)
                 cost = cost * 100
             end
@@ -337,16 +337,11 @@ end
 enchanter.get_effects_total_base_cost = function()
     local sum = 0
 
-    if storage.globalSection("effects_enchanting_ui"):get("remove_compound_effect_cost") then
-        for index, effect in ipairs(enchanter.effects_with_params) do
-            sum = sum + effect.cost
-        end
-
-    else
-        local total_num_effects = #enchanter.effects_with_params
-        for index, effect in ipairs(enchanter.effects_with_params) do
-            sum = sum + (effect.cost * (total_num_effects - index + 1))
-        end
+    -- Assumes get_effect_cost  has already been applied to each effect, this just summs them
+    for index, effect in ipairs(enchanter.effects_with_params) do
+        print("sum: ", sum)
+        print("effect.cost: ", effect.cost)
+        sum = sum + effect.cost
     end
     
     return sum
@@ -487,7 +482,8 @@ enchanter.check_requirements = function(is_vendor_enchant)
     if storage.globalSection("cheats_enchanting_ui"):get("remove_enchant_cap_limit") == false then
         if enchanter.enchantment.base_cost > enchanter.item.enchantment_capacity then
             UI.showMessage("Enchantment Cost beyond Item Capacity")
-            print("Failed: Enchantment Cost beyond Item Capacity")
+            print("Failed: Enchantment Cost beyond Item Capacity: ", enchanter.enchantment.base_cost .. " > " .. enchanter.item.enchantment_capacity)
+            print(enchanter.get_effects_total_base_cost())
             return false
         end
     end
