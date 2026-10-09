@@ -328,6 +328,7 @@ enchanter.get_effect_cost = function (effect, index)
 
     if not storage.globalSection("effects_enchanting_ui"):get("remove_compound_effect_cost") and index then
         cost = cost * (#enchanter.effects_with_params - index + 1)
+        print("Effect cost for index: " .. cost .. " " .. index)
     end
 
     return cost
