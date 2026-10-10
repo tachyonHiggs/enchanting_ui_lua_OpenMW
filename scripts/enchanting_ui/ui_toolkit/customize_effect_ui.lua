@@ -19,7 +19,7 @@ local effect_icon_size = v2(20,20)
 
 -- TODO: this for slider values, is there a better option?
 local function generate_slider_value(default_value)
-    local element = I.UIToolkit.Components.textButton { text = default_value, width = 35, canClick = false, style = 'thin', thickness = 0}
+    local element = I.UIToolkit.Components.textButton { text = default_value, width = 35, canClick = false, style = 'thin', thickness = 0, background = 0}
     return element
 end
 
@@ -113,7 +113,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         }
     }
 
-    local effect_cost = I.UIToolkit.Components.textButton { text = "Effect Cost: 0", canClick = false, style = 'thin', thickness = 0}
+    local effect_cost = I.UIToolkit.Components.textButton { text = "Effect Cost: 0", canClick = false, style = 'thin', thickness = 0, background = 0}
     effect_cost:updateProps({position = v2(250, 10)})
 
     local function update_effect_to_add_cost()
@@ -122,7 +122,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         effect_cost:setText("Effect Cost: " .. string.format("%.1f", cost))
     end
 
-    local okay_btn = I.UIToolkit.Components.textButton { text = "Okay", onClick = function() print("Okay!") 
+    local okay_btn = I.UIToolkit.Components.textButton { text = "Okay", background = 0, onClick = function() print("Okay!") 
         
         for index, effect in ipairs(enchanter.effects_with_params) do
             -- Attribute and skill effects allow multiple/duplicates on one enchantment
@@ -153,9 +153,9 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
 
     end}
     okay_btn:updateProps({})
-    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() customize_effect_ui.closePopup() end}
+    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", background = 0, onClick = function() customize_effect_ui.closePopup() end}
     cancel_btn:updateProps({})
-    local delete_btn = I.UIToolkit.Components.textButton { text = "Delete", onClick = function() print("Delete!") 
+    local delete_btn = I.UIToolkit.Components.textButton { text = "Delete", background = 0, onClick = function() print("Delete!") 
         
         print("Removing effect at index: ", enchanter.effect_to_add.index)
         if enchanter.effect_to_add.index > #enchanter.effects_with_params then

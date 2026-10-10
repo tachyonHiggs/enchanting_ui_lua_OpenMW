@@ -109,19 +109,19 @@ end
 
 ---@return ItemsListData
 local function create_enchantable_item(item)
-    local id = item.recordId
+    local recordId = item.recordId
 
     local multipler = storage.globalSection("options_enchanting_ui"):get("enchant_cap_multiplier")
 
     ---@type ItemsListData
     return
     {
-        id = id,
-        name = item.type.records[id].name,
-        enchant_pts = multipler * item.type.records[id].enchantCapacity,
+        id = item.id,
+        name = item.type.records[recordId].name,
+        enchant_pts = multipler * item.type.records[recordId].enchantCapacity,
         type = tostring(item.type), --TODO: this would require proper localisation in the future (use item slot name?)
         count = item.count,
-        icon = item.type.records[id].icon,
+        icon = item.type.records[recordId].icon,
         item = item,
     }
 end

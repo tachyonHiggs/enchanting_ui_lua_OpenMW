@@ -181,7 +181,7 @@ current_effects_ui.create_effect_ui = function(wnd)
         -- Will regen effects in update UI
     end
 
-    local add_effect_btn = I.UIToolkit.Components.textButton { text = "Add Effect", scrollWidth = 1, slimScroll = true, onClick = function()
+    local add_effect_btn = I.UIToolkit.Components.textButton { text = "Add Effect", scrollWidth = 1, slimScroll = true, background = 0, onClick = function()
         magic_effects_ui.show_add_effect_list(wnd)
     end}
     add_effect_btn:updateProps{

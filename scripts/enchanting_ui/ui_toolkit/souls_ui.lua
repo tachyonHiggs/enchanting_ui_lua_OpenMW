@@ -87,13 +87,11 @@ end
 
 ---@return SoulsListData
 local function create_soul_item(item)
-    local id = item.recordId
-    print(id)
-    local record = types.Miscellaneous.records[id]
+    local recordId = item.recordId
+    local record = types.Miscellaneous.records[recordId]
     local soul = types.Item.itemData(item).soul
     local count = item.count
 
-    print("record.icon: ", record.icon)
     ---@type SoulsListData
     return
     {

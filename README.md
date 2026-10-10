@@ -1,4 +1,5 @@
 # Enchanting UI: TODO
+This Readme is just for development specific notes.
 
 ## Vanilla Features
 
@@ -15,6 +16,3 @@
 
 ## Known Issues
  - Error message about "failed to open image: Resource:" then lists effect id instead of icon path
-
- ### Compatibility Issues
- - Issue with NCG mod

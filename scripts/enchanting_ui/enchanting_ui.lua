@@ -296,7 +296,7 @@ function Handler:onOpened(wnd, _, saved)
         }
    }
     
-    self.count_value = I.UIToolkit.Components.textButton { text = "0", width = 35, canClick = false, style = 'thin', thickness = 0, background = 'transparent'}
+    self.count_value = I.UIToolkit.Components.textButton { text = "0", width = 35, canClick = false, style = 'thin', thickness = 0, background = 0}
     self.count = I.UIToolkit.Components.scrollBar {
         horizontal = true,
         length = 100,
@@ -366,9 +366,9 @@ function Handler:onOpened(wnd, _, saved)
         end
         
     end
-    local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item, background = 'transparent'}
+    local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item, background = 0}
     create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(1,1), position = v2(-100, 1)})
-    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function()  I.UI.removeMode('Enchanting') end, background = 'transparent'}
+    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function()  I.UI.removeMode('Enchanting') end, background = 0}
     cancel_btn:updateProps({anchor = v2(1,1),  relativePosition = v2(1,1), position = v2(-25, 1)})
     local outputs = {
         name = "outputs",
@@ -580,7 +580,7 @@ I.UIToolkit.WindowManager.register(windowId, {
     title = 'Enchanting',
     handler = Handler,
     draggable = true,
-    resizing = true,
+    resizing = false,
     position = v2(600, 600), -- TODO: this value
     minSize = v2(main_width+stats_width, window_height),
 })

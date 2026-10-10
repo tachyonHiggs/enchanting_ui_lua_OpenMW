@@ -181,8 +181,8 @@ I.Settings.registerGroup {
         {
             key = 'constant_effect_constant_magnitude',
             renderer = 'checkbox',
-            name = 'Constant Effect Constant Magnitude',
-            description = 'When enabled, new Constant Effect enchantments have a constant magnitude. Max and min become equal. This is to discourage enchanting items with wide ranges and re-equiping them until the max is reached.',
+            name = 'Force Constant Effect to have Equal Magnitudes',
+            description = 'When enabled, new Constant Effect Enchantments will force equal Magnitudes. Max and min become equal, and are represented by a single slider. This is to discourage enchanting items with wide ranges and re-equiping them until the max is reached.',
             default = false,
 			argument = {
                 disabled = false,
