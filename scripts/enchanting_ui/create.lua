@@ -44,13 +44,13 @@ local function create_enchantment_and_item(data)
     -- Create item
     local originalRecord
     if item.type == "Weapon" then
-        originalRecord = types.Weapon.records[item.id]
+        originalRecord = types.Weapon.records[item.recordId]
     elseif item.type == "Armor" then
-        originalRecord = types.Armor.records[item.id]
+        originalRecord = types.Armor.records[item.recordId]
     elseif item.type == "Clothing" then
-        originalRecord = types.Clothing.records[item.id]
+        originalRecord = types.Clothing.records[item.recordId]
     else
-        originalRecord = types.Book.records[item.id]
+        originalRecord = types.Book.records[item.recordId]
     end
 
     if name == "" then

@@ -31,6 +31,7 @@ end
 enchanter.reset_item = function()
     enchanter.item = {
         id = "",
+        recordId = "",
         object = nil,
         icon = nil,
         type = 0,
@@ -63,7 +64,7 @@ enchanter.reset_enchantment = function()
     enchanter.enchantment.type = -1
     enchanter.enchantment.base_cost = 0
     enchanter.enchantment.effective_cost = 0
-    enchanter.enchantment.count_to_enchant = 1 -- Could set this to 0, but run the risk of count slider doing 0 - 1
+    enchanter.enchantment.count_to_enchant = 0
 end
 
 enchanter.reset = function()
@@ -119,11 +120,11 @@ enchanter.get_enchant_skill_modifier = function()
 end
 
 enchanter.get_count_max = function()
-    local count_max = 1
+    local count_max = 0
 
     -- If is valid item type
     if enchanter.item.type == "Weapon" then
-        local weapon_type = types.Weapon.records[enchanter.item.id].type
+        local weapon_type = types.Weapon.records[enchanter.item.recordId].type
         local is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
 
         -- if other items entered
@@ -154,8 +155,8 @@ enchanter.get_count_max = function()
     end
 
     -- Check max is in valid range
-    if count_max < 1 or count_max ~= count_max then
-        count_max = 1
+    if count_max < 0 or count_max ~= count_max then
+        count_max = 0
     end
 
     print("get_count_max: ", count_max)
@@ -715,7 +716,7 @@ enchanter.item_supports_cast_on_strike = function()
     end
 
     if enchanter.item.object.type == types.Weapon then
-        local weapon_type = types.Weapon.records[enchanter.item.id].type
+        local weapon_type = types.Weapon.records[enchanter.item.recordId].type
         print("Weapon type: ", weapon_type)
         if weapon_type == types.Weapon.TYPE.MarksmanBow or weapon_type == types.Weapon.TYPE.MarksmanCrossbow then
             return false
@@ -735,7 +736,7 @@ enchanter.item_supports_cast_on_use = function()
     end
 
     if enchanter.item.object.type == types.Weapon then
-        local weapon_type = types.Weapon.records[enchanter.item.id].type
+        local weapon_type = types.Weapon.records[enchanter.item.recordId].type
         print("Weapon type: ", weapon_type)
 
         if weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown then
@@ -755,7 +756,7 @@ enchanter.item_supports_constant = function()
     end
 
     if enchanter.item.object.type == types.Weapon then
-        local weapon_type = types.Weapon.records[enchanter.item.id].type
+        local weapon_type = types.Weapon.records[enchanter.item.recordId].type
         print("Weapon type: ", weapon_type)
 
         if weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown then

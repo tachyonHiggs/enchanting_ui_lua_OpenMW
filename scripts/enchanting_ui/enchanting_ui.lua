@@ -347,7 +347,7 @@ function Handler:onOpened(wnd, _, saved)
             I.UIToolkit.queueUpdate(self.itemInput)
             name_input:setValue('')
            
-            -- clear effects
+            -- clear effects and everything
             enchanter.reset()
 
             reset_type_input(self.type_input)
@@ -576,13 +576,14 @@ function Handler:updateUI()
     end
 end
 
+minSz = v2(main_width+stats_width, window_height)
 I.UIToolkit.WindowManager.register(windowId, {
     title = 'Enchanting',
     handler = Handler,
     draggable = true,
     resizing = false,
-    position = v2(600, 600), -- TODO: this value
-    minSize = v2(main_width+stats_width, window_height),
+    minSize = minSz,
+    position = I.UIToolkit.WindowManager.getCenterPositionForSize(minSz),
 })
 
 enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)

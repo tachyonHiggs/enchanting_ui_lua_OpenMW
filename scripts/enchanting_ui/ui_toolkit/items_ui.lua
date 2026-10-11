@@ -19,6 +19,7 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@field type string
 ---@field count number
 ---@field item userdata
+---@field recordId string
 
 local rowHeight = 25
 local items_window_size = {620, 600}
@@ -71,7 +72,7 @@ local columns = {
 local items_ui = {}
 
 -- TODO: should this only pass object?
-function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
+function items_ui.on_item_clicked(id, recordId, object, icon, enchant_pts, type_text)
 
     -- TODO: add appropiate sound to play depending on item type
     ambient.playSound('Item Misc Up')
@@ -84,7 +85,7 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
     enchanter.item.count = 1
     enchanter.enchantment.count_to_enchant = 1
     if object.type == types.Weapon then
-        local weapon_type = object.type.records[id].type
+        local weapon_type = object.type.records[recordId].type
         local is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
         if is_ammo then
             enchanter.item.count = object.count
@@ -92,6 +93,7 @@ function items_ui.on_item_clicked(id, object, icon, enchant_pts, type_text)
         end
     end
     enchanter.item.id = id
+    enchanter.item.recordId = recordId
     enchanter.item.object = object
     enchanter.item.icon = icon
     enchanter.item.type = type_text
@@ -123,6 +125,7 @@ local function create_enchantable_item(item)
         count = item.count,
         icon = item.type.records[recordId].icon,
         item = item,
+        recordId = item.recordId,
     }
 end
 
@@ -155,7 +158,7 @@ function items_ui.show_items_list(wnd)
         rowHeight = rowHeight,
         onItemClicked = function(data)
             print('---', 'ITEMS CLICKED')
-            items_ui.on_item_clicked(data.id, data.item, data.icon, data.enchant_pts, data.type)
+            items_ui.on_item_clicked(data.id, data.recordId, data.item, data.icon, data.enchant_pts, data.type)
             wnd:setItem(data.item)
         end,
     }
