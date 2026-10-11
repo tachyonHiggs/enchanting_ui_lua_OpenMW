@@ -121,6 +121,11 @@ end
 
 enchanter.get_count_max = function()
     local count_max = 0
+    
+    -- If valid item,
+    if enchanter.item.id ~= "" then
+        count_max = 1
+    end
 
     -- If is valid item type
     if enchanter.item.type == "Weapon" then
