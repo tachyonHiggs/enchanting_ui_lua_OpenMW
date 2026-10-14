@@ -193,13 +193,78 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
+    key = 'vendor_enchanting_ui',
+    page = 'enchanting_ui_page',
+    l10n = 'enchanting_ui',
+    name = 'Vendor Specific Options',
+    description = '',
+    permanentStorage = true,
+    order = 5,
+    settings = {
+        {
+            key = 'cast_once_cost_multiplier',
+            renderer = 'number',
+            name = '',
+            description = '',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+        {
+            key = 'cast_on_strike_cost_multiplier',
+            renderer = 'number',
+            name = '',
+            description = '',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+        {
+            key = 'cast_on_use_cost_multiplier',
+            renderer = 'number',
+            name = '',
+            description = '',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+        {
+            key = 'constant_effect_cost_multiplier',
+            renderer = 'number',
+            name = '',
+            description = '',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+
+   	},
+}
+
+I.Settings.registerGroup {
     key = 'cheats_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Cheats',
     description = 'Cheats, over-powered, and fun options',
     permanentStorage = true,
-    order = 5,
+    order = 100,
     settings = {
         {
             key = 'remove_enchant_cap_limit',

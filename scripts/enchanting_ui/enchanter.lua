@@ -7,6 +7,8 @@ local storage = require('openmw.storage')
 local ambient = require('openmw.ambient')
 local templates = require("scripts.enchanting_ui.templates")
 
+local vendor = require("scripts.enchanting_ui.vendor")
+
 -- Main object
 local enchanter = {}
 
@@ -194,16 +196,6 @@ enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
     return scale_factor
 end
 
-enchanter.calculate_vanilla_price = function()
-    local price = 1
-
-    local fEnchantmentValueMult = core.getGMST('fEnchantmentValueMult')
-    price = enchanter.enchantment.base_cost * fEnchantmentValueMult
-    price = math.max(1, price) -- set to at least 1
-
-    return price
-end
-
 enchanter.give_player_xp = function(is_vendor_enchant, enchant_success)
     if not is_vendor_enchant then
         print("Giving player xp!")
@@ -276,7 +268,7 @@ enchanter.calculate_price = function()
 
     -- Calculate item cost
     -- TOOD: add support for multiple options
-    local item_cost = enchanter.calculate_vanilla_price() 
+    local item_cost = vendor.calculate_vanilla_price(enchanter.enchantment.base_cost) 
     print("item costs: ", item_cost)
 
     return getBarterOffer(enchanter.vendor, item_cost, true)
