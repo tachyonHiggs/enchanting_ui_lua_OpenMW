@@ -193,13 +193,91 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
+    key = 'vendor_enchanting_ui',
+    page = 'enchanting_ui_page',
+    l10n = 'enchanting_ui',
+    name = 'Vendor Specific Options',
+    description = 'Options only relevant to Enchanting through an NPC Vendor',
+    permanentStorage = true,
+    order = 5,
+    settings = {
+        {
+            key = 'cast_once_cost_multiplier',
+            renderer = 'number',
+            name = 'Cast Once - Cost Multiplier',
+            description = 'Multiplies Enchantment type. A value of 1 equals no change in cost from Vanilla',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+        {
+            key = 'cast_on_strike_cost_multiplier',
+            renderer = 'number',
+            name = 'Cast On Strike - Cost Multiplier',
+            description = 'Multiplies Enchantment type. A value of 1 equals no change in cost from Vanilla',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+        {
+            key = 'cast_on_use_cost_multiplier',
+            renderer = 'number',
+            name = 'Cast On Use - Cost Multiplier',
+            description = 'Multiplies Enchantment type. A value of 1 equals no change in cost from Vanilla',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+        {
+            key = 'constant_effect_cost_multiplier',
+            renderer = 'number',
+            name = 'Constant Effect - Cost Multiplier',
+            description = 'Multiplies Enchantment type. A value of 1 equals no change in cost from Vanilla',
+            default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+        {
+            key = 'projectile_cost_multiplier',
+            renderer = 'number',
+            name = 'Projectile - Cost Multiplier',
+            description = 'Scales the cost for enchanting projectiles and multiple of them. A value of 1 equals no change in cost from Vanilla. WARNING: will multiply with the Cast On Strike - Cost Multiplier above.',
+            default = 0.1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+
+   	},
+}
+
+I.Settings.registerGroup {
     key = 'cheats_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Cheats',
     description = 'Cheats, over-powered, and fun options',
     permanentStorage = true,
-    order = 5,
+    order = 100,
     settings = {
         {
             key = 'remove_enchant_cap_limit',

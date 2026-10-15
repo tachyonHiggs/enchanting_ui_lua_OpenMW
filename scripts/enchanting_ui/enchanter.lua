@@ -7,6 +7,8 @@ local storage = require('openmw.storage')
 local ambient = require('openmw.ambient')
 local templates = require("scripts.enchanting_ui.templates")
 
+local vendor = require("scripts.enchanting_ui.vendor")
+
 -- Main object
 local enchanter = {}
 
@@ -128,21 +130,15 @@ enchanter.get_count_max = function()
     end
 
     -- If is valid item type
-    if enchanter.item.type == "Weapon" then
-        local weapon_type = types.Weapon.records[enchanter.item.recordId].type
-        local is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
-
-        -- if other items entered
-        if is_ammo then
-            if enchanter.soul.object and enchanter.enchantment.base_cost > 0 then
-                
-                local projectiles_enchant_multiplier = storage.globalSection("options_enchanting_ui"):get("projectiles_enchant_multiplier")
-                local max_per_enchantment = math.floor(enchanter.soul.charge * projectiles_enchant_multiplier / enchanter.enchantment.base_cost)
-                count_max = math.min(max_per_enchantment, enchanter.item.object.count)
-                
-            else 
-                count_max = enchanter.item.object.count
-            end
+    if enchanter.item.is_ammo then
+        if enchanter.soul.object and enchanter.enchantment.base_cost > 0 then
+            
+            local projectiles_enchant_multiplier = storage.globalSection("options_enchanting_ui"):get("projectiles_enchant_multiplier")
+            local max_per_enchantment = math.floor(enchanter.soul.charge * projectiles_enchant_multiplier / enchanter.enchantment.base_cost)
+            count_max = math.min(max_per_enchantment, enchanter.item.object.count)
+            
+        else 
+            count_max = enchanter.item.object.count
         end
     end
 
@@ -194,16 +190,6 @@ enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
     return scale_factor
 end
 
-enchanter.calculate_vanilla_price = function()
-    local price = 1
-
-    local fEnchantmentValueMult = core.getGMST('fEnchantmentValueMult')
-    price = enchanter.enchantment.base_cost * fEnchantmentValueMult
-    price = math.max(1, price) -- set to at least 1
-
-    return price
-end
-
 enchanter.give_player_xp = function(is_vendor_enchant, enchant_success)
     if not is_vendor_enchant then
         print("Giving player xp!")
@@ -223,69 +209,10 @@ enchanter.give_player_xp = function(is_vendor_enchant, enchant_success)
     end 
 end
 
--- FROM: https://gitlab.com/OpenMW/openmw/-/merge_requests/5396/diffs#c09212161591c36efefeae4c9bfecd2764cc1fab
-local function getFatigueTerm(actor)
-    local fatigue = actor.type.stats.dynamic.fatigue(actor)
-    local max, current, normalized = fatigue.base, fatigue.current, nil
-
-    if math.floor(max) == 0 then normalized = 1 else normalized = math.max(0., current / max) end
-
-    local fFatigueBase = core.getGMST('fFatigueBase')
-    local fFatigueMult = core.getGMST('fFatigueMult')
-
-    return fFatigueBase - fFatigueMult * (1 - normalized)
-end
-local function getBarterOffer(merchant, basePrice, buying)
-    print("vendor is: ", merchant)
-    if merchant == {} then
-        print("ERROR")
-        return 0
-    end
-    if basePrice == 0 or types.Creature.objectIsInstance(merchant) then
-        return basePrice
-    end
-
-    local playerMerc = self.type.stats.skills.mercantile(self).modified
-    local playerLuck  = self.type.stats.attributes.luck(self).modified
-    local playerPers  = self.type.stats.attributes.personality(self).modified
-
-    local merchantMerc = merchant.type.stats.skills.mercantile(merchant).modified
-    local merchantLuck  = merchant.type.stats.attributes.luck(merchant).modified
-    local merchantPers  = merchant.type.stats.attributes.personality(merchant).modified
-
-    -- :todo look into getDerivedDisposition details
-    local disposition = merchant.type.getDisposition(merchant, self)
-    local a = math.min(playerMerc, 100.)
-    local b = math.min(playerLuck * .1, 10.)
-    local c = math.min(playerPers * .2, 10.)
-    local d = math.min(merchantMerc, 100.)
-    local e = math.min(merchantLuck * .1, 10.)
-    local f = math.min(merchantPers * .2, 10.)
-
-    local pcTerm = (disposition - 50 + a + b + c) * getFatigueTerm(self)
-    local npcTerm = (d + e + f) * getFatigueTerm(merchant)
-    local buyTerm = 0.01 * (100 - 0.5 * (pcTerm - npcTerm))
-    local sellTerm = 0.01 * (50 - 0.5 * (npcTerm - pcTerm))
-    -- util.round may be more correct
-    local offerPrice = math.floor(basePrice * (buying and buyTerm or sellTerm))
-    return math.max(1, offerPrice)
-end
-
-enchanter.calculate_price = function()
-    print("check_price")
-
-    -- Calculate item cost
-    -- TOOD: add support for multiple options
-    local item_cost = enchanter.calculate_vanilla_price() 
-    print("item costs: ", item_cost)
-
-    return getBarterOffer(enchanter.vendor, item_cost, true)
-end
-
 enchanter.check_price = function()
     print("check_price")
 
-    enchanter.price = enchanter.calculate_price()
+    enchanter.price = vendor.calculate_actual_price(enchanter.enchantment.base_cost, enchanter.enchantment.type, enchanter.vendor, enchanter.item.is_ammo, enchanter.enchantment.count_to_enchant)
 
     -- Compare with Player gold
     local player_gold = types.Actor.inventory(self):countOf('Gold_001')

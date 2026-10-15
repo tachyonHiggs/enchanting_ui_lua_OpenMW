@@ -12,7 +12,7 @@ I.Settings.registerPage ({
 
 local function onLoad(data)
     -- Register Window
-    I.UI.registerWindow('EnchantingDialog', function() end, enchanting_ui.hide)
+    enchanting_ui.load()
 end
 
 return {

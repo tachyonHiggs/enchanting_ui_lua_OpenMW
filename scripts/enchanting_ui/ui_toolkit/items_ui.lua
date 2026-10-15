@@ -11,6 +11,7 @@ local storage = require('openmw.storage')
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
 
+local T  = I.UIToolkit.Templates
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
 ---@class ItemsListData : UIToolkit.ListData.Column
@@ -22,7 +23,7 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@field recordId string
 
 local rowHeight = 25
-local items_window_size = {620, 600}
+local items_window_size = {620, 500}
 local icon_width = 35
 local enchant_pts_width = 100
 
@@ -84,14 +85,17 @@ function items_ui.on_item_clicked(id, recordId, object, icon, enchant_pts, type_
     -- if item == ammo/throwable
     enchanter.item.count = 1
     enchanter.enchantment.count_to_enchant = 1
+
+    local is_ammo = false
     if object.type == types.Weapon then
         local weapon_type = object.type.records[recordId].type
-        local is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
+        is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
         if is_ammo then
             enchanter.item.count = object.count
             print("Projectile item selected with a total of: ", enchanter.item.count)
         end
     end
+    enchanter.item.is_ammo = is_ammo
     enchanter.item.id = id
     enchanter.item.recordId = recordId
     enchanter.item.object = object
@@ -199,6 +203,7 @@ function items_ui.show_items_list(wnd)
         type = UI.TYPE.Flex,
         props = {
             horizontal = false,
+            arrange = UI.ALIGNMENT.End
         },
         content = UI.content {
             {
@@ -218,6 +223,10 @@ function items_ui.show_items_list(wnd)
                 },
             },
             list.element,
+
+            {template = T.padding(3, 3),},
+
+            I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() ambient.playSound('menu click') items_ui.closePopup() end, background = 0}.element,
         }
     }
 

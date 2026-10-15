@@ -10,8 +10,9 @@ local core = require('openmw.core')
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
+local T  = I.UIToolkit.Templates
 
-local window_size = {620, 600}
+local window_size = {620, 500}
 
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
@@ -165,11 +166,15 @@ function magic_effects_ui.show_add_effect_list(wnd)
         position = v2(-5, 5),
     }
 
+    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() ambient.playSound('menu click') magic_effects_ui.closePopup() end, background = 0}
+    cancel_btn:updateProps({anchor = v2(1,1), relativePosition = v2(1,1)})
+
     local layout = {
         name = "magic_effects_list",
         type = UI.TYPE.Flex,
         props = {
             horizontal = false,
+            arrange = UI.ALIGNMENT.End
         },
         content = UI.content {
             {
@@ -189,6 +194,10 @@ function magic_effects_ui.show_add_effect_list(wnd)
                 },
             },
             list.element,
+            
+            {template = T.padding(3, 3),},
+
+            cancel_btn.element,
         }
     }
 
