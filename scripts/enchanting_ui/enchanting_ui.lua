@@ -152,11 +152,19 @@ function Handler:onOpened(wnd, _, saved)
         -- self:setSoul(enchanter.used_soul_gem)
         self.soulInput.layout.content[1].props.resource = I.UIToolkit.texture(icon)
 
+        self.gold_or_skill_stat_text = "Your Skill: "
+        self.gold_or_skill_stat_value = enchanter.get_player_enchanting_skill().modified
+        self.gold_or_skill_stat_tooltip = {body = 'The Players current total Enchanting Skill'}
+    
     else
         self.price_or_chance_stat_text = "Cost: "
         self.price_or_chance_stat_value = enchanter.price
         self.price_or_chance_stat_tooltip = {body = 'The Cost of the Enchantment service'}
-        
+
+        self.gold_or_skill_stat_text = "Your Gold: "
+        self.gold_or_skill_stat_value = enchanter.get_player_gold()
+        self.gold_or_skill_stat_tooltip = {body = 'The total amount of gold in the Players inventory'}
+    
     end
 
     self.price_or_chance_stat = I.UIToolkit.Interactive.makeInteractive({
@@ -165,6 +173,20 @@ function Handler:onOpened(wnd, _, saved)
         template = I.MWUI.templates.textNormal,
         props = {
             text = self.price_or_chance_stat_text..self.price_or_chance_stat_value,
+            textAlignH = UI.ALIGNMENT.Start,
+            anchor = v2(0,1),
+            relativePosition = v2(0,1),
+            position = v2(0,0),
+        },
+        userData = { colorable = true, },
+    })
+    
+    self.gold_or_skill_stat_text = I.UIToolkit.Interactive.makeInteractive({
+        tooltip = self.gold_or_skill_stat_tooltip,
+    }, {
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = self.gold_or_skill_stat_text..self.gold_or_skill_stat_value,
             textAlignH = UI.ALIGNMENT.Start,
             anchor = v2(0,1),
             relativePosition = v2(0,1),
@@ -272,7 +294,23 @@ function Handler:onOpened(wnd, _, saved)
                     table.unpack(self.enchanting_skill_stat)
                 }
             },
-            self.price_or_chance_stat
+            {
+                name = "vendor_or_player_stats_flex",
+                type = UI.TYPE.Flex,
+                props = {
+                    horizontal = false,
+                    arrange = UI.ALIGNMENT.Start,
+                    align = UI.ALIGNMENT.Start,
+                    autoSize = true,
+                    anchor = v2(0, 1),
+                    relativePosition = v2(0, 1),
+                    visible = true,
+                },
+                content = UI.content {
+                    self.gold_or_skill_stat_text,
+                    self.price_or_chance_stat,
+                },
+            }
         }
     }
 

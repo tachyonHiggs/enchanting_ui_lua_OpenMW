@@ -77,6 +77,14 @@ enchanter.reset = function()
     -- DO NOT RESET is_vendor and skyrim_like_enchanting, those are updating on show UI
 end
 
+enchanter.get_player_enchanting_skill = function()
+    return types.Player.stats["skills"]["enchant"](self.object)
+end
+
+enchanter.get_player_gold = function()
+    return types.Actor.inventory(self):countOf('Gold_001')
+end
+
 enchanter.get_hasDuration = function(effect_id, type)
     if core.magic.effects.records[effect_id].hasDuration and type ~= core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         return true
@@ -114,9 +122,9 @@ enchanter.show_cant_use_effect = function(effect)
 end
 
 enchanter.get_enchant_skill_modifier = function()
-    local base_skill = types.Player.stats["skills"]["enchant"](self.object).base
+    local base_skill = enchanter.get_player_enchanting_skill().base
     print("Base skill: ", base_skill)
-    local modified_skill = types.Player.stats["skills"]["enchant"](self.object).modified
+    local modified_skill = enchanter.get_player_enchanting_skill().modified
     local modifier = base_skill + (modified_skill-base_skill)*0.25 -- TODO: this number as param or something
     return modifier
 end
@@ -215,7 +223,7 @@ enchanter.check_price = function()
     enchanter.price = vendor.calculate_actual_price(enchanter.enchantment.base_cost, enchanter.enchantment.type, enchanter.vendor, enchanter.item.is_ammo, enchanter.enchantment.count_to_enchant)
 
     -- Compare with Player gold
-    local player_gold = types.Actor.inventory(self):countOf('Gold_001')
+    local player_gold = enchanter.get_player_gold()
     print("Player has: ", player_gold)
 
     if player_gold >= enchanter.price then
@@ -281,7 +289,7 @@ enchanter.get_effects_total_base_cost = function()
 end
 
 enchanter.get_effective_cost = function()
-    local enchant_skill = types.Player.stats["skills"]["enchant"](self.object).modified
+    local enchant_skill = enchanter.get_player_enchanting_skill().modified
     local effective_cost = enchanter.enchantment.base_cost - (enchanter.enchantment.base_cost / 100) * (enchant_skill - 10)
 
     if effective_cost < 1 then
@@ -551,7 +559,6 @@ enchanter.enchant_item = function(is_vendor_enchant, skyrim_like_enchanting)
     end
     if is_vendor_enchant then
         -- Take money from player
-        local current_gold = types.Actor.inventory(self):countOf('Gold_001')
         core.sendGlobalEvent('set_actor_gold', {actor = self, count = enchanter.price, is_player = true})
 
         -- Give money to vendor
@@ -577,7 +584,7 @@ enchanter.calculate_vanilla_success_rate = function()
     print("calculate_vanilla_success_rate")
 
     -- Get relevant skills and attributes
-    local enchant_skill = types.Player.stats["skills"]["enchant"](self.object).modified
+    local enchant_skill = enchanter.get_player_enchanting_skill().modified
     local intelligence = types.Player.stats["attributes"]["intelligence"](self.object).modified
     local luck = types.Player.stats["attributes"]["luck"](self.object).modified
 
