@@ -2,12 +2,13 @@
 This Readme is just for development specific notes.
 
 ## Vanilla Features
-- None for now
-
-## Expanded Features
 - Change sliders to take number input
 - Allow bartering for vendor enchanted items services
-- Add price scalling for cast once enchantments
+- Add player gold stat
+
+## Expanded Features
+- Add scaling settings for enchantment type difficulty
+- Add option to scale enchantment points based on skill
 - TBD add scalers for individual enchantment type success
 - TBD At higher enchanting skill levels, add ability to rename enchanted item and dis/re-enchant an item
 - TBD add features to make certain soul values, like Vivec's, to have special bonuses

@@ -8,11 +8,30 @@ local ambient = require('openmw.ambient')
 
 local vendor = {}
 
-vendor.calculate_vanilla_price = function(base_cost)
+vendor.calculate_base_price = function(base_cost, type, is_ammo)
     local price = 1
 
     local fEnchantmentValueMult = core.getGMST('fEnchantmentValueMult')
     price = base_cost * fEnchantmentValueMult
+
+    if is_ammo then
+        price = price * storage.globalSection("vendor_enchanting_ui"):get("projeectile_cost_multiplier")
+    end
+
+    if(type == core.magic.ENCHANTMENT_TYPE.CastOnce) then
+        price = price * storage.globalSection("vendor_enchanting_ui"):get("cast_once_cost_multiplier")
+    
+    elseif (type == core.magic.ENCHANTMENT_TYPE.CastOnStrike) then
+        price = price * storage.globalSection("vendor_enchanting_ui"):get("cast_on_strike_cost_multiplier")
+
+    elseif (type == core.magic.ENCHANTMENT_TYPE.CastOnUse) then
+        price = price * storage.globalSection("vendor_enchanting_ui"):get("cast_on_use_cost_multiplier")
+
+    else -- constant effect
+        price = price * storage.globalSection("vendor_enchanting_ui"):get("constant_effect_cost_multiplier")
+    
+    end
+
     price = math.max(1, price) -- set to at least 1
 
     return price
@@ -30,7 +49,7 @@ local function getFatigueTerm(actor)
 
     return fFatigueBase - fFatigueMult * (1 - normalized)
 end
-local function getBarterOffer(merchant, basePrice, buying)
+function vendor.getBarterOffer(merchant, basePrice, buying)
     print("vendor is: ", merchant)
     if merchant == {} then
         print("ERROR")
@@ -61,20 +80,19 @@ local function getBarterOffer(merchant, basePrice, buying)
     local npcTerm = (d + e + f) * getFatigueTerm(merchant)
     local buyTerm = 0.01 * (100 - 0.5 * (pcTerm - npcTerm))
     local sellTerm = 0.01 * (50 - 0.5 * (npcTerm - pcTerm))
+
     -- util.round may be more correct
     local offerPrice = math.floor(basePrice * (buying and buyTerm or sellTerm))
     return math.max(1, offerPrice)
 end
 
-local function getEffectiveValue(item, count)
-    local basePrice = item.type.record(item).value
+function vendor.calculate_actual_price(base_cost, type, merchant, is_ammo, count)
+    print("vendor.calculate_actual_price")
 
-    local itemData = item.type.itemData(item)
-    local itemRecord = item.type.record(item)
+    -- Calculate item cost
+    local item_cost = vendor.calculate_base_price(base_cost, type, is_ammo) * count
 
-    local x = 1
-
-    return x * count
+    return vendor.getBarterOffer(merchant, item_cost, true)
 end
 
 local function haggle(npc, playerOffer, merchantOffer)
@@ -122,53 +140,6 @@ local function haggle(npc, playerOffer, merchantOffer)
     end
 
     return true, skillGain
-end
-
-local function updateOffer(ctx)
-    local state = ctx.barterState
-    local merchant = ctx.windowArgs.Trade
-    if not state or not merchant then
-        return
-    end
-
-    local merchantOffer = 0
-    for _, buyingData in pairs(state.buying) do
-        local basePrice = getEffectiveValue(buyingData.item, buyingData.count)
-        local cap = math.modf(math.max(1, 0.75 * basePrice))
-        local buyingPrice = getBarterOffer(merchant, basePrice, true)
-        merchantOffer = merchantOffer - math.max(cap, buyingPrice)
-    end
-
-    for _, sellingData in pairs(state.selling) do
-        local basePrice = getEffectiveValue(sellingData.item, sellingData.count)
-        local cap = math.modf(math.max(1, 0.75 * basePrice))
-        local sellingPrice = getBarterOffer(merchant, basePrice, false)
-        merchantOffer = merchantOffer + (types.NPC.objectIsInstance(merchant) and math.min(cap, sellingPrice) or sellingPrice)
-    end
-
-    local diff = merchantOffer - (state.currentMerchantOffer or 0)
-    state.currentMerchantOffer = merchantOffer
-    state.currentBalance = (state.currentBalance or 0) + diff
-end
-
-vendor.check_price = function()
-    print("check_price")
-
-    enchanter.price = vendor.calculate_price()
-
-    -- Compare with Player gold
-    local player_gold = types.Actor.inventory(self):countOf('Gold_001')
-    print("Player has: ", player_gold)
-
-    if player_gold >= enchanter.price then
-        enchanter.price = enchanter.price
-        print("Success")
-        return true
-    end
-
-    UI.showMessage("You do not have enough gold for this transaction")
-    print("Failed to pay Vendor")
-    return false
 end
 
 return vendor

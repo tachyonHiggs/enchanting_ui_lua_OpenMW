@@ -197,15 +197,15 @@ I.Settings.registerGroup {
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Vendor Specific Options',
-    description = '',
+    description = 'Options only relevant to Enchanting through an NPC Vendor',
     permanentStorage = true,
     order = 5,
     settings = {
         {
             key = 'cast_once_cost_multiplier',
             renderer = 'number',
-            name = '',
-            description = '',
+            name = 'Cast Once - Cost Multiplier',
+            description = 'Multiplies Enchantment type. A value of 1 equals no change in cost from Vanilla',
             default = 1,
 			argument = {
                 disabled = false,
@@ -217,8 +217,8 @@ I.Settings.registerGroup {
         {
             key = 'cast_on_strike_cost_multiplier',
             renderer = 'number',
-            name = '',
-            description = '',
+            name = 'Cast On Strike - Cost Multiplier',
+            description = 'Multiplies Enchantment type. A value of 1 equals no change in cost from Vanilla',
             default = 1,
 			argument = {
                 disabled = false,
@@ -230,7 +230,7 @@ I.Settings.registerGroup {
         {
             key = 'cast_on_use_cost_multiplier',
             renderer = 'number',
-            name = '',
+            description = 'Multiplies Enchantment type. A value of 1 equals no change in cost from Vanilla',
             description = '',
             default = 1,
 			argument = {
@@ -243,9 +243,22 @@ I.Settings.registerGroup {
         {
             key = 'constant_effect_cost_multiplier',
             renderer = 'number',
-            name = '',
+            description = 'Multiplies Enchantment type. A value of 1 equals no change in cost from Vanilla',
             description = '',
             default = 1,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
+        {
+            key = 'projeectile_cost_multiplier',
+            renderer = 'number',
+            name = 'Projectile - Cost Multiplier',
+            description = 'Scales the cost for enchanting projectiles and multiple of them. A value of 1 equals no change in cost from Vanilla. WARNING: will multiply with the "Cast On Strike - Cost Multiplier" above.',
+            default = 0.1,
 			argument = {
                 disabled = false,
                 integer = false,

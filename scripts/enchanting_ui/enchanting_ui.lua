@@ -20,6 +20,7 @@ local enchanter = require("scripts.enchanting_ui.enchanter")
 local templates = require("scripts.enchanting_ui.templates")
 local items_ui = require("scripts.enchanting_ui.ui_toolkit.items_ui")
 local souls_ui = require("scripts.enchanting_ui.ui_toolkit.souls_ui")
+local vendor = require("scripts.enchanting_ui.vendor")
 
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
@@ -59,6 +60,23 @@ local function reset_type_input(type_input)
         { id = core.magic.ENCHANTMENT_TYPE.ConstantEffect,  text = "Constant Effect" },
     }
     type_input:setDisabled(true)
+end
+
+local function update_price_or_chance(handler)
+    if enchanter.is_vendor then
+        enchanter.price = vendor.calculate_actual_price(enchanter.enchantment.base_cost, enchanter.enchantment.type, enchanter.vendor, enchanter.item.is_ammo, enchanter.enchantment.count_to_enchant)
+        handler.price_or_chance_stat.layout.props.text = handler.price_or_chance_stat_text..string.format("%.1f", enchanter.price)
+        I.UIToolkit.queueUpdate(handler.price_or_chance_stat)
+    else
+        if enchanter.skyrim_like_enchanting then
+            enchanter.chance = 100
+        else
+            enchanter.chance = enchanter.get_success_rate()
+        end
+        
+        handler.price_or_chance_stat.layout.props.text = handler.price_or_chance_stat_text..string.format("%.1f", enchanter.chance).." %"
+        I.UIToolkit.queueUpdate(handler.price_or_chance_stat)
+    end
 end
 
 function Handler:onOpened(wnd, _, saved)
@@ -306,6 +324,7 @@ function Handler:onOpened(wnd, _, saved)
             local value = math.floor(position) + 1
             self.count_value:setText(tostring(value))
             enchanter.enchantment.count_to_enchant = value
+            update_price_or_chance(self)
         end,
     }
     local count_text = { template = T.text(), props = { text = 'Count: ' } }
@@ -529,20 +548,7 @@ function Handler:updateUI()
     
     -- Now update UI
     -- Update price or Chance
-    if enchanter.is_vendor then
-        enchanter.price = enchanter.calculate_price()
-        self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.price)
-        I.UIToolkit.queueUpdate(self.price_or_chance_stat)
-    else
-        if enchanter.skyrim_like_enchanting then
-            enchanter.chance = 100
-        else
-            enchanter.chance = enchanter.get_success_rate()
-        end
-        
-        self.price_or_chance_stat.layout.props.text = self.price_or_chance_stat_text..string.format("%.1f", enchanter.chance).." %"
-        I.UIToolkit.queueUpdate(self.price_or_chance_stat)
-    end
+    update_price_or_chance(self)
 
     local enchantment_pts_value = (string.format("%.1f", enchanter.item.enchantment_capacity))
     if enchanter.item.enchantment_capacity ~= enchanter.item.default_enchantment_capacity then
@@ -557,10 +563,9 @@ function Handler:updateUI()
     self.soul_charge_stat.layout.props.text = " Charge: "..(string.format("%.1f", enchanter.soul.charge))
     I.UIToolkit.queueUpdate(self.soul_charge_stat)
 
-    local uses = 0
+    local uses = ""
     if enchanter.enchantment.effective_cost ~= 0 then -- Some effects are in. To avoid infinite
-        uses = enchanter.soul.charge/enchanter.enchantment.effective_cost
-        uses = (string.format("%.0f", uses))
+        uses = (string.format("%.0f", enchanter.soul.charge/enchanter.enchantment.effective_cost))
     end
     if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.CastOnce then
         uses = "1"
@@ -575,16 +580,6 @@ function Handler:updateUI()
         I.UIToolkit.queueUpdate(self.enchanting_skill_mod_stat)
     end
 end
-
-minSz = v2(main_width+stats_width, window_height)
-I.UIToolkit.WindowManager.register(windowId, {
-    title = 'Enchanting',
-    handler = Handler,
-    draggable = true,
-    resizing = false,
-    minSize = minSz,
-    position = I.UIToolkit.WindowManager.getCenterPositionForSize(minSz),
-})
 
 enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
     print("Menu Show")
@@ -631,6 +626,19 @@ enchanting_ui.destroy = function()
     if souls_ui.closePopup then
         souls_ui.closePopup()
     end
+end
+
+enchanting_ui.load = function()
+    local minSz = v2(main_width+stats_width, window_height)
+    I.UIToolkit.WindowManager.register(windowId, {
+        title = 'Enchanting',
+        handler = Handler,
+        draggable = true,
+        resizing = true,
+        minSize = minSz,
+        position = I.UIToolkit.WindowManager.getCenterPositionForSize(minSz),
+    })
+    I.UI.registerWindow('EnchantingDialog', function() end, enchanting_ui.hide)
 end
 
 return enchanting_ui

@@ -10,6 +10,7 @@ local types = require('openmw.types')
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
 
+local T  = I.UIToolkit.Templates
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
 ---@class SoulsListData : UIToolkit.ListData.Column
@@ -19,7 +20,7 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@field count number
 
 local rowHeight = 25
-local souls_window_size = {620, 600}
+local souls_window_size = {620, 500}
 
 ---@type UIToolkit.SortedList.Column[]
 local columns = {
@@ -174,6 +175,7 @@ function souls_ui.show_soul_list(wnd)
         type = UI.TYPE.Flex,
         props = {
             horizontal = false,
+            arrange = UI.ALIGNMENT.End
         },
         content = UI.content {
             {
@@ -193,6 +195,9 @@ function souls_ui.show_soul_list(wnd)
                 },
             },
             list.element,
+            
+            {template = T.padding(3, 3),},
+            I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() ambient.playSound('menu click') souls_ui.closePopup() end, background = 0}.element,
         }
     }
 
