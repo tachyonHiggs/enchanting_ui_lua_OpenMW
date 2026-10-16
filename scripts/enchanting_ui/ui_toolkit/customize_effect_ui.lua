@@ -17,6 +17,30 @@ local rowHeight = 25
 local window_size = {400, 600}
 local effect_icon_size = v2(20,20)
 
+local MAX_MAG =  1000
+local function mag_slider_value_to_position(value)
+    return (value-1)*2
+end
+local function mag_slider_position_to_value(position)
+    return math.floor(position/2) + 1
+end
+
+local MAX_DUR =   2000
+local function dur_slider_value_to_position(value)
+    return value-1
+end
+local function dur_slider_position_to_value(position)
+    return position + 1
+end
+
+local MAX_AREA = 100
+local function area_slider_value_to_position(value)
+    return (value-1)*2
+end
+local function area_slider_position_to_value(position)
+    return math.floor(position/2) + 1
+end
+
 -- TODO: this for slider values, is there a better option?
 local function generate_slider_value(default_value)
     local element = I.UIToolkit.Components.textButton { text = default_value, width = 35, canClick = false, style = 'thin', thickness = 0, background = 0}
@@ -298,11 +322,11 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         length = 250,
         handleSize = 20,
         scrollStep = 2,
-        maxScroll = 198,
+        maxScroll = mag_slider_value_to_position(MAX_MAG),
         onScroll = function(position)
-            local value = math.floor(position / 2) + 1
+            local value = mag_slider_position_to_value(position)
             print('Value:', value)
-            -- TODO: handle mag specific things
+
             enchanter.effect_to_add.magnitudeMin = value
             magnitudeMin_value:setText(tostring(value))
 
@@ -323,9 +347,9 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         length = 250,
         handleSize = 20,
         scrollStep = 2,
-        maxScroll = 198,
+        maxScroll = mag_slider_value_to_position(MAX_MAG),
         onScroll = function(position)
-            local value = math.floor(position / 2) + 1
+            local value = mag_slider_position_to_value(position)
             print('Value:', value)
             -- TODO: handle mag specific things
             enchanter.effect_to_add.magnitudeMax = value
@@ -348,9 +372,9 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         length = 250,
         handleSize = 20,
         scrollStep = 2,
-        maxScroll = 198,
+        maxScroll = mag_slider_value_to_position(MAX_MAG),
         onScroll = function(position)
-            local value = math.floor(position / 2) + 1
+            local value = mag_slider_position_to_value(position)
             print('Value:', value)
             enchanter.effect_to_add.magnitudeMin = value
             enchanter.effect_to_add.magnitudeMax = value
@@ -380,7 +404,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         length = 250,
         handleSize = 15,
         scrollStep = 1,
-        maxScroll = 1439,
+        maxScroll = dur_slider_value_to_position(MAX_DUR),
         onScroll = function(position)
             local value = math.floor(position) + 1
             print('Value:', value)
@@ -405,7 +429,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         length = 250,
         handleSize = 25,
         scrollStep = 2,
-        maxScroll = 99,
+        maxScroll = area_slider_value_to_position(MAX_AREA),
         onScroll = function(position)
             local value = math.floor(position/2) + 1
             print('Value:', value)

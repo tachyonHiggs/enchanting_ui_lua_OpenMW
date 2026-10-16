@@ -670,7 +670,7 @@ enchanting_ui.load = function()
         title = 'Enchanting',
         handler = Handler,
         draggable = true,
-        resizing = true,
+        resizing = false,
         minSize = minSz,
         position = I.UIToolkit.WindowManager.getCenterPositionForSize(minSz),
     })
