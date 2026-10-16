@@ -456,8 +456,6 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     update_effect_to_add_cost() -- run this once to set the current cost
     
     local sliders = templates.flex(valid_sliders, "customize_effect_sliders", false, UI.ALIGNMENT.Start, UI.ALIGNMENT.Start, 5, 5)
-    
-    ambient.playSound('menu click')
 
     local layout = {
         name = "customize_effect_ui",

@@ -389,8 +389,6 @@ function Handler:onOpened(wnd, _, saved)
     self.count:setDisabled(true)
     self.count_value:setText("0")
 
-    ambient.playSound('menu click')
-
     local function enchant_item()
         local icons_to_reset = enchanter.enchant_item(enchanter.is_vendor, enchanter.skyrim_like_enchanting)
 

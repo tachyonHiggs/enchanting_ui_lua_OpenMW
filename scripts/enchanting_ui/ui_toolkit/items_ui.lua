@@ -151,8 +151,6 @@ function items_ui.show_items_list(wnd)
     print("items_ui.show_items_list")
     local theme = I.UIToolkit.getTheme()
 
-    ambient.playSound('menu click')
-
     local titleHeight = math.floor(1.5 * rowHeight)
     local allItems = items_ui.make_enchantable_items_list()
 
@@ -226,7 +224,7 @@ function items_ui.show_items_list(wnd)
 
             {template = T.padding(3, 3),},
 
-            I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() ambient.playSound('menu click') items_ui.closePopup() end, background = 0}.element,
+            I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() items_ui.closePopup() end, background = 0}.element,
         }
     }
 

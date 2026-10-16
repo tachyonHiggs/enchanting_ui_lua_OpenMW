@@ -124,8 +124,6 @@ function souls_ui.show_soul_list(wnd)
     print("souls_ui.show_soul_list")
     local theme = I.UIToolkit.getTheme()
 
-    ambient.playSound('menu click')
-
     local titleHeight = math.floor(1.5 * rowHeight)
     local allItems = souls_ui.make_souls_list()
 
@@ -197,7 +195,7 @@ function souls_ui.show_soul_list(wnd)
             list.element,
             
             {template = T.padding(3, 3),},
-            I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() ambient.playSound('menu click') souls_ui.closePopup() end, background = 0}.element,
+            I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() souls_ui.closePopup() end, background = 0}.element,
         }
     }
 

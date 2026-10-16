@@ -64,7 +64,6 @@ local magic_effects_ui = {}
 magic_effects_ui.on_magic_effect_clicked = function(wnd, id)
     print("On magic effect clicked: ", id)
 
-    ambient.playSound('menu click')
     if #enchanter.effects_with_params >= 8 then
         print("Max effects added, returning!")
         UI.showMessage("Max number of effects reached")
@@ -123,8 +122,6 @@ function magic_effects_ui.show_add_effect_list(wnd)
     print("magic_effects_ui.show_add_effect_list")
     local theme = I.UIToolkit.getTheme()
 
-    ambient.playSound('menu click')
-
     local titleHeight = math.floor(1.5 * rowHeight)
     local allItems = magic_effects_ui.make_magic_effects_list()
 
@@ -166,7 +163,7 @@ function magic_effects_ui.show_add_effect_list(wnd)
         position = v2(-5, 5),
     }
 
-    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() ambient.playSound('menu click') magic_effects_ui.closePopup() end, background = 0}
+    local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function() magic_effects_ui.closePopup() end, background = 0}
     cancel_btn:updateProps({anchor = v2(1,1), relativePosition = v2(1,1)})
 
     local layout = {
