@@ -41,12 +41,6 @@ local function area_slider_position_to_value(position)
     return math.floor(position/2) + 1
 end
 
--- TODO: this for slider values, is there a better option?
-local function generate_slider_value(default_value)
-    local element = I.UIToolkit.Components.textButton { text = default_value, width = 35, canClick = false, style = 'thin', thickness = 0, background = 0}
-    return element
-end
-
 local function generate_slider(name, value_element, scrollBar_element)
     local theme = I.UIToolkit.getTheme()
     local text_width = 129
@@ -315,9 +309,26 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
 
     local magnitudeMax_value = {}
     local magnitudeMax_scrollbar = {}
+    local magnitudeMin_scrollbar = {}
 
-    local magnitudeMin_value = generate_slider_value(tostring(enchanter.effect_to_add.magnitudeMin))
-    local magnitudeMin_scrollbar = I.UIToolkit.Components.scrollBar{
+    local magnitudeMin_value = I.UIToolkit.Components.textEdit {
+        default = 1,
+        width = 35,
+        textAlignH = ui.ALIGNMENT.End,
+        validate = function(text)
+            local number = tonumber(text)
+            if not number then
+                return false, nil
+            else
+                return true, Util.clamp(number, 1, MAX_MAG)
+            end
+        end,
+        onValueChanged = function(value)
+            enchanter.effect_to_add.magnitudeMin = value
+            magnitudeMin_scrollbar:setPosition(mag_slider_value_to_position(value), true)
+        end
+    }
+    magnitudeMin_scrollbar = I.UIToolkit.Components.scrollBar{
         horizontal = true,
         length = 250,
         handleSize = 20,
@@ -328,7 +339,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             print('Value:', value)
 
             enchanter.effect_to_add.magnitudeMin = value
-            magnitudeMin_value:setText(tostring(value))
+            magnitudeMin_value:setValue(value)
 
             on_effect_mag_slider_clicked(magnitudeMax_scrollbar, magnitudeMax_value, position, value, false)
 
@@ -341,7 +352,23 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         magnitudeMin_scrollbar.element
     )
 
-    magnitudeMax_value = generate_slider_value(tostring(enchanter.effect_to_add.magnitudeMax))
+    magnitudeMax_value = I.UIToolkit.Components.textEdit {
+        default = 1,
+        width = 35,
+        textAlignH = ui.ALIGNMENT.End,
+        validate = function(text)
+            local number = tonumber(text)
+            if not number then
+                return false, nil
+            else
+                return true, Util.clamp(number, 1, MAX_MAG)
+            end
+        end,
+        onValueChanged = function(value)
+            enchanter.effect_to_add.magnitudeMax = value
+            magnitudeMax_scrollbar:setPosition(mag_slider_value_to_position(value), true)
+        end
+    }
     magnitudeMax_scrollbar = I.UIToolkit.Components.scrollBar{
         horizontal = true,
         length = 250,
@@ -353,7 +380,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             print('Value:', value)
             -- TODO: handle mag specific things
             enchanter.effect_to_add.magnitudeMax = value
-            magnitudeMax_value:setText(tostring(value))
+            magnitudeMax_value:setValue(value)
             
             on_effect_mag_slider_clicked(magnitudeMin_scrollbar, magnitudeMin_value, position, value, true)
 
@@ -366,8 +393,26 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         magnitudeMax_scrollbar.element
     )
 
-    local magnitude_value = generate_slider_value(tostring(enchanter.effect_to_add.magnitudeMin))
-    local magnitude_scrollbar = I.UIToolkit.Components.scrollBar{
+    local magnitude_scrollbar = {}
+    local magnitude_value = I.UIToolkit.Components.textEdit {
+        default = 1,
+        width = 35,
+        textAlignH = ui.ALIGNMENT.End,
+        validate = function(text)
+            local number = tonumber(text)
+            if not number then
+                return false, nil
+            else
+                return true, Util.clamp(number, 1, MAX_MAG)
+            end
+        end,
+        onValueChanged = function(value)
+            enchanter.effect_to_add.magnitudeMin = value
+            enchanter.effect_to_add.magnitudeMax = value
+            magnitude_scrollbar:setPosition(mag_slider_value_to_position(value), true)
+        end
+    }
+    magnitude_scrollbar = I.UIToolkit.Components.scrollBar{
         horizontal = true,
         length = 250,
         handleSize = 20,
@@ -378,7 +423,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             print('Value:', value)
             enchanter.effect_to_add.magnitudeMin = value
             enchanter.effect_to_add.magnitudeMax = value
-            magnitude_value:setText(tostring(value))
+            magnitude_value:setValue(value)
             update_effect_to_add_cost()
         end,
     }
@@ -398,8 +443,25 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         end
     end
 
-    local duration_value = generate_slider_value(tostring(enchanter.effect_to_add.duration))
-    local duration_scrollbar = I.UIToolkit.Components.scrollBar{
+    local duration_scrollbar = {}
+    local duration_value = I.UIToolkit.Components.textEdit {
+        default = 1,
+        width = 35,
+        textAlignH = ui.ALIGNMENT.End,
+        validate = function(text)
+            local number = tonumber(text)
+            if not number then
+                return false, nil
+            else
+                return true, Util.clamp(number, 1, MAX_DUR)
+            end
+        end,
+        onValueChanged = function(value)
+            enchanter.effect_to_add.duration = value
+            duration_scrollbar:setPosition(dur_slider_value_to_position(value), true)
+        end
+    }
+    duration_scrollbar = I.UIToolkit.Components.scrollBar{
         horizontal = true,
         length = 250,
         handleSize = 15,
@@ -409,7 +471,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             local value = math.floor(position) + 1
             print('Value:', value)
             enchanter.effect_to_add.duration = value
-            duration_value:setText(tostring(value))
+            duration_value:setValue(value)
 
             update_effect_to_add_cost()
         end,
@@ -423,7 +485,23 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         table.insert(valid_sliders, duration)
     end
     
-    local area_value = generate_slider_value(tostring(enchanter.effect_to_add.area))
+    local area_value = I.UIToolkit.Components.textEdit {
+        default = 1,
+        width = 35,
+        textAlignH = ui.ALIGNMENT.End,
+        validate = function(text)
+            local number = tonumber(text)
+            if not number then
+                return false, nil
+            else
+                return true, Util.clamp(number, 1, MAX_AREA)
+            end
+        end,
+        onValueChanged = function(value)
+            enchanter.effect_to_add.area = value
+            area_scrollbar:setPosition(area_slider_value_to_position(value), true)
+        end
+    }
     area_scrollbar = I.UIToolkit.Components.scrollBar{
         horizontal = true,
         length = 250,
@@ -434,7 +512,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             local value = math.floor(position/2) + 1
             print('Value:', value)
             enchanter.effect_to_add.area = value
-            area_value:setText(tostring(value))
+            area_value:setValue(value)
 
             update_effect_to_add_cost()
         end,

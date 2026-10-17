@@ -351,16 +351,45 @@ function Handler:onOpened(wnd, _, saved)
             current_effects_ui.create_effect_ui(self)
         }
    }
+   
+    local function count_value_to_position(value)
+        return math.max(value - 1, 0)
+    end
+
+    local function count_position_to_value(position)
+        return position + 1
+    end
     
-    self.count_value = I.UIToolkit.Components.textButton { text = "0", width = 35, canClick = false, style = 'thin', thickness = 0, background = 0}
+    self.count_value = I.UIToolkit.Components.textEdit {
+        default = 1,
+        width = 35,
+        textAlignH = UI.ALIGNMENT.End,
+        validate = function(text)
+            local number = tonumber(text)
+            if not number then
+                return false, nil
+            else
+                local max = enchanter.get_count_max()
+                local min = 0
+                if max > 0 then min = 1 end
+                return true, Util.clamp(number, min, max)
+            end
+        end,
+        onValueChanged = function(value)
+            enchanter.effect_to_add.area = value
+            self.count:setPosition(count_value_to_position(value), true)
+        end
+    }
+
     self.count = I.UIToolkit.Components.scrollBar {
         horizontal = true,
         length = 100,
+        -- handleSize = 25,
         scrollStep = 1,
         maxScroll = 0,
         onScroll = function(position)
-            local value = math.floor(position) + 1
-            self.count_value:setText(tostring(value))
+            local value = count_position_to_value(position)
+            self.count_value:setValue(value)
             enchanter.enchantment.count_to_enchant = value
             update_price_or_chance(self)
         end,
@@ -387,7 +416,8 @@ function Handler:onOpened(wnd, _, saved)
 
     -- Reset count slider
     self.count:setDisabled(true)
-    self.count_value:setText("0")
+    self.count_value:setValue(0)
+    self.count_value:setDisabled(true)
 
     local function enchant_item()
         local icons_to_reset = enchanter.enchant_item(enchanter.is_vendor, enchanter.skyrim_like_enchanting)
@@ -417,7 +447,8 @@ function Handler:onOpened(wnd, _, saved)
         if icons_to_reset >= 2 then
             -- Reset count slider
             self.count:setDisabled(true)
-            self.count_value:setText("0")
+            self.count_value:setValue(0)
+            self.count_value:setDisabled(true)
         end
         
     end
@@ -524,6 +555,7 @@ function Handler:setItem(item)
     self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
 
     self.count:setDisabled(false) -- only used if item type is weapon ammo
+    self.count_value:setDisabled(false)
      
     self.type_input:setDisabled(false) -- Enable type input
 
@@ -570,7 +602,7 @@ function Handler:updateUI()
     -- first get and regen effects
     self.effects_list:setItems(self.effects_list:getItems())
     current_effects_ui.regen_effects(self) -- To update effect cost by index or any other changes
-    
+
     -- Then Base/effective cost
     enchanter.enchantment.base_cost = enchanter.get_effects_total_base_cost()
     enchanter.enchantment.effective_cost = enchanter.get_effective_cost()
@@ -579,9 +611,9 @@ function Handler:updateUI()
     local max = enchanter.get_count_max()
     self.count:setMaxScroll((max-1))
     enchanter.enchantment.count_to_enchant = math.min(max, enchanter.enchantment.count_to_enchant)
-    self.count:setPosition((enchanter.enchantment.count_to_enchant-1), true) -- Seems that setPosition does not call on scroll?
-    self.count_value:setText(tostring(enchanter.enchantment.count_to_enchant))
-    
+
+    self.count_value:setValue(enchanter.enchantment.count_to_enchant)
+
     -- Now update UI
     -- Update price or Chance
     update_price_or_chance(self)

@@ -650,8 +650,21 @@ enchanter.item_supports_cast_on_strike = function()
         return false
     end
 
-    if enchanter.item.object.type == types.Armor or enchanter.item.object.type == types.Clothing or enchanter.item.object.type == types.Book then
+    if enchanter.item.object.type == types.Clothing or enchanter.item.object.type == types.Book then
         return false
+    end
+    
+    if enchanter.item.object.type == types.Armor then
+        if core.contentFiles.has("aegis.omwscripts") and enchanter.item.object.type == types.Armor then
+            local armor_type = types.Armor.records[enchanter.item.recordId].type
+            print("Armor type: ", armor_type)
+            if armor_type == types.Armor.TYPE.Shield then
+                print("Shield supports case on strike")
+                return true
+            end
+        else
+            return false
+        end
     end
 
     if enchanter.item.object.type == types.Weapon then

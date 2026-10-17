@@ -16,8 +16,6 @@ local T  = I.UIToolkit.Templates
 
 local current_effects_ui = {}
 local current_effects_ui_size = {500, 250}
-local rowHeight = 25
-local effects_padding = 5
 
 -- Responsible for the current effects list and the add effect button
 
@@ -25,7 +23,6 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@class CurrentEffectsListData : UIToolkit.ListData.Column
 ---@field effect_text string
 ---@field cost number
-
 
 local textSize   = I.UIToolkit.getTheme().Sizes.textNormal
 local rowHeight  = 1.5 * (textSize + 2)
