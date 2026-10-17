@@ -15,7 +15,7 @@ vendor.calculate_base_price = function(base_cost, type, is_ammo)
     price = base_cost * fEnchantmentValueMult
 
     if is_ammo then
-        price = price * storage.globalSection("vendor_enchanting_ui"):get("projeectile_cost_multiplier")
+        price = price * storage.globalSection("vendor_enchanting_ui"):get("projectile_cost_multiplier")
     end
 
     if(type == core.magic.ENCHANTMENT_TYPE.CastOnce) then
