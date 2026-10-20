@@ -109,6 +109,17 @@ current_effects_ui.regen_effects = function(wnd)
             table.remove(enchanter.effects_with_params, index)
             enchanter.show_cant_use_effect(effect)
         end
+
+        if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+            if core.magic.effects.records[effect.id].onSelf then
+                effect.range = core.magic.RANGE.Self
+            else
+                templates.print(debug, "current_effects_ui", "REMOVING effect: ".. tostring(effect.id))
+                table.remove(enchanter.effects_with_params, index)
+                enchanter.show_cant_use_Effect_on_self(effect)
+            end
+        end
+        
     end
 
     -- regen items and indices now

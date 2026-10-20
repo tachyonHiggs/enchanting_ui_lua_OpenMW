@@ -123,6 +123,11 @@ enchanter.show_cant_use_effect = function(effect)
     UI.showMessage("You do not have the skill required for " .. record.name.. ". Your Enchanting skill is short by " .. string.format("%.1f", effect.cost/skyrim_like_enchanting_constant-enchanter.get_enchant_skill_modifier()))
 end
 
+enchanter.show_cant_use_Effect_on_self = function(effect)
+    local record = core.magic.effects.records[effect.id]
+    UI.showMessage("The Effect " .. record.name .. " does not support a Range of Self")
+end
+
 enchanter.get_enchant_skill_modifier = function()
     local base_skill = enchanter.get_player_enchanting_skill().base
     local modified_skill = enchanter.get_player_enchanting_skill().modified
