@@ -35,6 +35,8 @@ local outputs_width = 525
 local stats_width = 150
 local window_height = 430
 
+local debug = false
+
 ---@class EnchantingHandler: UIToolkit.WindowHandler
 local Handler = Class(WindowHandler)
 
@@ -116,7 +118,7 @@ function Handler:onOpened(wnd, _, saved)
     local function on_type_clicked(new_type)
 
         if new_type == enchanter.enchantment.type then
-            print("New type is current type")
+            templates.print(debug, "enchanting_ui", "New type is current type")
             return
         end
         enchanter.enchantment.type = new_type
@@ -134,7 +136,7 @@ function Handler:onOpened(wnd, _, saved)
             { id = core.magic.ENCHANTMENT_TYPE.ConstantEffect,  text = "Constant Effect" },
         },
         onItemSelected = function(item, index)
-            print('Type:', item.text, 'Id:', item.id)
+            templates.print(debug, "enchanting_ui", 'Type:' .. item.text .. ' Id:' .. item.id)
             on_type_clicked( item.id)
         end,
     }
@@ -575,7 +577,7 @@ function Handler:setItem(item)
     self.type_input:setItems(types_supported)
 
     if #types_supported <= 0 then
-        print("CRITICAL ERROR: no valid enchantment types for this item")
+        templates.print(debug, "enchanting_ui", "CRITICAL ERROR: no valid enchantment types for this item")
         return
     end
     enchanter.enchantment.type = types_supported[1].id
@@ -650,11 +652,11 @@ function Handler:updateUI()
 end
 
 enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
-    print("Menu Show")
+    templates.print(debug, "enchanting_ui", "Menu Show")
+
     enchanter.reset()
 
     enchanter.is_vendor = is_vendor
-    print("is_vendor_enchant", enchanter.is_vendor)
     if is_vendor then
         enchanter.vendor = vendor
     else
@@ -666,7 +668,7 @@ enchanting_ui.show = function(is_vendor, vendor, used_soul_gem)
 end
 
 enchanting_ui.hide = function()
-    print("Menu Hide")
+    templates.print(debug, "enchanting_ui", "Menu Hide")
 
     enchanter.is_vendor_enchant = false
     enchanter.vendor = {}
@@ -697,7 +699,10 @@ enchanting_ui.destroy = function()
 end
 
 enchanting_ui.load = function()
-    local minSz = v2(main_width+stats_width, window_height)
+    local size = I.UIToolkit.WindowManager.toAbsolute(v2(0.9, 0.9))
+    local width = math.min(main_width+stats_width, size.x)
+    local height = math.min(window_height, size.y)
+    local minSz = v2(width, height)
     I.UIToolkit.WindowManager.register(windowId, {
         title = 'Enchanting',
         handler = Handler,

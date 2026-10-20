@@ -3,12 +3,13 @@ local types = require('openmw.types')
 local core = require('openmw.core')
 local util = require('openmw.util')
 local storage = require('openmw.storage')
+local templates = require("scripts.enchanting_ui.templates")
 
-
+local debug = false
 
 local function create_enchantment_and_item(data)
 
-    print("create_enchantment_and_item")
+    templates.print(debug, "create", "create_enchantment_and_item")
     local name = data.name
     local item = data.item
     local soul = data.soul
@@ -29,7 +30,8 @@ local function create_enchantment_and_item(data)
     local template_enchantment_record = core.magic.enchantments.records[1]
 
     enchantment.isAutocalc = false -- TODO: temp
-    print("NEW ENCHANTMENT BASE COST iS: ", enchantment.base_cost)
+    templates.print(debug, "create", "NEW ENCHANTMENT BASE COST iS: " .. enchantment.base_cost)
+
     -- Update the enchantment field cost for specific cases
     if enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
         enchantment.base_cost = 0
@@ -56,7 +58,7 @@ local function create_enchantment_and_item(data)
     if name == "" then
         name = originalRecord.name
     end
-    print("The item shall be called: ", name)
+    templates.print(debug, "create", "The item shall be called: " .. name)
     
     local item_table = {name = name, enchant = new_enchantment.id, template = originalRecord}
     local new_item_draft
@@ -71,7 +73,7 @@ local function create_enchantment_and_item(data)
     end
     local new_item = world.createRecord(new_item_draft)
 
-    print("creating x", enchantment.count_to_enchant)
+    templates.print(debug, "create", "creating x" .. enchantment.count_to_enchant)
     local new_item_instance = world.createObject(new_item.id, enchantment.count_to_enchant)
 
     -- Move to player inventory
@@ -90,7 +92,7 @@ end
 local function move_into_player(data)
     local id = data.id
     local count = data.count
-    print("move_into_player ID: ", id)
+    templates.print(debug, "create", "move_into_player ID: ".. id)
 
     world.createObject(id, count):moveInto(world.players[1])
 end
@@ -101,8 +103,8 @@ local function set_actor_gold(data)
     local count = data.count
     local is_player = data.is_player
 
-    print("Setting actor: ", actor)
-    print("To gold count: ", count)
+    templates.print(debug, "create", "Setting actor: ".. actor)
+    templates.print(debug, "create", "To gold count: ".. count)
     if is_player then
         local payment = types.Actor.inventory(actor):find("gold_001")
         if payment then

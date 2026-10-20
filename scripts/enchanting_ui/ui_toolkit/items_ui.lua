@@ -23,7 +23,8 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@field recordId string
 
 local rowHeight = 25
-local items_window_size = {620, 500}
+local items_window_size = I.UIToolkit.WindowManager.toAbsolute(v2(0.5, 0.7))
+
 local icon_width = 35
 local enchant_pts_width = 100
 
@@ -92,7 +93,6 @@ function items_ui.on_item_clicked(id, recordId, object, icon, enchant_pts, type_
         is_ammo = weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown
         if is_ammo then
             enchanter.item.count = object.count
-            print("Projectile item selected with a total of: ", enchanter.item.count)
         end
     end
     enchanter.item.is_ammo = is_ammo
@@ -135,7 +135,6 @@ end
 
 ---@return ItemsListData[]
 function items_ui.make_enchantable_items_list()
-    print("make_enchantable_items_list")
     local valid_items = {}
 
     local items = enchanter.get_enchantable_inventory_items()
@@ -148,18 +147,16 @@ end
 
 ---@param wnd EnchantingHandler
 function items_ui.show_items_list(wnd)
-    print("items_ui.show_items_list")
     local theme = I.UIToolkit.getTheme()
 
     local titleHeight = math.floor(1.5 * rowHeight)
     local allItems = items_ui.make_enchantable_items_list()
 
     local list = I.UIToolkit.Components.sortedList {
-        size = v2(items_window_size[1], items_window_size[2] - titleHeight),
+        size = v2(items_window_size.x, items_window_size.y - titleHeight),
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
-            print('---', 'ITEMS CLICKED')
             items_ui.on_item_clicked(data.id, data.recordId, data.item, data.icon, data.enchant_pts, data.type)
             wnd:setItem(data.item)
         end,
@@ -206,7 +203,7 @@ function items_ui.show_items_list(wnd)
         content = UI.content {
             {
                 props = {
-                    size = v2(items_window_size[1], titleHeight),
+                    size = v2(items_window_size.x, titleHeight),
                 },
                 content = ui.content {
                     {

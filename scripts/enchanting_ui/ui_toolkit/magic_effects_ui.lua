@@ -12,7 +12,7 @@ local enchanter = require("scripts.enchanting_ui.enchanter")
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 local T  = I.UIToolkit.Templates
 
-local window_size = {620, 500}
+local window_size = I.UIToolkit.WindowManager.toAbsolute(v2(0.5, 0.7))
 
 local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 
@@ -62,10 +62,8 @@ local magic_effects_ui = {}
 
 ---@param wnd EnchantingHandler
 magic_effects_ui.on_magic_effect_clicked = function(wnd, id)
-    print("On magic effect clicked: ", id)
 
     if #enchanter.effects_with_params >= 8 then
-        print("Max effects added, returning!")
         UI.showMessage("Max number of effects reached")
         return
     end
@@ -105,7 +103,6 @@ end
 function magic_effects_ui.make_magic_effects_list()
     local known_magic_effects = enchanter.get_known_magic_effects()
     if known_magic_effects == nil then
-        print("!! ERROR magic_effects_list is NIL")
         return {}
     end
     local items = {}
@@ -119,14 +116,13 @@ end
 
 ---@param wnd EnchantingHandler
 function magic_effects_ui.show_add_effect_list(wnd)
-    print("magic_effects_ui.show_add_effect_list")
     local theme = I.UIToolkit.getTheme()
 
     local titleHeight = math.floor(1.5 * rowHeight)
     local allItems = magic_effects_ui.make_magic_effects_list()
 
     local list = I.UIToolkit.Components.sortedList {
-        size = v2(window_size[1], window_size[2] - titleHeight),
+        size = v2(window_size.x, window_size.y - titleHeight),
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
@@ -176,7 +172,7 @@ function magic_effects_ui.show_add_effect_list(wnd)
         content = UI.content {
             {
                 props = {
-                    size = v2(window_size[1], titleHeight),
+                    size = v2(window_size.x, titleHeight),
                 },
                 content = ui.content {
                     {

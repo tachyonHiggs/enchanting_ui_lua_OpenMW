@@ -20,7 +20,7 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@field count number
 
 local rowHeight = 25
-local souls_window_size = {620, 500}
+local souls_window_size = I.UIToolkit.WindowManager.toAbsolute(v2(0.5, 0.7))
 
 ---@type UIToolkit.SortedList.Column[]
 local columns = {
@@ -72,7 +72,6 @@ function souls_ui.on_soul_clicked(id, object, charge, icon)
 
     enchanter.soul.id = id
     enchanter.soul.object = object
-    print("Icon: ", icon)
     enchanter.soul.icon = icon
     enchanter.soul.charge = charge
     enchanter.item.enchantment_capacity = enchanter.item.default_enchantment_capacity * enchanter.scale_enchantment_capacity_factor_from_soul_charge()
@@ -108,7 +107,6 @@ end
 
 ---@return SoulsListData[]
 function souls_ui.make_souls_list()
-    print("make_souls_list")
     local valid_items = {}
 
     local items = enchanter.get_inventory_souls()
@@ -121,14 +119,13 @@ end
 
 ---@param wnd EnchantingHandler
 function souls_ui.show_soul_list(wnd)
-    print("souls_ui.show_soul_list")
     local theme = I.UIToolkit.getTheme()
 
     local titleHeight = math.floor(1.5 * rowHeight)
     local allItems = souls_ui.make_souls_list()
 
     local list = I.UIToolkit.Components.sortedList {
-        size = v2(souls_window_size[1], souls_window_size[2] - titleHeight),
+        size = v2(souls_window_size.x, souls_window_size.y - titleHeight),
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
@@ -178,7 +175,7 @@ function souls_ui.show_soul_list(wnd)
         content = UI.content {
             {
                 props = {
-                    size = v2(souls_window_size[1], titleHeight),
+                    size = v2(souls_window_size.x, titleHeight),
                 },
                 content = ui.content {
                     {

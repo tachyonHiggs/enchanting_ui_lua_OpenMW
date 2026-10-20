@@ -13,6 +13,9 @@ local templates = require("scripts.enchanting_ui.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 
 local customize_effect_ui = {}
+
+local debug = false
+
 local rowHeight = 25
 local window_size = {400, 600}
 local effect_icon_size = v2(20,20)
@@ -77,14 +80,14 @@ end
 
 ---@param wnd EnchantingHandler
 function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_effect, index_to_modify)
-    print("customize_effect_ui.show_customize_effect_ui")
+    templates.print(debug, "customize_effect_ui", "show_customize_effect_ui")
 
     -- First reset this guy
     enchanter.reset_effect_to_add()
     enchanter.effect_to_modify = modify_effect
     if enchanter.effect_to_modify then
         if index_to_modify > #enchanter.effects_with_params then
-            print("CRITICAL ERROR: attempting to modify effect outside of existing ones")
+            templates.print(debug, "customize_effect_ui", "CRITICAL ERROR: attempting to modify effect outside of existing ones")
             return
         end
         enchanter.effect_to_add = templates.deepCopy(enchanter.effects_with_params[index_to_modify])
@@ -140,7 +143,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         effect_cost:setText("Effect Cost: " .. string.format("%.1f", cost))
     end
 
-    local okay_btn = I.UIToolkit.Components.textButton { text = "Okay", background = 0, onClick = function() print("Okay!") 
+    local okay_btn = I.UIToolkit.Components.textButton { text = "Okay", background = 0, onClick = function() 
         
         for index, effect in ipairs(enchanter.effects_with_params) do
             -- Attribute and skill effects allow multiple/duplicates on one enchantment
@@ -158,7 +161,6 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             return
         end
 
-        -- print("wnd.effects_list: ", wnd.effects_list)
         if enchanter.effect_to_modify then
             wnd:modify_effect(enchanter.effect_to_add.index)
         else
@@ -173,11 +175,10 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     okay_btn:updateProps({})
     local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", background = 0, onClick = function() customize_effect_ui.closePopup() end}
     cancel_btn:updateProps({})
-    local delete_btn = I.UIToolkit.Components.textButton { text = "Delete", background = 0, onClick = function() print("Delete!") 
+    local delete_btn = I.UIToolkit.Components.textButton { text = "Delete", background = 0, onClick = function()
         
-        print("Removing effect at index: ", enchanter.effect_to_add.index)
         if enchanter.effect_to_add.index > #enchanter.effects_with_params then
-            print("ERROR: tried to delete effect outside of eith_params")
+            templates.print(debug, "customize_effect_ui", "ERROR: tried to delete effect outside of eith_params")
             return
         end
         
@@ -211,20 +212,17 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
 
     if not enchanter.effect_to_modify then
         enchanter.effect_to_add.range = valid_ranges[1].id
-        print("Range defaulting to: ", valid_ranges[1].id)
     end
 
     local range_input = I.UIToolkit.Components.dropbox { -- Default is this guys is disabled
         items = valid_ranges,
         width = 150,
         onItemSelected = function(item, index)
-            print('Type:', item.text, 'Id:', item.id)
             enchanter.effect_to_add.range = item.id
 
             update_effect_to_add_cost()
             
             if enchanter.effect_to_add.range == core.magic.RANGE.Self then
-                print("disabling area")
                 area_scrollbar:setDisabled(true)
             else
                 area_scrollbar:setDisabled(false)
@@ -248,7 +246,6 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
 
     -- If constant effect only self is allowed
     if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
-        print("Constant Effect")
         force_no_area = true
     end
     if #valid_ranges == 1 and valid_ranges[1].id == core.magic.RANGE.Self then
@@ -263,7 +260,6 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         items = attributes,
         width = 150,
         onItemSelected = function(item, index)
-            print('Type:', item.text, 'Id:', item.id)
             enchanter.effect_to_add.affectedAttribute = item
         end,
     }
@@ -282,7 +278,6 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         items = skills,
         width = 150,
         onItemSelected = function(item, index)
-            print('Type:', item.text, 'Id:', item.id)
             enchanter.effect_to_add.affectedSkill = item
         end,
     }
@@ -295,9 +290,6 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
 
 
     local function on_effect_mag_slider_clicked(other_slider, other_value, position, value, is_max_slider)
-
-        print("Setting slider mag values: ", position, value)
-        print("is_max_slider", is_max_slider)
         if is_max_slider and position < other_slider:getPosition() then
             other_slider:setPosition(position)
             other_value:setText(tostring(value))
@@ -336,7 +328,6 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         maxScroll = mag_slider_value_to_position(MAX_MAG),
         onScroll = function(position)
             local value = mag_slider_position_to_value(position)
-            print('Value:', value)
 
             enchanter.effect_to_add.magnitudeMin = value
             magnitudeMin_value:setValue(value)
@@ -377,7 +368,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         maxScroll = mag_slider_value_to_position(MAX_MAG),
         onScroll = function(position)
             local value = mag_slider_position_to_value(position)
-            print('Value:', value)
+        
             -- TODO: handle mag specific things
             enchanter.effect_to_add.magnitudeMax = value
             magnitudeMax_value:setValue(value)
@@ -420,7 +411,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         maxScroll = mag_slider_value_to_position(MAX_MAG),
         onScroll = function(position)
             local value = mag_slider_position_to_value(position)
-            print('Value:', value)
+
             enchanter.effect_to_add.magnitudeMin = value
             enchanter.effect_to_add.magnitudeMax = value
             magnitude_value:setValue(value)
@@ -469,7 +460,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         maxScroll = dur_slider_value_to_position(MAX_DUR),
         onScroll = function(position)
             local value = math.floor(position) + 1
-            print('Value:', value)
+
             enchanter.effect_to_add.duration = value
             duration_value:setValue(value)
 
@@ -510,7 +501,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         maxScroll = area_slider_value_to_position(MAX_AREA),
         onScroll = function(position)
             local value = math.floor(position/2) + 1
-            print('Value:', value)
+
             enchanter.effect_to_add.area = value
             area_value:setValue(value)
 
@@ -523,7 +514,6 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         area_scrollbar.element
     )
     if enchanter.effect_to_add.range == core.magic.RANGE.Self then
-        print("disabling area")
         area_scrollbar:setDisabled(true)
     else
         area_scrollbar:setDisabled(false)
@@ -533,17 +523,13 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     end
     
     if enchanter.effect_to_modify then
-        print("setting range: ", enchanter.effect_to_add.range)
         range_input:selectById(enchanter.effect_to_add.range)
         if constant_effect_constant_magnitude then
             magnitude_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMin*2 - 1, 0))
         else
-            print("enchanter.effect_to_add.magnitudeMax: ", enchanter.effect_to_add.magnitudeMax)
-            print("enchanter.effect_to_add.magnitudeMin: ", enchanter.effect_to_add.magnitudeMin)
             magnitudeMax_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMax*2 - 1, 0))
             magnitudeMin_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMin*2 - 1, 0)) -- MAX must be set before min, to avoid min overriding the max
         end
-        print("effect_to_add.duration: ", enchanter.effect_to_add.duration)
         duration_scrollbar:setPosition(math.max(enchanter.effect_to_add.duration - 1, 0))
         area_scrollbar:setPosition(math.max(enchanter.effect_to_add.area*2 - 1, 0))
 

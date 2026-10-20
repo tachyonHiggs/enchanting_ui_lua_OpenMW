@@ -12,6 +12,8 @@ local vendor = require("scripts.enchanting_ui.vendor")
 -- Main object
 local enchanter = {}
 
+local debug = false
+
 local skyrim_like_enchanting_constant = 3 -- effect.cost / skyrim_like_enchanting_constant
 
 enchanter.reset_effect_to_add = function()
@@ -123,7 +125,6 @@ end
 
 enchanter.get_enchant_skill_modifier = function()
     local base_skill = enchanter.get_player_enchanting_skill().base
-    print("Base skill: ", base_skill)
     local modified_skill = enchanter.get_player_enchanting_skill().modified
     local modifier = base_skill + (modified_skill-base_skill)*0.25 -- TODO: this number as param or something
     return modifier
@@ -168,12 +169,11 @@ enchanter.get_count_max = function()
         count_max = 0
     end
 
-    print("get_count_max: ", count_max)
+    templates.print(debug, "enchanter", "get_count_max: " .. count_max)
     return count_max
 end 
 
 enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
-    print("scale_enchantment_capacity_factor_from_soul_charge")
     local scale_factor = 1
     local soul_charge_scales_item_enchant_cap = storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_scales_item_enchant_cap")
     local soul_charge_scales_item_enchant_cap_constant_effect_only = soul_charge_scales_item_enchant_cap or storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_scales_item_enchant_cap_constant_effect_only")
@@ -183,24 +183,21 @@ enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
         local soul_charge_to_enchant_cap_factor = storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_to_enchant_cap_factor")
 
         if (soul_charge_scales_item_enchant_cap_constant_effect_only and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect) then
-            print(enchanter.soul.charge)
             scale_factor = math.sqrt(enchanter.soul.charge / soul_charge_to_enchant_cap_factor)
-            print("Scaling item enchant cap by: ", scale_factor)
 
         elseif soul_charge_scales_item_enchant_cap then -- else setting is true and not constant effect
-            print(enchanter.soul.charge)
             scale_factor = math.sqrt(enchanter.soul.charge / soul_charge_to_enchant_cap_factor)
             scale_factor = math.max(scale_factor, 1) -- sets non-constant effects to be equal to or greater than their current enchantment cap
-            print("Scaling item enchant cap by: ", scale_factor)
         end
     end
 
+    
+    templates.print(debug, "enchanter", "Scaling item enchant cap by: " .. scale_factor)
     return scale_factor
 end
 
 enchanter.give_player_xp = function(is_vendor_enchant, enchant_success)
     if not is_vendor_enchant then
-        print("Giving player xp!")
         if enchant_success then
             I.SkillProgression.skillUsed(
                 'enchant',
@@ -218,22 +215,20 @@ enchanter.give_player_xp = function(is_vendor_enchant, enchant_success)
 end
 
 enchanter.check_price = function()
-    print("check_price")
 
     enchanter.price = vendor.calculate_actual_price(enchanter.enchantment.base_cost, enchanter.enchantment.type, enchanter.vendor, enchanter.item.is_ammo, enchanter.enchantment.count_to_enchant)
 
     -- Compare with Player gold
     local player_gold = enchanter.get_player_gold()
-    print("Player has: ", player_gold)
+    
+    templates.print(debug, "enchanter", "Player has: " .. player_gold)
 
     if player_gold >= enchanter.price then
         enchanter.price = enchanter.price
-        print("Success")
         return true
     end
 
     UI.showMessage("You do not have enough gold for this transaction")
-    print("Failed to pay Vendor")
     return false
 end
 
@@ -260,8 +255,7 @@ enchanter.get_effect_cost = function (effect, index)
     if storage.globalSection("effects_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
         if effect.affectedSkill then
             if effect.affectedSkill.text == "Armorer" or effect.affectedSkill.text == "Enchant" or effect.affectedSkill.text == "Alchemy" or effect.affectedSkill.text == "Mercantile" or effect.affectedSkill.text == "Speechcraft" then
-                print("make_fortify_skill_interactions_costlier is TRUE")
-                print("affectedSkill is: ", effect.affectedSkill.text)
+                templates.print(debug, "enchanter", "make_fortify_skill_interactions_costlier is TRUE and affectedSkill is: " .. effect.affectedSkill.text)
                 cost = cost * 100
             end
         end
@@ -269,7 +263,6 @@ enchanter.get_effect_cost = function (effect, index)
 
     if not storage.globalSection("effects_enchanting_ui"):get("remove_compound_effect_cost") and index then
         cost = cost * (#enchanter.effects_with_params - index + 1)
-        print("Effect cost for index: " .. cost .. " " .. index)
     end
 
     return cost
@@ -280,8 +273,6 @@ enchanter.get_effects_total_base_cost = function()
 
     -- Assumes get_effect_cost  has already been applied to each effect, this just summs them
     for index, effect in ipairs(enchanter.effects_with_params) do
-        print("sum: ", sum)
-        print("effect.cost: ", effect.cost)
         sum = sum + effect.cost
     end
     
@@ -339,28 +330,24 @@ enchanter.get_enchantable_inventory_items = function()
         -- check not enchanted
         if types.Weapon.records[item.recordId].enchant == nil then
             table.insert(enchantable_inventory_items, item)
-            -- print(item.recordId)
         end
     end
     for _, item in ipairs(armors) do
         -- check not enchanted
         if types.Armor.records[item.recordId].enchant == nil then
             table.insert(enchantable_inventory_items, item)
-            -- print(item.recordId)
         end
     end
     for _, item in ipairs(clothing) do
         -- check not enchanted
         if types.Clothing.records[item.recordId].enchant == nil then
             table.insert(enchantable_inventory_items, item)
-            -- print(item.recordId)
         end
     end
     for _, item in ipairs(books) do
         -- check not enchanted
         if types.Book.records[item.recordId].enchant == nil then
             table.insert(enchantable_inventory_items, item)
-            -- print(item.recordId)
         end
     end
 
@@ -389,33 +376,30 @@ enchanter.get_inventory_souls = function ()
 end
 
 enchanter.check_requirements = function(is_vendor_enchant)
-    print("check_requirements")
+    
+    templates.print(debug, "enchanter", "check_requirements")
 
     -- Check item
     if enchanter.item.id == "" then
         UI.showMessage("No item selected")
-        print("Failed: no item selected")
         return false
     end 
 
     -- Check soul
     if enchanter.soul.id == "" then
         UI.showMessage("No soul selected")
-        print("Failed: no soul selected")
         return false
     end
 
     -- Check type has been selected
     if enchanter.enchantment.type == -1 then
         UI.showMessage("No type selected, please select an enchantment type")
-        print("Failed: no type selected")
         return false
     end
 
     -- Check effects
     if enchanter.effects_with_params[1] == nil then
         UI.showMessage("No effects selected")
-        print("Failed: no effects selected")
         return false
     end
 
@@ -423,8 +407,6 @@ enchanter.check_requirements = function(is_vendor_enchant)
     if storage.globalSection("cheats_enchanting_ui"):get("remove_enchant_cap_limit") == false then
         if enchanter.enchantment.base_cost > enchanter.item.enchantment_capacity then
             UI.showMessage("Enchantment Cost beyond Item Capacity")
-            print("Failed: Enchantment Cost beyond Item Capacity: ", enchanter.enchantment.base_cost .. " > " .. enchanter.item.enchantment_capacity)
-            print(enchanter.get_effects_total_base_cost())
             return false
         end
     end
@@ -435,7 +417,6 @@ enchanter.check_requirements = function(is_vendor_enchant)
             local constant_effect_threshold = storage.globalSection("constant_enchanting_ui"):get("constant_effect_threshold")
             if enchanter.soul.charge < constant_effect_threshold then
                 UI.showMessage("Soul Charge below Constant Effect Threshold")
-                print("Failed: Soul Charge below Constant Effect Threshold")
                 return false
             end
         end
@@ -476,17 +457,16 @@ enchanter.get_success = function(success_percent)
 end
 
 enchanter.get_enchant_success = function()
-    print("get_enchant_success")
+    templates.print(debug, "enchanter", "get_enchant_success")
     
     if storage.globalSection("cheats_enchanting_ui"):get("always_success") == false then
 
         -- Vanilla success rate
         local success_percent = enchanter.get_success_rate()
-        print("calculated success is at: ", success_percent)
+        templates.print(debug, "enchanter", "calculated success is at: " .. success_percent)
         
         if not enchanter.get_success(success_percent) then
             UI.showMessage("Failed to Create Enchanted Item")
-            print("Failed: Failed to create enchanted item")
             ambient.playSound('enchant fail')
             return false
         end
@@ -494,14 +474,14 @@ enchanter.get_enchant_success = function()
     end
 
     UI.showMessage("Created Enchanted Item")
-    print("Success: Passed")
     ambient.playSound('enchant success')
     return true
 end
 
 -- This fnc assumes passed in values have already been verified as valid
 enchanter.create_item = function(modify_effect_potency)
-    print("create_item")
+    templates.print(debug, "enchanter", "create_item")
+
     local item_copy = templates.deepCopy(enchanter.item)
     local effects_copy = templates.deepCopy(enchanter.effects_with_params)
 
@@ -523,7 +503,7 @@ enchanter.create_item = function(modify_effect_potency)
             
             -- else no params, like divine intervention and constant summon
             if not has_mag and not has_duration then
-                print("ERROR: Effect has no params, should have already tested user is qualified to use it")
+                templates.print(debug, "enchanter", "ERROR: Effect has no params, should have already tested user is qualified to use it")
             end
         end
     end
@@ -535,7 +515,8 @@ local reset_nothing = 0
 local reset_soulgem_icon = 1
 local reset_soulgem_and_item_icon = 2
 enchanter.enchant_item = function(is_vendor_enchant, skyrim_like_enchanting)
-    print("enchant_item")
+    templates.print(debug, "enchanter", "enchant_item")
+      
     local modify_effect_potency = skyrim_like_enchanting and not is_vendor_enchant
 
     if enchanter.check_requirements(is_vendor_enchant) == false then
@@ -581,7 +562,7 @@ end
 
 -- This fnc is used to calculate the vanilla success rate
 enchanter.calculate_vanilla_success_rate = function()
-    print("calculate_vanilla_success_rate")
+    templates.print(debug, "enchanter", "calculate_vanilla_success_rate")
 
     -- Get relevant skills and attributes
     local enchant_skill = enchanter.get_player_enchanting_skill().modified
@@ -592,17 +573,16 @@ enchanter.calculate_vanilla_success_rate = function()
     local fatigue_base = types.Player.stats["dynamic"]["fatigue"](self.object).base
     local fatigue_current = types.Player.stats["dynamic"]["fatigue"](self.object).current
     local fatigue_percent = fatigue_current/fatigue_base
-    print("Fatigue percent: ", fatigue_percent)
+    templates.print(debug, "enchanter", "Fatigue percent: " .. fatigue_percent)
 
     -- Get GMST
     local enchantment_chance_mult = core.getGMST('fEnchantmentChanceMult')
     local enchantment_const_chance_mult = core.getGMST('fEnchantmentConstantChanceMult')
-    print("enchantment_chance_mult: ", enchantment_chance_mult)
-    print("enchantment_const_chance_mult: ", enchantment_const_chance_mult)
+    templates.print(debug, "enchanter", "enchantment_chance_mult: " .. enchantment_chance_mult)
+    templates.print(debug, "enchanter", "enchantment_const_chance_mult: " .. enchantment_const_chance_mult)
 
     -- Get is constant effect
     local is_effect_constant = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect and 1 or 0
-    print("Is effect constant: ", is_effect_constant)
 
     -- From: "Enchanting success rate" at https://en.uesp.net/wiki/Morrowind:Enchant
     local rate = (0.75 + (fatigue_percent/2)) * (1 - (enchantment_const_chance_mult * is_effect_constant)) * (enchant_skill + (intelligence/5) + (luck/10) - (enchantment_chance_mult * enchanter.enchantment.base_cost))
@@ -625,7 +605,8 @@ end
 enchanter.get_vanilla_success = function(success_percent)
     local success = true
     local dice_roll = math.random(0, 100)
-    print("random dice roll: ", dice_roll)
+    templates.print(debug, "enchanter", "random dice roll: " .. dice_roll)
+    
 
     if dice_roll > success_percent then
         success = false
@@ -657,9 +638,8 @@ enchanter.item_supports_cast_on_strike = function()
     if enchanter.item.object.type == types.Armor then
         if core.contentFiles.has("aegis.omwscripts") and enchanter.item.object.type == types.Armor then
             local armor_type = types.Armor.records[enchanter.item.recordId].type
-            print("Armor type: ", armor_type)
             if armor_type == types.Armor.TYPE.Shield then
-                print("Shield supports case on strike")
+                templates.print(debug, "enchanter", "Shield supports case on strike")
                 return true
             end
         else
@@ -669,7 +649,6 @@ enchanter.item_supports_cast_on_strike = function()
 
     if enchanter.item.object.type == types.Weapon then
         local weapon_type = types.Weapon.records[enchanter.item.recordId].type
-        print("Weapon type: ", weapon_type)
         if weapon_type == types.Weapon.TYPE.MarksmanBow or weapon_type == types.Weapon.TYPE.MarksmanCrossbow then
             return false
         end
@@ -689,8 +668,6 @@ enchanter.item_supports_cast_on_use = function()
 
     if enchanter.item.object.type == types.Weapon then
         local weapon_type = types.Weapon.records[enchanter.item.recordId].type
-        print("Weapon type: ", weapon_type)
-
         if weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown then
             return false
         end
@@ -709,8 +686,6 @@ enchanter.item_supports_constant = function()
 
     if enchanter.item.object.type == types.Weapon then
         local weapon_type = types.Weapon.records[enchanter.item.recordId].type
-        print("Weapon type: ", weapon_type)
-
         if weapon_type == types.Weapon.TYPE.Arrow or weapon_type == types.Weapon.TYPE.Bolt or weapon_type == types.Weapon.TYPE.MarksmanThrown then
             return false
         end

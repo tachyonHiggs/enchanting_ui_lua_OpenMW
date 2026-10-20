@@ -11,10 +11,14 @@ local storage = require('openmw.storage')
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
+local templates = require("scripts.enchanting_ui.templates")
 
 local T  = I.UIToolkit.Templates
 
 local current_effects_ui = {}
+
+local debug = false
+
 local current_effects_ui_size = {500, 250}
 
 -- Responsible for the current effects list and the add effect button
@@ -37,7 +41,7 @@ provider:init({
 
 
 function current_effects_ui.generate_effect_item(effect_to_add, index)
-    print("current_effects_ui for effect: ", effect_to_add.id)
+    templates.print(debug, "current_effects_ui", "current_effects_ui for effect: ".. effect_to_add.id)
 
     local icon = core.magic.effects.records[effect_to_add.id].icon
 
@@ -46,7 +50,7 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
     local cost = effect_to_add.cost
 
     local name = tostring(core.magic.effects.records[effect_to_add.id].name)
-    print("Name: ", name)
+    templates.print(debug, "current_effects_ui", "name: ".. name)
 
     local parts = { name }
 
@@ -74,20 +78,16 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
         table.insert(parts, ("in %d ft"):format(effect_to_add.area))
     end
 
-    print("range is: ", tostring(effect_to_add.range))
+    templates.print(debug, "current_effects_ui", "range is".. tostring(effect_to_add.range))
     if effect_to_add.range == core.magic.RANGE.Self then
         table.insert(parts, "on Self")
-        print("range is: on Self" )
     elseif effect_to_add.range == core.magic.RANGE.Target then
         table.insert(parts, "on Target")
-        print("range is: on Target" )
     else 
         table.insert(parts, "on Touch")
-        print("range is: on Touch" )
     end
 
     local text = table.concat(parts, " ")
-    print("text: ", text)
 
     return {
         id = index,
@@ -105,7 +105,7 @@ current_effects_ui.regen_effects = function(wnd)
     for index, effect in ipairs(enchanter.effects_with_params) do
         effect.cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(effect, index)))
         if enchanter.skyrim_like_enchanting and not enchanter.check_can_use_effect(effect) then
-            print("REMOVING effect: " .. tostring(effect.id))
+            templates.print(debug, "current_effects_ui", "REMOVING effect: ".. tostring(effect.id))
             table.remove(enchanter.effects_with_params, index)
             enchanter.show_cant_use_effect(effect)
         end
@@ -136,7 +136,7 @@ current_effects_ui.create_effect_ui = function(wnd)
 
 
     function wnd:add_effect()
-        print("wnd:add_effect, adding", enchanter.effect_to_add.id )
+        templates.print(debug, "current_effects_ui", "wnd:add_effect, adding ".. enchanter.effect_to_add.id)
 
         local effect_element = current_effects_ui.generate_effect_item(enchanter.effect_to_add, #enchanter.effects_with_params + 1)
 
@@ -150,8 +150,7 @@ current_effects_ui.create_effect_ui = function(wnd)
     end
 
     function wnd:modify_effect(index)
-        print("wnd:modify_effect, modifying", enchanter.effect_to_add.id )
-        print("at index: ", index)
+        templates.print(debug, "current_effects_ui", "wnd:modify_effect, modifying ".. enchanter.effect_to_add.id .. "at index: " .. index)
 
         local effect_element = current_effects_ui.generate_effect_item(enchanter.effect_to_add, index)
 
@@ -164,8 +163,7 @@ current_effects_ui.create_effect_ui = function(wnd)
     end
 
     function wnd:remove_effect(index)
-        print("wnd:remove_effect, removing", index )
-        print("at index: ", index)
+        templates.print(debug, "current_effects_ui", "wnd:remove_effect, at index ".. index)
         
         -- Remove from enchanter effects
         table.remove(enchanter.effects_with_params, enchanter.effect_to_add.index)
@@ -190,8 +188,6 @@ current_effects_ui.create_effect_ui = function(wnd)
         size = v2(current_effects_ui_size[1], current_effects_ui_size[2] - (textSize+8)),
         provider = provider,
         onItemClicked = function(data)
-            print("On current effect clicked: ", data.effect_id)
-            print("On current effect clicked: ", data.id)
             customize_effect_ui.show_customize_effect_ui(wnd, data.effect_id, true, data.id)
         end,
     }

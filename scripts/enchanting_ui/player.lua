@@ -22,8 +22,6 @@ return {
     },
     eventHandlers = {
         UiModeChanged = function(data)
-            print('UiModeChanged from', data.oldMode , 'to', data.newMode, '('..tostring(data.arg)..')')
-
             if data.newMode == 'Enchanting' then
                 -- This handles displaying the actual UI depending on which one is appropiate
                 if data.oldMode == 'Dialogue' then

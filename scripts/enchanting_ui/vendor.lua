@@ -50,9 +50,7 @@ local function getFatigueTerm(actor)
     return fFatigueBase - fFatigueMult * (1 - normalized)
 end
 function vendor.getBarterOffer(merchant, basePrice, buying)
-    print("vendor is: ", merchant)
     if merchant == {} then
-        print("ERROR")
         return 0
     end
     if basePrice == 0 or types.Creature.objectIsInstance(merchant) then
@@ -87,7 +85,6 @@ function vendor.getBarterOffer(merchant, basePrice, buying)
 end
 
 function vendor.calculate_actual_price(base_cost, type, merchant, is_ammo, count)
-    print("vendor.calculate_actual_price")
 
     -- Calculate item cost
     local item_cost = vendor.calculate_base_price(base_cost, type, is_ammo) * count

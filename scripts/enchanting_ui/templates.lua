@@ -9,27 +9,6 @@ local auxUi = require("openmw_aux.ui")
 
 local templates = {}
 
-
--- Helper fncs
-templates.make_border = function(size, alpha, properties)
-    properties = properties or {}
-    properties.anchor = properties.anchor or v2(0,0)
-    properties.relativePosition = properties.relativePosition or v2(0,0)
-    return {
-        template = I.MWUI.templates.borders,
-        type = UI.TYPE.Image,
-        props = {
-            resource = UI.texture({
-            path = "black"
-            }),
-            alpha = alpha,
-            size = size,
-            anchor = properties.anchor,
-            properties.relativePosition,
-        }
-    }
-end
-
 templates.padding = function(x, y, x_r, y_r)
 
     local prop
@@ -113,7 +92,7 @@ templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y,
 
     for index, item in ipairs(items) do
         if item == nil then
-            print("Item at index: ", index, " is nil")
+            -- NOP
         else 
             local item_flex = {
                 name = name .. "_item_" .. index,
@@ -148,7 +127,7 @@ templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y,
     table.insert(content, padding)
     for index, item in ipairs(individual_padded_content) do
         if item == nil then
-            print("Item at index: ", index, " is nil")
+            -- NOP
         else 
             table.insert(content, item)
             table.insert(content, padding)
@@ -175,85 +154,10 @@ templates.flex = function(items, name, horizontal, arrange, align, gap_x, gap_y,
     }
 end
 
-
-templates.text_output = {}
-templates.text_output.new = function(name, text_length, padding_length, default_text, text_align_h, tooltip_text, tooltip_element)
-
-    local text_output = {}
-
-    text_output.name = name
-    text_output.text = default_text or ""
-    text_output.text_length = text_length
-    text_output.padding_length = padding_length
-    text_output.text_align_h = text_align_h or UI.ALIGNMENT.Start
-
-    text_output.has_tooltip = false
-    if tooltip_text then
-        -- print("text_input has tooltip")
-        text_output.has_tooltip = true
-        text_output.tooltip_text = tooltip_text
-        text_output.tooltip_element = tooltip_element -- pass by reference
+templates.print = function(debug, file_name, string)
+    if debug then
+        print(file_name .. ": " .. string)
     end
-
-    text_output.output = {
-        name = "output",
-        type = UI.TYPE.Text,
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = text_output.text,
-            textSize = 20,
-            size = v2(text_length, 20),
-            textAlignH = text_output.text_align_h,
-        }
-    }
-
-    function text_output:set_text(text)
-        self.text = text
-        self.output.props.text = text
-    end
-
-    function text_output:show()
-        self.ui.props.visible = true
-    end
-    function text_output:hide()
-        self.ui.props.visible = false
-    end
-
-    function text_output:create()
-
-        local tooltip_events = {}
-        if self.has_tooltip then
-            tooltip_events = text_output.tooltip_element:get_events(self)
-        end
-
-        self.ui = {
-            name = self.name .. "_text_output",
-            type = UI.TYPE.Flex,
-            props = {
-                horizontal = true,
-                arrange = UI.ALIGNMENT.Start,
-                align = UI.ALIGNMENT.Start,
-                visible = true,
-            },
-            content = UI.content {
-                {
-                    name = "name",
-                    type = UI.TYPE.Text,
-                    template = I.MWUI.templates.textNormal,
-                    props = {
-                        text = self.name,
-                        textSize = 20,
-                    }
-                },
-                templates.padding(self.padding_length, 0),
-                self.output,
-            }, events = tooltip_events
-        }
-
-        return self.ui
-    end
-
-    return text_output
 end
 
 return templates
