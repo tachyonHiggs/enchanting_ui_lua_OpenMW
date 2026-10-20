@@ -292,10 +292,10 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     local function on_effect_mag_slider_clicked(other_slider, other_value, position, value, is_max_slider)
         if is_max_slider and position < other_slider:getPosition() then
             other_slider:setPosition(position)
-            other_value:setText(tostring(value))
+            other_value:setValue(value)
         elseif not is_max_slider and other_slider:getPosition() < position then
             other_slider:setPosition(position)
-            other_value:setText(tostring(value))
+            other_value:setValue(value)
         end
     end
 
