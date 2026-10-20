@@ -7,6 +7,7 @@ local v2 = Util.vector2
 local ui = require("openmw.ui")
 local ambient = require('openmw.ambient')
 local core = require('openmw.core')
+local storage = require('openmw.storage')
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
@@ -68,6 +69,24 @@ magic_effects_ui.on_magic_effect_clicked = function(wnd, id)
         return
     end
 
+    for index, effect in ipairs(enchanter.effects_with_params) do
+        -- Attribute and skill effects allow multiple/duplicates on one enchantment
+        local allow_duplicate_effects = core.magic.effects.records[effect.id].hasAttribute or core.magic.effects.records[effect.id].hasSkill or storage.globalSection("effects_enchanting_ui"):get("allow_duplicate_effects")
+        if effect.id == id then
+            if enchanter.effect_to_modify==false and not allow_duplicate_effects then
+                UI.showMessage("This magic effect has already been added")
+                return
+            end
+        end
+    end
+
+    if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        if not core.magic.effects.records[id].onSelf then
+            enchanter.show_cant_use_Effect_on_self(id)
+            return
+        end
+    end
+
     -- Close this popup
     magic_effects_ui.closePopup()
     -- create customize_effect_ui popup
@@ -126,6 +145,7 @@ function magic_effects_ui.show_add_effect_list(wnd)
         columns = columns,
         rowHeight = rowHeight,
         onItemClicked = function(data)
+            enchanter.effect_to_modify = false -- if an effect is clicked, means modify should be false
             magic_effects_ui.on_magic_effect_clicked(wnd, data.id)
         end,
     }

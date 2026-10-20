@@ -118,13 +118,13 @@ enchanter.check_can_use_effect = function(effect)
     return true
 end
 
-enchanter.show_cant_use_effect = function(effect)
+enchanter.show_cant_use_effect_low_skill = function(effect)
     local record = core.magic.effects.records[effect.id]
     UI.showMessage("You do not have the skill required for " .. record.name.. ". Your Enchanting skill is short by " .. string.format("%.1f", effect.cost/skyrim_like_enchanting_constant-enchanter.get_enchant_skill_modifier()))
 end
 
-enchanter.show_cant_use_Effect_on_self = function(effect)
-    local record = core.magic.effects.records[effect.id]
+enchanter.show_cant_use_Effect_on_self = function(id)
+    local record = core.magic.effects.records[id]
     UI.showMessage("The Effect " .. record.name .. " does not support a Range of Self")
 end
 
@@ -277,7 +277,7 @@ enchanter.get_effects_total_base_cost = function()
     local sum = 0
 
     -- Assumes get_effect_cost  has already been applied to each effect, this just summs them
-    for index, effect in ipairs(enchanter.effects_with_params) do
+    for _, effect in ipairs(enchanter.effects_with_params) do
         sum = sum + effect.cost
     end
     

@@ -157,7 +157,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         end
 
         if not enchanter.check_can_use_effect(enchanter.effect_to_add) then
-            enchanter.show_cant_use_effect(enchanter.effect_to_add)
+            enchanter.show_cant_use_effect_low_skill(enchanter.effect_to_add)
             return
         end
 

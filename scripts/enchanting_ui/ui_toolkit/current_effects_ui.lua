@@ -101,22 +101,22 @@ end
 ---@param wnd EnchantingHandler
 current_effects_ui.regen_effects = function(wnd)
     
-    -- Remove uncastable effects
-    for index, effect in ipairs(enchanter.effects_with_params) do
+    -- Remove invalid effects
+    for index = #enchanter.effects_with_params, 1, -1 do
+        local effect = enchanter.effects_with_params[index]
+        
         effect.cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(effect, index)))
-        if enchanter.skyrim_like_enchanting and not enchanter.check_can_use_effect(effect) then
-            templates.print(debug, "current_effects_ui", "REMOVING effect: ".. tostring(effect.id))
+        if not enchanter.check_can_use_effect(effect) then
             table.remove(enchanter.effects_with_params, index)
-            enchanter.show_cant_use_effect(effect)
-        end
+            enchanter.show_cant_use_effect_low_skill(effect)
 
-        if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        elseif enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
             if core.magic.effects.records[effect.id].onSelf then
                 effect.range = core.magic.RANGE.Self
             else
                 templates.print(debug, "current_effects_ui", "REMOVING effect: ".. tostring(effect.id))
                 table.remove(enchanter.effects_with_params, index)
-                enchanter.show_cant_use_Effect_on_self(effect)
+                enchanter.show_cant_use_Effect_on_self(effect.id)
             end
         end
         
