@@ -22,7 +22,7 @@ enchanter.reset_effect_to_add = function()
         affectedAttribute = nil,
         affectedSkill = nil,
         area = 0,
-        duration = 1,
+        duration = 0,
         id = 0,
         index = 0,
         magnitudeMax = 1,
@@ -503,7 +503,7 @@ enchanter.create_item = function(modify_effect_potency)
                 effect.magnitudeMax = math.max(effect.magnitudeMax * modifier, 1)
             end
             if has_duration then
-                effect.duration = math.max(effect.duration * modifier, 1)
+                effect.duration = math.max(effect.duration * modifier, 0)
             end
             
             -- else no params, like divine intervention and constant summon

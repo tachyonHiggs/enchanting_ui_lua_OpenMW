@@ -10,6 +10,16 @@ I.Settings.registerGroup {
     order = 1,
     settings = {
         {
+            key = 'enable_enchanting_ui',
+            renderer = 'checkbox',
+            name = 'Enable/Disable Enchanting Remastered',
+            description = 'Changing this value to false will cause the Vanilla Enchanting UI to display. CHANGING THIS VALUE REQUIRES A RELOAD TO WORK',
+            default = true,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
             key = 'skyrim_like_enchanting',
             renderer = 'checkbox',
             name = 'Skyrim/Oblivion Like Enchanting',

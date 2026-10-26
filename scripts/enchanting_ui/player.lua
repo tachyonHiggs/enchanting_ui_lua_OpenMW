@@ -1,4 +1,5 @@
 local I = require('openmw.interfaces')
+local storage = require('openmw.storage')
 
 local enchanting_ui = require("scripts.enchanting_ui.enchanting_ui")
 
@@ -11,8 +12,10 @@ I.Settings.registerPage ({
 })
 
 local function onLoad(data)
-    -- Register Window
-    enchanting_ui.load()
+    if storage.globalSection("options_enchanting_ui"):get("enable_enchanting_ui") then
+        -- Register Window
+        enchanting_ui.load()
+    end
 end
 
 return {
@@ -23,13 +26,16 @@ return {
     eventHandlers = {
         UiModeChanged = function(data)
             if data.newMode == 'Enchanting' then
-                -- This handles displaying the actual UI depending on which one is appropiate
-                if data.oldMode == 'Dialogue' then
-                    local vendor = data.arg
-                    enchanting_ui.show(true, vendor, nil)
-                else 
-                    local soul_gem = data.arg
-                    enchanting_ui.show(false, nil, soul_gem)
+
+                if storage.globalSection("options_enchanting_ui"):get("enable_enchanting_ui") then 
+                    -- This handles displaying the actual UI depending on which one is appropiate
+                    if data.oldMode == 'Dialogue' then
+                        local vendor = data.arg
+                        enchanting_ui.show(true, vendor, nil)
+                    else 
+                        local soul_gem = data.arg
+                        enchanting_ui.show(false, nil, soul_gem)
+                    end
                 end
                 
             end

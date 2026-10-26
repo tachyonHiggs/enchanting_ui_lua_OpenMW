@@ -367,6 +367,7 @@ function Handler:onOpened(wnd, _, saved)
         width = 35,
         textAlignH = UI.ALIGNMENT.End,
         validate = function(text)
+            if text == '' then return true, '' end
             local number = tonumber(text)
             if not number then
                 return false, nil
@@ -378,6 +379,7 @@ function Handler:onOpened(wnd, _, saved)
             end
         end,
         onValueChanged = function(value)
+            if value == '' then return end -- Do not update values and/or sliders in this case
             enchanter.effect_to_add.area = value
             self.count:setPosition(count_value_to_position(value), true)
         end
@@ -404,14 +406,15 @@ function Handler:onOpened(wnd, _, saved)
             anchor = v2(0, 1),
             relativePosition = v2(0, 1),
             position = v2(20, -3),
-            arrange = UI.ALIGNMENT.End,
+            arrange = UI.ALIGNMENT.Center,
             align = UI.ALIGNMENT.End,
             autoSize = true,
             visible = true,
         },
         content = UI.content {
             count_text,
-            self.count_value.element, 
+            self.count_value.element,
+            {template = T.padding(5)},
             self.count.element
         }
     }
