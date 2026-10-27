@@ -12,8 +12,8 @@ I.Settings.registerGroup {
         {
             key = 'enable_enchanting_ui',
             renderer = 'checkbox',
-            name = 'Enable/Disable Enchanting Remastered',
-            description = 'Changing this value to false will cause the Vanilla Enchanting UI to display. CHANGING THIS VALUE REQUIRES A RELOAD TO WORK',
+            name = 'Enable Enchanting Remastered',
+            description = 'CHANGING THIS VALUE REQUIRES A RELOAD TO WORK',
             default = true,
 			argument = {
                 disabled = false,
