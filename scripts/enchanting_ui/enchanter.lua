@@ -108,8 +108,8 @@ enchanter.check_can_use_effect = function(effect)
         local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
         local has_mag = enchanter.get_hasMag(effect.id)
         if not has_mag and not has_duration then
-            if effect.cost/skyrim_like_enchanting_constant >= enchanter.get_enchant_skill_modifier() then
-
+            local cost = effect.cost or core.magic.effects.records[effect.id].baseCost  -- if record is passed instead of local struct
+            if cost/skyrim_like_enchanting_constant >= enchanter.get_enchant_skill_modifier() then
                 return false
             end
             
@@ -302,8 +302,10 @@ enchanter.get_known_magic_effects = function()
     -- TODO: if all effects cheat, get all spells 
     if storage.globalSection("cheats_enchanting_ui"):get("show_all_magic_effects") then
         for _, effect in ipairs(core.magic.effects.records) do
-            if effect.allowsEnchanting then
+            if effect.allowsEnchanting and enchanter.check_can_use_effect(effect) then
                 known_magic_effects[effect.id] = effect.name
+            else
+                templates.print(debug, "enchanter", "Not adding effect: " .. effect.name)
             end
         end
     else
@@ -312,8 +314,10 @@ enchanter.get_known_magic_effects = function()
         for _, spell in ipairs(spells) do
             if spell.type == core.magic.SPELL_TYPE.Spell then
                 for _, effect in ipairs(spell.effects) do
-                    if effect.effect.allowsEnchanting then
+                    if effect.effect.allowsEnchanting and enchanter.check_can_use_effect(effect.effect) then
                         known_magic_effects[effect.effect.id] = effect.effect.name
+                    else
+                        templates.print(debug, "enchanter", "Not adding effect: " .. effect.effect.name)
                     end
                 end
             end

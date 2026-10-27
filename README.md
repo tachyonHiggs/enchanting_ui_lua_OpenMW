@@ -5,6 +5,8 @@ This Readme is just for development specific notes.
 - Allow bartering for vendor enchanted items services
 
 ## Expanded Features
+- For skyrim enchanting, disable/remove effects player is not able to cast
+- AND have effects indicate how much they will be reduced by
 - TBD Add option to scale enchantment points based on skill, need to decide on balance for this
 - TBD add scalers for individual enchantment type success
 - TBD At higher enchanting skill levels, add ability to rename enchanted item and dis/re-enchant an item
