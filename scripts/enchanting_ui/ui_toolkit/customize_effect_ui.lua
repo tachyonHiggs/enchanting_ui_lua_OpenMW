@@ -38,14 +38,10 @@ end
 
 local MAX_AREA = 100
 local function area_slider_value_to_position(value)
-    return (value)*2
+    return value*2
 end
 local function area_slider_position_to_value(position)
     return math.floor(position/2)
-end
-
-local function is_effect_applied_once(effect_id)
-    return core.magic.effects.records[effect_id].isAppliedOnce
 end
 
 local function generate_slider(name, value_element, scrollBar_element)
@@ -221,6 +217,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     local range_input = I.UIToolkit.Components.dropbox { -- Default is this guys is disabled
         items = valid_ranges,
         width = 150,
+        maxVisibleItems = 3,
         onItemSelected = function(item, index)
             enchanter.effect_to_add.range = item.id
 
@@ -263,6 +260,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     local attribute_select = I.UIToolkit.Components.dropbox {
         items = attributes,
         width = 150,
+        maxVisibleItems = 8,
         onItemSelected = function(item, index)
             enchanter.effect_to_add.affectedAttribute = item
         end,
@@ -281,6 +279,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     local skill_select = I.UIToolkit.Components.dropbox {
         items = skills,
         width = 150,
+        maxVisibleItems = 8,
         onItemSelected = function(item, index)
             enchanter.effect_to_add.affectedSkill = item
         end,
@@ -447,7 +446,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     end
 
     local duration_min = 1
-    if is_effect_applied_once(enchanter.effect_to_add.id) then
+    if enchanter.is_effect_applied_once(enchanter.effect_to_add.id) then
         duration_min = 0
     end
 
@@ -547,13 +546,13 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     if enchanter.effect_to_modify then
         range_input:selectById(enchanter.effect_to_add.range)
         if constant_effect_constant_magnitude then
-            magnitude_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMin*2 - 1, 0))
+            magnitude_scrollbar:setPosition(mag_slider_value_to_position(enchanter.effect_to_add.magnitudeMin))
         else
-            magnitudeMax_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMax*2 - 1, 0))
-            magnitudeMin_scrollbar:setPosition(math.max(enchanter.effect_to_add.magnitudeMin*2 - 1, 0)) -- MAX must be set before min, to avoid min overriding the max
+            magnitudeMax_scrollbar:setPosition(mag_slider_value_to_position(enchanter.effect_to_add.magnitudeMax))
+            magnitudeMin_scrollbar:setPosition(mag_slider_value_to_position(enchanter.effect_to_add.magnitudeMin)) -- MAX must be set before min, to avoid min overriding the max
         end
-        duration_scrollbar:setPosition(math.max(enchanter.effect_to_add.duration - 1, 0))
-        area_scrollbar:setPosition(math.max(enchanter.effect_to_add.area*2 - 1, 0))
+        duration_scrollbar:setPosition(dur_slider_value_to_position(enchanter.effect_to_add.duration))
+        area_scrollbar:setPosition(area_slider_value_to_position(enchanter.effect_to_add.area))
 
         if enchanter.effect_to_add.affectedAttribute then
             attribute_select:selectById(enchanter.effect_to_add.affectedAttribute.id)

@@ -103,6 +103,16 @@ enchanter.get_hasMag = function(effect_id)
     end
 end
 
+enchanter.is_effect_applied_once = function(effect_id)
+    return core.magic.effects.records[effect_id].isAppliedOnce
+end
+
+enchanter.get_effect_modified_value = function(value, min)
+    local modifier = enchanter.get_enchant_skill_modifier()/100
+    local modified = math.max(value * modifier, min)
+    return modified
+end
+
 enchanter.check_can_use_effect = function(effect)
     if enchanter.skyrim_like_enchanting and not enchanter.is_vendor then
         local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
@@ -503,11 +513,15 @@ enchanter.create_item = function(modify_effect_potency)
             local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
             local has_mag = enchanter.get_hasMag(effect.id)
             if has_mag then
-                effect.magnitudeMin = math.max(effect.magnitudeMin * modifier, 1)
-                effect.magnitudeMax = math.max(effect.magnitudeMax * modifier, 1)
+                effect.magnitudeMin = enchanter.get_effect_modified_value(effect.magnitudeMin, 1)
+                effect.magnitudeMax = enchanter.get_effect_modified_value(effect.magnitudeMax, 1)
             end
             if has_duration then
-                effect.duration = math.max(effect.duration * modifier, 0)
+                if enchanter.is_effect_applied_once(effect.id) then
+                    effect.duration = enchanter.get_effect_modified_value(effect.duration, 0)
+                else
+                    effect.duration = enchanter.get_effect_modified_value(effect.duration, 1)
+                end
             end
             
             -- else no params, like divine intervention and constant summon

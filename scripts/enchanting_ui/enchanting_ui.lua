@@ -139,6 +139,7 @@ function Handler:onOpened(wnd, _, saved)
             templates.print(debug, "enchanting_ui", 'Type:' .. item.text .. ' Id:' .. item.id)
             on_type_clicked( item.id)
         end,
+        maxVisibleItems = 4,
     }
 
     if not enchanter.is_vendor then
