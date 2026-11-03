@@ -276,6 +276,11 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     for _, record in ipairs(core.stats.Skill.records) do
             table.insert(skills, { id = record.id, text = record.name })
     end
+    -- Sort Skills alphabetically
+    table.sort(skills, function(a, b)
+        return a.text < b.text
+    end)
+    
     local skill_select = I.UIToolkit.Components.dropbox {
         items = skills,
         width = 150,
