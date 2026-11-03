@@ -2,13 +2,14 @@ local I = require('openmw.interfaces')
 local storage = require('openmw.storage')
 
 local enchanting_ui = require("scripts.enchanting_ui.enchanting_ui")
+local VERSION = 0.69
 
 -- For the menu settings tab
 I.Settings.registerPage ({
     key = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Enchanting Remastered',
-    description = 'Enchanting Remastered Description and Settings.',
+    description = 'Enchanting Remastered Description and Settings.\nVersion ' .. VERSION,
 })
 
 local function onLoad(data)

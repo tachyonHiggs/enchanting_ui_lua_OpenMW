@@ -103,6 +103,16 @@ enchanter.get_hasMag = function(effect_id)
     end
 end
 
+enchanter.is_effect_applied_once = function(effect_id)
+    return core.magic.effects.records[effect_id].isAppliedOnce
+end
+
+enchanter.get_effect_modified_value = function(value, min)
+    local modifier = enchanter.get_enchant_skill_modifier()/100
+    local modified = math.max(value * modifier, min)
+    return modified
+end
+
 enchanter.check_can_use_effect = function(effect)
     if enchanter.skyrim_like_enchanting and not enchanter.is_vendor then
         local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
@@ -243,17 +253,16 @@ enchanter.get_effect_cost = function (effect, index)
 
     local constant_effect_bool = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect
     local base_cost = core.magic.effects.records[effect.id].baseCost
-    local min_plus_max = effect.magnitudeMin + effect.magnitudeMax
 
-    local area = math.max(effect.area, 1) -- others are default to 1
-
+    local duration = effect.duration
     if constant_effect_bool then
-        local fEnchantmentConstantDurationMult = core.getGMST('fEnchantmentConstantDurationMult')
-        cost = base_cost * (min_plus_max*fEnchantmentConstantDurationMult + area) / 40
-    elseif effect.range == core.magic.RANGE.Self or effect.range == core.magic.RANGE.Touch then
-        cost = base_cost * (min_plus_max*effect.duration + area) / 40
-    elseif effect.range == core.magic.RANGE.Target then
-        cost = 1.5 * base_cost * (min_plus_max*effect.duration + area) / 40
+        duration = core.getGMST('fEnchantmentConstantDurationMult')
+    end
+    
+    cost = (((effect.magnitudeMin + effect.magnitudeMax) * duration) + effect.area) * base_cost * core.getGMST('fEffectCostMult') * 0.05
+
+    if effect.range == core.magic.RANGE.Target then
+        cost = cost * 1.5
     end
 
     -- TODO: convert this into a constant for easier modification
@@ -503,11 +512,15 @@ enchanter.create_item = function(modify_effect_potency)
             local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
             local has_mag = enchanter.get_hasMag(effect.id)
             if has_mag then
-                effect.magnitudeMin = math.max(effect.magnitudeMin * modifier, 1)
-                effect.magnitudeMax = math.max(effect.magnitudeMax * modifier, 1)
+                effect.magnitudeMin = enchanter.get_effect_modified_value(effect.magnitudeMin, 1)
+                effect.magnitudeMax = enchanter.get_effect_modified_value(effect.magnitudeMax, 1)
             end
             if has_duration then
-                effect.duration = math.max(effect.duration * modifier, 0)
+                if enchanter.is_effect_applied_once(effect.id) then
+                    effect.duration = enchanter.get_effect_modified_value(effect.duration, 0)
+                else
+                    effect.duration = enchanter.get_effect_modified_value(effect.duration, 1)
+                end
             end
             
             -- else no params, like divine intervention and constant summon
