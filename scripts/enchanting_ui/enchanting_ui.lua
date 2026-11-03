@@ -81,6 +81,18 @@ local function update_price_or_chance(handler)
     end
 end
 
+local function enable_count_elements(enabled)
+    if self.btnMinus then
+        self.btnMinus:setDisabled(not enabled)
+    end
+    if self.btnPlus then
+        self.btnPlus:setDisabled(not enabled)
+    end
+    if self.count_value then
+        self.count_value:setDisabled(not enabled)
+    end
+end
+
 function Handler:onOpened(wnd, _, saved)
     -- Inputs
     self.type_input = {}
@@ -365,8 +377,8 @@ function Handler:onOpened(wnd, _, saved)
     
     self.count_value = I.UIToolkit.Components.textEdit {
         default = 1,
-        width = 35,
-        textAlignH = UI.ALIGNMENT.End,
+        width = 50,
+        textAlignH = UI.ALIGNMENT.Center,
         validate = function(text)
             if text == '' then return true, '' end
             local number = tonumber(text)
@@ -381,25 +393,26 @@ function Handler:onOpened(wnd, _, saved)
         end,
         onValueChanged = function(value)
             if value == '' then return end -- Do not update values and/or sliders in this case
-            enchanter.effect_to_add.area = value
-            self.count:setPosition(count_value_to_position(value), true)
+            enchanter.enchantment.count_to_enchant = value
+            update_price_or_chance(self)
         end
     }
 
-    self.count = I.UIToolkit.Components.scrollBar {
-        horizontal = true,
-        length = 100,
-        -- handleSize = 25,
-        scrollStep = 1,
-        maxScroll = 0,
-        onScroll = function(position)
-            local value = count_position_to_value(position)
-            self.count_value:setValue(value)
-            enchanter.enchantment.count_to_enchant = value
-            update_price_or_chance(self)
-        end,
-    }
-    local count_text = { template = T.text(), props = { text = 'Count: ' } }
+    self.btnMinus = I.UIToolkit.Components.textButton { text = "-", name = 'btn-minus', style = 'thin', padding = v2(4, 2),
+        onClick = function() enchanter.enchantment.count_to_enchant = Util.clamp(enchanter.enchantment.count_to_enchant - 1, 1, enchanter.get_count_max()) update_price_or_chance(self) self.count_value:setValue(enchanter.enchantment.count_to_enchant) end }
+    self.btnPlus = I.UIToolkit.Components.textButton { text = "+", name = 'btn-plus', style = 'thin', padding = v2(4, 2),
+        onClick = function() enchanter.enchantment.count_to_enchant = Util.clamp(enchanter.enchantment.count_to_enchant + 1, 1, enchanter.get_count_max()) update_price_or_chance(self) self.count_value:setValue(enchanter.enchantment.count_to_enchant) end }
+
+
+    local count_text = I.UIToolkit.Interactive.makeInteractive({
+        tooltip = {body = 'The total number of items to enchant. This is only used by projectiles (and optionally scrolls/books if enabled). The max value is limited between the item count and the Soul charge over the total effect cost, and effect by the Projectiles Enchant Multiplier'},
+    }, {
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = 'Count: ',
+        },
+    })
+
     local count_input = {
         type = UI.TYPE.Flex,
         props = {
@@ -414,16 +427,17 @@ function Handler:onOpened(wnd, _, saved)
         },
         content = UI.content {
             count_text,
-            self.count_value.element,
             {template = T.padding(5)},
-            self.count.element
+            self.btnMinus.element,
+            self.count_value.element,
+            self.btnPlus.element,
+            {template = T.padding(5)},
         }
     }
 
     -- Reset count slider
-    self.count:setDisabled(true)
     self.count_value:setValue(0)
-    self.count_value:setDisabled(true)
+    enable_count_elements(false)
 
     local function enchant_item()
         local icons_to_reset = enchanter.enchant_item(enchanter.is_vendor, enchanter.skyrim_like_enchanting)
@@ -452,9 +466,8 @@ function Handler:onOpened(wnd, _, saved)
 
         if icons_to_reset >= 2 then
             -- Reset count slider
-            self.count:setDisabled(true)
             self.count_value:setValue(0)
-            self.count_value:setDisabled(true)
+            enable_count_elements(false)
         end
         
     end
@@ -560,8 +573,7 @@ function Handler:setItem(item)
     local record = item.type.records[item.recordId]
     self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
 
-    self.count:setDisabled(false) -- only used if item type is weapon ammo
-    self.count_value:setDisabled(false)
+    enable_count_elements(true)
      
     self.type_input:setDisabled(false) -- Enable type input
 
@@ -615,9 +627,7 @@ function Handler:updateUI()
 
     -- Then Item count
     local max = enchanter.get_count_max()
-    self.count:setMaxScroll((max-1))
     enchanter.enchantment.count_to_enchant = math.min(max, enchanter.enchantment.count_to_enchant)
-
     self.count_value:setValue(enchanter.enchantment.count_to_enchant)
 
     -- Now update UI

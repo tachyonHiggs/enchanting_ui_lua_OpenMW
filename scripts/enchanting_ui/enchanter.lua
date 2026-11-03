@@ -253,17 +253,17 @@ enchanter.get_effect_cost = function (effect, index)
 
     local constant_effect_bool = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect
     local base_cost = core.magic.effects.records[effect.id].baseCost
-    local min_plus_max = effect.magnitudeMin + effect.magnitudeMax
 
     local area = math.max(effect.area, 1) -- others are default to 1
-
+    local duration = effect.duration
     if constant_effect_bool then
-        local fEnchantmentConstantDurationMult = core.getGMST('fEnchantmentConstantDurationMult')
-        cost = base_cost * (min_plus_max*fEnchantmentConstantDurationMult + area) / 40
-    elseif effect.range == core.magic.RANGE.Self or effect.range == core.magic.RANGE.Touch then
-        cost = base_cost * (min_plus_max*effect.duration + area) / 40
-    elseif effect.range == core.magic.RANGE.Target then
-        cost = 1.5 * base_cost * (min_plus_max*effect.duration + area) / 40
+        duration = core.getGMST('fEnchantmentConstantDurationMult')
+    end
+    
+    cost = (((effect.magnitudeMin + effect.magnitudeMax) * duration) + area) * base_cost * core.getGMST('fEffectCostMult') * 0.05
+
+    if effect.range == core.magic.RANGE.Target then
+        cost = cost * 1.5
     end
 
     -- TODO: convert this into a constant for easier modification

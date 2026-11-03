@@ -560,6 +560,8 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         if enchanter.effect_to_add.affectedSkill then
             skill_select:selectById(enchanter.effect_to_add.affectedSkill.id)
         end
+    else
+        enchanter.effect_to_add.duration = duration_min
     end
 
     update_effect_to_add_cost() -- run this once to set the current cost
