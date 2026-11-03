@@ -3,6 +3,7 @@ This Readme is just for development specific notes.
 
 ## Vanilla Features
 - Allow bartering for vendor enchanted items services
+- Hide count input when not needed
 
 ## Expanded Features
 - For skyrim enchanting, disable/remove effects player is not able to cast
