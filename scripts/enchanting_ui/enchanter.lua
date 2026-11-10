@@ -5,8 +5,9 @@ local UI = require('openmw.ui')
 local I = require('openmw.interfaces')
 local storage = require('openmw.storage')
 local ambient = require('openmw.ambient')
-local templates = require("scripts.enchanting_ui.components.templates")
 
+local templates = require("scripts.enchanting_ui.components.templates")
+local effects = require("scripts.enchanting_ui.components.effects")
 local vendor = require("scripts.enchanting_ui.components.vendor")
 
 -- Main object
@@ -42,6 +43,7 @@ enchanter.reset_item = function()
         count = 1,
         enchantment_capacity = 0,
         default_enchantment_capacity = 0, -- Used for enchantment capacity modification
+        value = 0
     }
 end
 
@@ -87,26 +89,6 @@ enchanter.get_player_gold = function()
     return types.Actor.inventory(self):countOf('Gold_001')
 end
 
-enchanter.get_hasDuration = function(effect_id, type)
-    if core.magic.effects.records[effect_id].hasDuration and type ~= core.magic.ENCHANTMENT_TYPE.ConstantEffect then
-        return true
-    else 
-        return false
-    end
-end
-
-enchanter.get_hasMag = function(effect_id)
-    if core.magic.effects.records[effect_id].hasMagnitude then
-        return true
-    else 
-        return false
-    end
-end
-
-enchanter.is_effect_applied_once = function(effect_id)
-    return core.magic.effects.records[effect_id].isAppliedOnce
-end
-
 enchanter.get_effect_modified_value = function(value, min)
     local modifier = enchanter.get_enchant_skill_modifier()/100
     local modified = math.max(value * modifier, min)
@@ -115,8 +97,8 @@ end
 
 enchanter.check_can_use_effect = function(effect)
     if enchanter.skyrim_like_enchanting and not enchanter.is_vendor then
-        local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
-        local has_mag = enchanter.get_hasMag(effect.id)
+        local has_duration = effects.get_hasDuration(effect.id, enchanter.enchantment.type)
+        local has_mag = effects.get_hasMag(effect.id)
         if not has_mag and not has_duration then
             local cost = effect.cost or core.magic.effects.records[effect.id].baseCost  -- if record is passed instead of local struct
             if cost/skyrim_like_enchanting_constant >= enchanter.get_enchant_skill_modifier() then
@@ -230,6 +212,29 @@ enchanter.give_player_xp = function(is_vendor_enchant, enchant_success)
     end 
 end
 
+enchanter.get_enchanted_item_value = function()
+    -- (enchanter.item.type)
+    if enchanter.item.object ~= nil then
+        local record = enchanter.item.object.type.records[enchanter.item.recordId]
+        return enchanter.calculate_enchanted_item_value(record.value, enchanter.enchantment.base_cost)
+    else
+        return 0
+    end
+end
+enchanter.calculate_enchanted_item_value = function(item_value, enchantment_points_used)
+    print("enchanter.get_enchanted_item_value")
+    local enchanted_item_price_scale = storage.globalSection("options_enchanting_ui"):get("enchanted_item_price_scale")
+
+    print("enchantment_points_used: ", enchantment_points_used)
+    print("enchanted_item_price_scale: ", enchanted_item_price_scale)
+
+    local value = item_value + (enchantment_points_used*enchanted_item_price_scale)
+    print("value: ", value)
+
+    return value
+
+end
+
 enchanter.check_price = function()
 
     enchanter.price = vendor.calculate_actual_price(enchanter.enchantment.base_cost, enchanter.enchantment.type, enchanter.vendor, enchanter.item.is_ammo, enchanter.enchantment.count_to_enchant)
@@ -246,41 +251,6 @@ enchanter.check_price = function()
 
     UI.showMessage("You do not have enough gold for this transaction")
     return false
-end
-
-enchanter.get_effect_cost = function (effect, index)
-
-    local cost = 0
-
-    local constant_effect_bool = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect
-    local base_cost = core.magic.effects.records[effect.id].baseCost
-
-    local duration = effect.duration
-    if constant_effect_bool then
-        duration = core.getGMST('fEnchantmentConstantDurationMult')
-    end
-    
-    cost = (((effect.magnitudeMin + effect.magnitudeMax) * duration) + effect.area) * base_cost * core.getGMST('fEffectCostMult') * 0.05
-
-    if effect.range == core.magic.RANGE.Target then
-        cost = cost * 1.5
-    end
-
-    -- TODO: convert this into a constant for easier modification
-    if storage.globalSection("effects_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
-        if effect.affectedSkill then
-            if effect.affectedSkill.text == "Armorer" or effect.affectedSkill.text == "Enchant" or effect.affectedSkill.text == "Alchemy" or effect.affectedSkill.text == "Mercantile" or effect.affectedSkill.text == "Speechcraft" then
-                templates.print(debug, "enchanter", "make_fortify_skill_interactions_costlier is TRUE and affectedSkill is: " .. effect.affectedSkill.text)
-                cost = cost * 100
-            end
-        end
-    end
-
-    if not storage.globalSection("effects_enchanting_ui"):get("remove_compound_effect_cost") and index then
-        cost = cost * (#enchanter.effects_with_params - index + 1)
-    end
-
-    return cost
 end
 
 enchanter.get_effects_total_base_cost = function()
@@ -510,14 +480,14 @@ enchanter.create_item = function(modify_effect_potency)
             -- if effect has duration/mag/area
             local modifier = enchanter.get_enchant_skill_modifier()/100
 
-            local has_duration = enchanter.get_hasDuration(effect.id, enchanter.enchantment.type)
-            local has_mag = enchanter.get_hasMag(effect.id)
+            local has_duration = effects.get_hasDuration(effect.id, enchanter.enchantment.type)
+            local has_mag = effects.get_hasMag(effect.id)
             if has_mag then
                 effect.magnitudeMin = enchanter.get_effect_modified_value(effect.magnitudeMin, 1)
                 effect.magnitudeMax = enchanter.get_effect_modified_value(effect.magnitudeMax, 1)
             end
             if has_duration then
-                if enchanter.is_effect_applied_once(effect.id) then
+                if effects.is_effect_applied_once(effect.id) then
                     effect.duration = enchanter.get_effect_modified_value(effect.duration, 0)
                 else
                     effect.duration = enchanter.get_effect_modified_value(effect.duration, 1)

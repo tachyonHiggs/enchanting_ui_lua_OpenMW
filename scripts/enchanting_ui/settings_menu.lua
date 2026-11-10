@@ -75,6 +75,19 @@ I.Settings.registerGroup {
                 disabled = false,
             }
         },
+        {
+            key = 'enchanted_item_price_scale',
+            renderer = 'number',
+            name = 'Enchanted Item Price Scale',
+            description = "Determines how much an Enchantment will increase the item's value, ONLy based on how many Enchantment Points are used. It is simply calculated by: item cost + (Enchantment points used * Enchanted Item Price Scale). An Item's value can only increase, larger values for this setting will make any added Enchantments more valuable.",
+            default = 5,
+			argument = {
+                disabled = false,
+                integer = false,
+                min = 0,
+                max = 100,
+            }
+        },
    	},
 }
 

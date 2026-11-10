@@ -63,9 +63,10 @@ local function create_enchantment_and_item(data)
     end
     if debug then
         print("create: " .. "The item shall be called: " .. name)
+        print("Item is worth: " .. item.value)
     end
     
-    local item_table = {name = name, enchant = new_enchantment.id, template = originalRecord}
+    local item_table = {name = name, enchant = new_enchantment.id, value = item.value, template = originalRecord}
     local new_item_draft
     if item.type == "Weapon" then
         new_item_draft = types.Weapon.createRecordDraft(item_table)

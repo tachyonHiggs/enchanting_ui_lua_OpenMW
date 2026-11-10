@@ -11,6 +11,7 @@ local storage = require('openmw.storage')
 
 local templates = require("scripts.enchanting_ui.components.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
+local effects = require("scripts.enchanting_ui.components.effects")
 
 local customize_effect_ui = {}
 
@@ -138,7 +139,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     effect_cost:updateProps({position = v2(250, 10)})
 
     local function update_effect_to_add_cost()
-        local cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(enchanter.effect_to_add)))
+        local cost = tonumber(string.format("%.1f", effects.get_effect_cost(enchanter.effect_to_add, enchanter.enchantment.type)))
         enchanter.effect_to_add.cost = cost
         effect_cost:setText("Effect Cost: " .. string.format("%.1f", cost))
     end
@@ -440,7 +441,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         magnitude_scrollbar.element
     )
     local constant_effect_constant_magnitude = false
-    if enchanter.get_hasMag(enchanter.effect_to_add.id) then
+    if effects.get_hasMag(enchanter.effect_to_add.id) then
         if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
             constant_effect_constant_magnitude = true
             table.insert(valid_sliders, magnitude)
@@ -451,7 +452,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     end
 
     local duration_min = 1
-    if enchanter.is_effect_applied_once(enchanter.effect_to_add.id) then
+    if effects.is_effect_applied_once(enchanter.effect_to_add.id) then
         duration_min = 0
     end
 
@@ -496,7 +497,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         duration_value.element,
         duration_scrollbar.element
     )
-    if enchanter.get_hasDuration(enchanter.effect_to_add.id, enchanter.enchantment.type) then
+    if effects.get_hasDuration(enchanter.effect_to_add.id, enchanter.enchantment.type) then
         table.insert(valid_sliders, duration)
     end
     

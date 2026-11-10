@@ -12,6 +12,7 @@ local enchanter = require("scripts.enchanting_ui.enchanter")
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
 local templates = require("scripts.enchanting_ui.components.templates")
+local effects = require("scripts.enchanting_ui.components.effects")
 
 local T  = I.UIToolkit.Templates
 
@@ -70,7 +71,7 @@ function current_effects_ui.create_effect_dur_str(dur, effect_id)
 
     if enchanter.skyrim_like_enchanting and not enchanter.is_vendor then
         local mod_dur
-        if enchanter.is_effect_applied_once(effect_id) then
+        if effects.is_effect_applied_once(effect_id) then
             mod_dur = enchanter.get_effect_modified_value(dur, 0)
         else
             mod_dur = enchanter.get_effect_modified_value(dur, 1)
@@ -105,7 +106,7 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
         table.insert(parts, effect_to_add.affectedAttribute.text)
     end
 
-    if enchanter.get_hasMag(effect_to_add.id) then
+    if effects.get_hasMag(effect_to_add.id) then
         if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
             table.insert(parts, current_effects_ui.create_effect_mag_str(effect_to_add.magnitudeMin, effect_to_add.magnitudeMin))
         else
@@ -113,7 +114,7 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
         end
     end
 
-    if enchanter.get_hasDuration(effect_to_add.id, enchanter.enchantment.type) and effect_to_add.duration > 0 then
+    if effects.get_hasDuration(effect_to_add.id, enchanter.enchantment.type) and effect_to_add.duration > 0 then
         table.insert(parts, current_effects_ui.create_effect_dur_str(effect_to_add.duration, effect_to_add.id))
     end
     
@@ -148,7 +149,7 @@ current_effects_ui.regen_effects = function(wnd)
     for index = #enchanter.effects_with_params, 1, -1 do
         local effect = enchanter.effects_with_params[index]
         
-        effect.cost = tonumber(string.format("%.1f", enchanter.get_effect_cost(effect, index)))
+        effect.cost = tonumber(string.format("%.1f", effects.get_effect_cost(effect, enchanter.enchantment.type, index, #enchanter.effects_with_params)))
         if not enchanter.check_can_use_effect(effect) then
             table.remove(enchanter.effects_with_params, index)
             enchanter.show_cant_use_effect_low_skill(effect)

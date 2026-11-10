@@ -233,6 +233,18 @@ function Handler:onOpened(wnd, _, saved)
         userData = { colorable = true, },
     })
 
+    self.enchanted_item_value = I.UIToolkit.Interactive.makeInteractive({
+        tooltip = {body = "The expected value of the Enchanted Item. Based on the Item's value and Enchantment Points used."},
+    }, {
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = " Value: 0",
+            textAlignH = UI.ALIGNMENT.Start,
+            anchor = v2(0,1),
+        },
+        userData = { colorable = true, },
+    })
+
     self.soul_charge_stat = I.UIToolkit.Interactive.makeInteractive({
         tooltip = {body = 'The Charge of the selected Soul Gem. This determines the max possible base enchantment and the number of uses a user can get out of the item.'},
     }, {
@@ -299,6 +311,7 @@ function Handler:onOpened(wnd, _, saved)
                     { template = T.header(),    props = { text = 'Enchantment Points' } },
                     self.enchantment_pts_stat,
                     self.enchantment_pts_used_stat,
+                    self.enchanted_item_value,
                     { template = T.text(),    props = { text = '' } },
 
                     { template = T.header(),    props = { text = 'Soul Charge' } },
@@ -658,6 +671,10 @@ function Handler:updateUI()
     end
     self.soul_uses_stat.layout.props.text = " Uses: "..uses
     I.UIToolkit.queueUpdate(self.soul_uses_stat)
+
+    enchanter.item.value = enchanter.get_enchanted_item_value()
+    self.enchanted_item_value.layout.props.text = " Value: " .. enchanter.item.value
+    I.UIToolkit.queueUpdate(self.enchanted_item_value)
 
     if enchanter.skyrim_like_enchanting then
         self.enchanting_skill_mod_stat.layout.props.text = " Modifier: +"..(string.format("%.0f", enchanter.get_enchant_skill_modifier())).."%"
