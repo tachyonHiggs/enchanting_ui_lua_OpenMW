@@ -81,15 +81,15 @@ local function update_price_or_chance(handler)
     end
 end
 
-local function enable_count_elements(enabled)
-    if self.btnMinus then
-        self.btnMinus:setDisabled(not enabled)
+local function enable_count_elements(enabled, handler)
+    if handler.btnMinus then
+        handler.btnMinus:setDisabled(not enabled)
     end
-    if self.btnPlus then
-        self.btnPlus:setDisabled(not enabled)
+    if handler.btnPlus then
+        handler.btnPlus:setDisabled(not enabled)
     end
-    if self.count_value then
-        self.count_value:setDisabled(not enabled)
+    if handler.count_value then
+        handler.count_value:setDisabled(not enabled)
     end
 end
 
@@ -437,7 +437,7 @@ function Handler:onOpened(wnd, _, saved)
 
     -- Reset count slider
     self.count_value:setValue(0)
-    enable_count_elements(false)
+    enable_count_elements(false, self)
 
     local function enchant_item()
         local icons_to_reset = enchanter.enchant_item(enchanter.is_vendor, enchanter.skyrim_like_enchanting)
@@ -467,7 +467,7 @@ function Handler:onOpened(wnd, _, saved)
         if icons_to_reset >= 2 then
             -- Reset count slider
             self.count_value:setValue(0)
-            enable_count_elements(false)
+            enable_count_elements(false, self)
         end
         
     end
@@ -573,7 +573,7 @@ function Handler:setItem(item)
     local record = item.type.records[item.recordId]
     self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
 
-    enable_count_elements(true)
+    enable_count_elements(true, self)
      
     self.type_input:setDisabled(false) -- Enable type input
 
