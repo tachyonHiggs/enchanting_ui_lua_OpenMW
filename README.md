@@ -3,6 +3,7 @@ This Readme is just for development specific notes.
 
 ## Vanilla Features
 - Allow bartering for vendor enchanted items services
+- Add scale setting to effect enchanted item price
 
 ## Expanded Features
 - For skyrim enchanting, disable/remove effects player is not able to cast

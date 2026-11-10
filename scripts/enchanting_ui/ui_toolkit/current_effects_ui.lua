@@ -11,7 +11,7 @@ local storage = require('openmw.storage')
 local enchanter = require("scripts.enchanting_ui.enchanter")
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")
-local templates = require("scripts.enchanting_ui.templates")
+local templates = require("scripts.enchanting_ui.components.templates")
 
 local T  = I.UIToolkit.Templates
 

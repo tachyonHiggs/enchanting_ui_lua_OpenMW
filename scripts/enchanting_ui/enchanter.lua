@@ -5,9 +5,9 @@ local UI = require('openmw.ui')
 local I = require('openmw.interfaces')
 local storage = require('openmw.storage')
 local ambient = require('openmw.ambient')
-local templates = require("scripts.enchanting_ui.templates")
+local templates = require("scripts.enchanting_ui.components.templates")
 
-local vendor = require("scripts.enchanting_ui.vendor")
+local vendor = require("scripts.enchanting_ui.components.vendor")
 
 -- Main object
 local enchanter = {}
@@ -153,29 +153,30 @@ enchanter.get_count_max = function()
         count_max = 1
     end
 
-    -- If is valid item type
-    if enchanter.item.is_ammo then
-        if enchanter.soul.object and enchanter.enchantment.base_cost > 0 then
+    local function get_count_max_if_valid(remove_soul_charge_limit)
+        if (enchanter.soul.object and enchanter.enchantment.base_cost > 0) and not remove_soul_charge_limit then
             
             local projectiles_enchant_multiplier = storage.globalSection("options_enchanting_ui"):get("projectiles_enchant_multiplier")
             local max_per_enchantment = math.floor(enchanter.soul.charge * projectiles_enchant_multiplier / enchanter.enchantment.base_cost)
             count_max = math.min(max_per_enchantment, enchanter.item.object.count)
             
-        else 
+        else
             count_max = enchanter.item.object.count
         end
+
+        return count_max
+    end
+
+    local remove_soul_charge_limit = storage.globalSection("cheats_enchanting_ui"):get("remove_soul_charge_limit")
+
+    -- If is valid item type
+    if enchanter.item.is_ammo then
+        get_count_max_if_valid(remove_soul_charge_limit)
     end
 
     if storage.globalSection("options_enchanting_ui"):get("allow_enchant_multiple_books") then
         if enchanter.item.type == "Book" then
-            if enchanter.soul.object and enchanter.enchantment.base_cost > 0 then
-                
-                local projectiles_enchant_multiplier = storage.globalSection("options_enchanting_ui"):get("projectiles_enchant_multiplier")
-                local max_per_enchantment = math.floor(enchanter.soul.charge * projectiles_enchant_multiplier / enchanter.enchantment.base_cost)
-                count_max = math.min(max_per_enchantment, enchanter.item.object.count)
-            else 
-                count_max = enchanter.item.object.count
-            end
+            get_count_max_if_valid(remove_soul_charge_limit)
         end
     end
 

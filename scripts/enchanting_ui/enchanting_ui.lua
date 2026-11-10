@@ -17,10 +17,10 @@ local T  = I.UIToolkit.Templates
 
 
 local enchanter = require("scripts.enchanting_ui.enchanter")
-local templates = require("scripts.enchanting_ui.templates")
+local templates = require("scripts.enchanting_ui.components.templates")
 local items_ui = require("scripts.enchanting_ui.ui_toolkit.items_ui")
 local souls_ui = require("scripts.enchanting_ui.ui_toolkit.souls_ui")
-local vendor = require("scripts.enchanting_ui.vendor")
+local vendor = require("scripts.enchanting_ui.components.vendor")
 
 local customize_effect_ui = require("scripts.enchanting_ui.ui_toolkit.customize_effect_ui")
 local magic_effects_ui = require("scripts.enchanting_ui.ui_toolkit.magic_effects_ui")

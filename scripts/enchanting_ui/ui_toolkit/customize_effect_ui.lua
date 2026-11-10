@@ -9,7 +9,7 @@ local ambient = require('openmw.ambient')
 local core = require('openmw.core')
 local storage = require('openmw.storage')
 
-local templates = require("scripts.enchanting_ui.templates")
+local templates = require("scripts.enchanting_ui.components.templates")
 local enchanter = require("scripts.enchanting_ui.enchanter")
 
 local customize_effect_ui = {}
