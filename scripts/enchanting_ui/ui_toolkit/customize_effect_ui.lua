@@ -492,11 +492,22 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
             update_effect_to_add_cost()
         end,
     }
-    local duration = generate_slider(
-        "Duration:",
-        duration_value.element,
-        duration_scrollbar.element
-    )
+    local theme = I.UIToolkit.getTheme()
+    local text_width = 129
+
+    local duration_text = I.UIToolkit.Interactive.makeInteractive({
+        tooltip = {body = "Duration defines how long an effect is active for. Some effects that support 'Applied Once' allow a duration of 0, while those that don't allow a minimum of 1. This means they are applied on every game frame instead of every second. A duration of 0 results in the same effect cost as a duration of 1. Please refer to OpenMW documentation on isAppliedOnce for Magic Effects for more info."},
+    }, {
+        template = I.MWUI.templates.textNormal,
+        props = {
+            text = "Duration:",
+            textSize = theme.Sizes.textNormal,
+            size = v2(text_width, theme.Sizes.textNormal),
+            autoSize = false
+        }
+    })
+    local duration = templates.flex({duration_text, duration_value.element, duration_scrollbar.element}, "duration_slider", true, UI.ALIGNMENT.Center, UI.ALIGNMENT.End, 5, 5)
+
     if effects.get_hasDuration(enchanter.effect_to_add.id, enchanter.enchantment.type) then
         table.insert(valid_sliders, duration)
     end

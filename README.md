@@ -3,7 +3,7 @@ This Readme is just for development specific notes.
 
 ## Vanilla Features
 - Allow bartering for vendor enchanted items services
-- Add scale setting to effect enchanted item price
+- Add visuals to indicate max count has been reached
 - Hide count input when not needed
 
 ## Expanded Features
