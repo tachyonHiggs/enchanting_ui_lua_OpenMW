@@ -136,35 +136,36 @@ enchanter.get_count_max = function()
     end
 
     local function get_count_max_if_valid(remove_soul_charge_limit)
+        local count
         if (enchanter.soul.object and enchanter.enchantment.base_cost > 0) and not remove_soul_charge_limit then
             
             local projectiles_enchant_multiplier = storage.globalSection("options_enchanting_ui"):get("projectiles_enchant_multiplier")
             local max_per_enchantment = math.floor(enchanter.soul.charge * projectiles_enchant_multiplier / enchanter.enchantment.base_cost)
-            count_max = math.min(max_per_enchantment, enchanter.item.object.count)
+            count = math.min(max_per_enchantment, enchanter.item.object.count)
             
         else
-            count_max = enchanter.item.object.count
+            count = enchanter.item.object.count
         end
 
-        return count_max
+        return count
     end
 
     local remove_soul_charge_limit = storage.globalSection("cheats_enchanting_ui"):get("remove_soul_charge_limit")
 
     -- If is valid item type
     if enchanter.item.is_ammo then
-        get_count_max_if_valid(remove_soul_charge_limit)
+        count_max = get_count_max_if_valid(remove_soul_charge_limit)
     end
 
     if storage.globalSection("options_enchanting_ui"):get("allow_enchant_multiple_books") then
         if enchanter.item.type == "Book" then
-            get_count_max_if_valid(remove_soul_charge_limit)
+            count_max = get_count_max_if_valid(remove_soul_charge_limit)
         end
     end
 
     -- Check max is in valid range
-    if count_max < 0 or count_max ~= count_max then
-        count_max = 0
+    if enchanter.item.id ~= "" then
+        count_max = math.max(1, count_max)
     end
 
     templates.print(debug, "enchanter", "get_count_max: " .. count_max)
