@@ -50,7 +50,7 @@ effects.get_effect_cost = function (effect, type, index, total_effects)
     end
 
     -- TODO: convert this into a constant for easier modification
-    if storage.globalSection("effects_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
+    if storage.globalSection("Settings_effects_enchanting_ui"):get("make_fortify_skill_interactions_costlier") then
         if effect.affectedSkill then
             if effect.affectedSkill.text == "Armorer" or effect.affectedSkill.text == "Enchant" or effect.affectedSkill.text == "Alchemy" or effect.affectedSkill.text == "Mercantile" or effect.affectedSkill.text == "Speechcraft" then
                 templates.print(debug, "effects", "make_fortify_skill_interactions_costlier is TRUE and affectedSkill is: " .. effect.affectedSkill.text)
@@ -59,7 +59,7 @@ effects.get_effect_cost = function (effect, type, index, total_effects)
         end
     end
 
-    if not storage.globalSection("effects_enchanting_ui"):get("remove_compound_effect_cost") and index then
+    if not storage.globalSection("Settings_effects_enchanting_ui"):get("remove_compound_effect_cost") and index then
         cost = cost * (total_effects - index + 1)
     end
 

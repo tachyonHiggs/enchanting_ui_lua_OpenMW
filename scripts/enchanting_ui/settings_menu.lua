@@ -1,7 +1,7 @@
 local I = require('openmw.interfaces')
 
 I.Settings.registerGroup {
-    key = 'options_enchanting_ui',
+    key = 'Settings_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'General Options',
@@ -92,7 +92,7 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'enchantment_points_enchanting_ui',
+    key = 'Settings_enchantment_points_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Enchantment Points Options',
@@ -138,7 +138,7 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'effects_enchanting_ui',
+    key = 'Settings_effects_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Effect Cost Options',
@@ -180,7 +180,7 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'constant_enchanting_ui',
+    key = 'Settings_constant_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Constant Effect Options',
@@ -216,7 +216,7 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'vendor_enchanting_ui',
+    key = 'Settings_vendor_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Vendor Specific Options',
@@ -294,7 +294,7 @@ I.Settings.registerGroup {
 }
 
 I.Settings.registerGroup {
-    key = 'cheats_enchanting_ui',
+    key = 'Settings_cheats_enchanting_ui',
     page = 'enchanting_ui_page',
     l10n = 'enchanting_ui',
     name = 'Cheats',

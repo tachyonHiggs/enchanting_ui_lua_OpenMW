@@ -13,7 +13,7 @@ I.Settings.registerPage ({
 })
 
 local function onLoad(data)
-    if storage.globalSection("options_enchanting_ui"):get("enable_enchanting_ui") then
+    if storage.globalSection("Settings_enchanting_ui"):get("enable_enchanting_ui") then
         -- Register Window
         enchanting_ui.load()
     end
@@ -28,7 +28,7 @@ return {
         UiModeChanged = function(data)
             if data.newMode == 'Enchanting' then
 
-                if storage.globalSection("options_enchanting_ui"):get("enable_enchanting_ui") then 
+                if storage.globalSection("Settings_enchanting_ui"):get("enable_enchanting_ui") then 
                     -- This handles displaying the actual UI depending on which one is appropiate
                     if data.oldMode == 'Dialogue' then
                         local vendor = data.arg

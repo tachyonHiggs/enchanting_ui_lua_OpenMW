@@ -15,20 +15,20 @@ vendor.calculate_base_price = function(base_cost, type, is_ammo)
     price = base_cost * fEnchantmentValueMult
 
     if is_ammo then
-        price = price * storage.globalSection("vendor_enchanting_ui"):get("projectile_cost_multiplier")
+        price = price * storage.globalSection("Settings_vendor_enchanting_ui"):get("projectile_cost_multiplier")
     end
 
     if(type == core.magic.ENCHANTMENT_TYPE.CastOnce) then
-        price = price * storage.globalSection("vendor_enchanting_ui"):get("cast_once_cost_multiplier")
+        price = price * storage.globalSection("Settings_vendor_enchanting_ui"):get("cast_once_cost_multiplier")
     
     elseif (type == core.magic.ENCHANTMENT_TYPE.CastOnStrike) then
-        price = price * storage.globalSection("vendor_enchanting_ui"):get("cast_on_strike_cost_multiplier")
+        price = price * storage.globalSection("Settings_vendor_enchanting_ui"):get("cast_on_strike_cost_multiplier")
 
     elseif (type == core.magic.ENCHANTMENT_TYPE.CastOnUse) then
-        price = price * storage.globalSection("vendor_enchanting_ui"):get("cast_on_use_cost_multiplier")
+        price = price * storage.globalSection("Settings_vendor_enchanting_ui"):get("cast_on_use_cost_multiplier")
 
     else -- constant effect
-        price = price * storage.globalSection("vendor_enchanting_ui"):get("constant_effect_cost_multiplier")
+        price = price * storage.globalSection("Settings_vendor_enchanting_ui"):get("constant_effect_cost_multiplier")
     
     end
 

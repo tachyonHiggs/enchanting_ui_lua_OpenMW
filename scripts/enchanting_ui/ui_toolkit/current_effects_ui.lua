@@ -47,7 +47,7 @@ function current_effects_ui.create_effect_mag_str(min, max)
     local mod_min = min
     local mod_max = max
     
-    if enchanter.skyrim_like_enchanting and not enchanter.is_vendor then
+    if enchanter.skyrim_like_enchanting then
         mod_min = enchanter.get_effect_modified_value(min, 1)
         string_min = string.format("%d", mod_min) .. " (" .. string.format("%d", min) .. ")"
         mod_max = enchanter.get_effect_modified_value(max, 1)
@@ -69,7 +69,7 @@ end
 function current_effects_ui.create_effect_dur_str(dur, effect_id)
     local string = ""
 
-    if enchanter.skyrim_like_enchanting and not enchanter.is_vendor then
+    if enchanter.skyrim_like_enchanting then
         local mod_dur
         if effects.is_effect_applied_once(effect_id) then
             mod_dur = enchanter.get_effect_modified_value(dur, 0)
@@ -107,7 +107,7 @@ function current_effects_ui.generate_effect_item(effect_to_add, index)
     end
 
     if effects.get_hasMag(effect_to_add.id) then
-        if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        if storage.globalSection("Settings_constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
             table.insert(parts, current_effects_ui.create_effect_mag_str(effect_to_add.magnitudeMin, effect_to_add.magnitudeMin))
         else
             table.insert(parts, current_effects_ui.create_effect_mag_str(effect_to_add.magnitudeMin, effect_to_add.magnitudeMax))

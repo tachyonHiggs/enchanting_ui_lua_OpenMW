@@ -117,7 +117,7 @@ end
 local function create_enchantable_item(item)
     local recordId = item.recordId
 
-    local multipler = storage.globalSection("options_enchanting_ui"):get("enchant_cap_multiplier")
+    local multipler = storage.globalSection("Settings_enchanting_ui"):get("enchant_cap_multiplier")
 
     ---@type ItemsListData
     return

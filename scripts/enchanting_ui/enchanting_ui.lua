@@ -67,7 +67,7 @@ end
 local function update_price_or_chance(handler)
     if enchanter.is_vendor then
         enchanter.price = vendor.calculate_actual_price(enchanter.enchantment.base_cost, enchanter.enchantment.type, enchanter.vendor, enchanter.item.is_ammo, enchanter.enchantment.count_to_enchant)
-        handler.price_or_chance_stat.layout.props.text = handler.price_or_chance_stat_text..string.format("%.1f", enchanter.price)
+        handler.price_or_chance_stat.layout.props.text = handler.price_or_chance_stat_text..string.format("%.0f", enchanter.price)
         I.UIToolkit.queueUpdate(handler.price_or_chance_stat)
     else
         if enchanter.skyrim_like_enchanting then
@@ -76,7 +76,7 @@ local function update_price_or_chance(handler)
             enchanter.chance = enchanter.get_success_rate()
         end
         
-        handler.price_or_chance_stat.layout.props.text = handler.price_or_chance_stat_text..string.format("%.1f", enchanter.chance).." %"
+        handler.price_or_chance_stat.layout.props.text = handler.price_or_chance_stat_text..string.format("%.0f", enchanter.chance).." %"
         I.UIToolkit.queueUpdate(handler.price_or_chance_stat)
     end
 end
@@ -270,7 +270,7 @@ function Handler:onOpened(wnd, _, saved)
 
     -- TODO: if Skyrim like enchanting enabled
     self.enchanting_skill_stat = {}
-    enchanter.skyrim_like_enchanting = storage.globalSection("options_enchanting_ui"):get("skyrim_like_enchanting")
+    enchanter.skyrim_like_enchanting = storage.globalSection("Settings_enchanting_ui"):get("skyrim_like_enchanting") and not enchanter.is_vendor
     if enchanter.skyrim_like_enchanting then
         self.enchanting_skill_mod_stat = I.UIToolkit.Interactive.makeInteractive({
             tooltip = {body = "The percentage the magnitude, duration, and/or area the output enchantment will actually be. This is determined off user enchanting skill, and enchant skill modifiers only contribute 1/4 as much as the base skill."},
@@ -284,7 +284,9 @@ function Handler:onOpened(wnd, _, saved)
             userData = { colorable = true, },
         })
         table.insert(self.enchanting_skill_stat, { template = T.header(),    props = { text = 'Enchantment Skill' } })
+        table.insert(self.enchanting_skill_stat, {template = T.padding(5)})
         table.insert(self.enchanting_skill_stat, self.enchanting_skill_mod_stat)
+        table.insert(self.enchanting_skill_stat, {template = T.padding(5)})
         
     end
 
@@ -309,15 +311,22 @@ function Handler:onOpened(wnd, _, saved)
                 },
                 content = UI.content {
                     { template = T.header(),    props = { text = 'Enchantment Points' } },
+                    {template = T.padding(5)},
                     self.enchantment_pts_stat,
+                    {template = T.padding(5)},
                     self.enchantment_pts_used_stat,
+                    {template = T.padding(5)},
                     self.enchanted_item_value,
                     { template = T.text(),    props = { text = '' } },
+                    {template = T.padding(5)},
 
-                    { template = T.header(),    props = { text = 'Soul Charge' } },
+                    { template = T.header(),    props = { text = 'Soul Gem' } },
+                    {template = T.padding(5)},
                     self.soul_charge_stat,
+                    {template = T.padding(5)},
                     self.soul_uses_stat,
                     { template = T.text(),    props = { text = '' } },
+                    {template = T.padding(5)},
 
                     table.unpack(self.enchanting_skill_stat)
                 }
@@ -336,7 +345,9 @@ function Handler:onOpened(wnd, _, saved)
                 },
                 content = UI.content {
                     self.gold_or_skill_stat_text,
+                    {template = T.padding(5)},
                     self.price_or_chance_stat,
+                    {template = T.padding(5)},
                 },
             }
         }
@@ -543,6 +554,7 @@ function Handler:onOpened(wnd, _, saved)
                     },
                     content = UI.content {
                         { template = T.header(),    props = { text = 'Statistics' } },
+                        {template = T.padding(5)},
                         {
                             template = T.box { style = 'thin', padding = 5, background = 'tranent' },
                             content = UI.content {

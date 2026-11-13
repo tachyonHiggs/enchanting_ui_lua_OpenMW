@@ -139,7 +139,7 @@ enchanter.get_count_max = function()
         local count
         if (enchanter.soul.object and enchanter.enchantment.base_cost > 0) and not remove_soul_charge_limit then
             
-            local projectiles_enchant_multiplier = storage.globalSection("options_enchanting_ui"):get("projectiles_enchant_multiplier")
+            local projectiles_enchant_multiplier = storage.globalSection("Settings_enchanting_ui"):get("projectiles_enchant_multiplier")
             local max_per_enchantment = math.floor(enchanter.soul.charge * projectiles_enchant_multiplier / enchanter.enchantment.base_cost)
             count = math.min(max_per_enchantment, enchanter.item.object.count)
             
@@ -150,14 +150,14 @@ enchanter.get_count_max = function()
         return count
     end
 
-    local remove_soul_charge_limit = storage.globalSection("cheats_enchanting_ui"):get("remove_soul_charge_limit")
+    local remove_soul_charge_limit = storage.globalSection("Settings_cheats_enchanting_ui"):get("remove_soul_charge_limit")
 
     -- If is valid item type
     if enchanter.item.is_ammo then
         count_max = get_count_max_if_valid(remove_soul_charge_limit)
     end
 
-    if storage.globalSection("options_enchanting_ui"):get("allow_enchant_multiple_books") then
+    if storage.globalSection("Settings_enchanting_ui"):get("allow_enchant_multiple_books") then
         if enchanter.item.type == "Book" then
             count_max = get_count_max_if_valid(remove_soul_charge_limit)
         end
@@ -174,12 +174,12 @@ end
 
 enchanter.scale_enchantment_capacity_factor_from_soul_charge = function()
     local scale_factor = 1
-    local soul_charge_scales_item_enchant_cap = storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_scales_item_enchant_cap")
-    local soul_charge_scales_item_enchant_cap_constant_effect_only = soul_charge_scales_item_enchant_cap or storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_scales_item_enchant_cap_constant_effect_only")
+    local soul_charge_scales_item_enchant_cap = storage.globalSection("Settings_enchantment_points_enchanting_ui"):get("soul_charge_scales_item_enchant_cap")
+    local soul_charge_scales_item_enchant_cap_constant_effect_only = soul_charge_scales_item_enchant_cap or storage.globalSection("Settings_enchantment_points_enchanting_ui"):get("soul_charge_scales_item_enchant_cap_constant_effect_only")
 
     if enchanter.item.id ~= "" and enchanter.soul.id ~= "" then -- if valid item and soul gem,
 
-        local soul_charge_to_enchant_cap_factor = storage.globalSection("enchantment_points_enchanting_ui"):get("soul_charge_to_enchant_cap_factor")
+        local soul_charge_to_enchant_cap_factor = storage.globalSection("Settings_enchantment_points_enchanting_ui"):get("soul_charge_to_enchant_cap_factor")
 
         if (soul_charge_scales_item_enchant_cap_constant_effect_only and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect) then
             scale_factor = math.sqrt(enchanter.soul.charge / soul_charge_to_enchant_cap_factor)
@@ -203,7 +203,7 @@ enchanter.give_player_xp = function(is_vendor_enchant, enchant_success)
                 {useType = I.SkillProgression.SKILL_USE_TYPES.Enchant_CreateMagicItem}
             )
         else
-            if storage.globalSection("options_enchanting_ui"):get("enchant_fail_gives_xp") then
+            if storage.globalSection("Settings_enchanting_ui"):get("enchant_fail_gives_xp") then
                 I.SkillProgression.skillUsed(
                     'enchant',
                     {useType = I.SkillProgression.SKILL_USE_TYPES.Enchant_Recharge}
@@ -223,14 +223,9 @@ enchanter.get_enchanted_item_value = function()
     end
 end
 enchanter.calculate_enchanted_item_value = function(item_value, enchantment_points_used)
-    print("enchanter.get_enchanted_item_value")
-    local enchanted_item_price_scale = storage.globalSection("options_enchanting_ui"):get("enchanted_item_price_scale")
-
-    print("enchantment_points_used: ", enchantment_points_used)
-    print("enchanted_item_price_scale: ", enchanted_item_price_scale)
+    local enchanted_item_price_scale = storage.globalSection("Settings_enchanting_ui"):get("enchanted_item_price_scale")
 
     local value = item_value + (enchantment_points_used*enchanted_item_price_scale)
-    print("value: ", value)
 
     return value
 
@@ -281,7 +276,7 @@ enchanter.get_known_magic_effects = function()
     local known_magic_effects = {}
 
     -- TODO: if all effects cheat, get all spells 
-    if storage.globalSection("cheats_enchanting_ui"):get("show_all_magic_effects") then
+    if storage.globalSection("Settings_cheats_enchanting_ui"):get("show_all_magic_effects") then
         for _, effect in ipairs(core.magic.effects.records) do
             if effect.allowsEnchanting and enchanter.check_can_use_effect(effect) then
                 known_magic_effects[effect.id] = effect.name
@@ -394,7 +389,7 @@ enchanter.check_requirements = function(is_vendor_enchant)
     end
 
     -- Check enchantment capacity limit
-    if storage.globalSection("cheats_enchanting_ui"):get("remove_enchant_cap_limit") == false then
+    if storage.globalSection("Settings_cheats_enchanting_ui"):get("remove_enchant_cap_limit") == false then
         if enchanter.enchantment.base_cost > enchanter.item.enchantment_capacity then
             UI.showMessage("Enchantment Cost beyond Item Capacity")
             return false
@@ -402,9 +397,9 @@ enchanter.check_requirements = function(is_vendor_enchant)
     end
 
     -- Check charge
-    if storage.globalSection("cheats_enchanting_ui"):get("remove_soul_charge_limit") == false then
+    if storage.globalSection("Settings_cheats_enchanting_ui"):get("remove_soul_charge_limit") == false then
         if enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
-            local constant_effect_threshold = storage.globalSection("constant_enchanting_ui"):get("constant_effect_threshold")
+            local constant_effect_threshold = storage.globalSection("Settings_constant_enchanting_ui"):get("constant_effect_threshold")
             if enchanter.soul.charge < constant_effect_threshold then
                 UI.showMessage("Soul Charge below Constant Effect Threshold")
                 return false
@@ -415,7 +410,7 @@ enchanter.check_requirements = function(is_vendor_enchant)
         enchanter.enchantment.base_cost = 0
     end
 
-    if not storage.globalSection("cheats_enchanting_ui"):get("free_enchantments_from_vendors") then
+    if not storage.globalSection("Settings_cheats_enchanting_ui"):get("free_enchantments_from_vendors") then
         if is_vendor_enchant and enchanter.check_price() == false then
             return false
         end
@@ -449,7 +444,7 @@ end
 enchanter.get_enchant_success = function()
     templates.print(debug, "enchanter", "get_enchant_success")
     
-    if storage.globalSection("cheats_enchanting_ui"):get("always_success") == false then
+    if storage.globalSection("Settings_cheats_enchanting_ui"):get("always_success") == false then
 
         -- Vanilla success rate
         local success_percent = enchanter.get_success_rate()
@@ -518,7 +513,7 @@ enchanter.enchant_item = function(is_vendor_enchant, skyrim_like_enchanting)
     end
 
     -- Remove Soul gem
-    if not storage.globalSection("cheats_enchanting_ui"):get("dont_consume_item_and_soul") then
+    if not storage.globalSection("Settings_cheats_enchanting_ui"):get("dont_consume_item_and_soul") then
         core.sendGlobalEvent('remove_object', {object = enchanter.soul.object, count = 1, type = "soul"})
     end
 
@@ -544,7 +539,7 @@ enchanter.enchant_item = function(is_vendor_enchant, skyrim_like_enchanting)
     enchanter.create_item(modify_effect_potency)
 
     -- Remove unenchanted item
-    if not storage.globalSection("cheats_enchanting_ui"):get("dont_consume_item_and_soul") then
+    if not storage.globalSection("Settings_cheats_enchanting_ui"):get("dont_consume_item_and_soul") then
         core.sendGlobalEvent('remove_object', {object = enchanter.item.object, count = enchanter.enchantment.count_to_enchant, type = "item"})
     end
 

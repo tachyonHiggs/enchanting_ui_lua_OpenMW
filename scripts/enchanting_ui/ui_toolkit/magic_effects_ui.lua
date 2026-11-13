@@ -71,7 +71,7 @@ magic_effects_ui.on_magic_effect_clicked = function(wnd, id)
 
     for index, effect in ipairs(enchanter.effects_with_params) do
         -- Attribute and skill effects allow multiple/duplicates on one enchantment
-        local allow_duplicate_effects = core.magic.effects.records[effect.id].hasAttribute or core.magic.effects.records[effect.id].hasSkill or storage.globalSection("effects_enchanting_ui"):get("allow_duplicate_effects")
+        local allow_duplicate_effects = core.magic.effects.records[effect.id].hasAttribute or core.magic.effects.records[effect.id].hasSkill or storage.globalSection("Settings_effects_enchanting_ui"):get("allow_duplicate_effects")
         if effect.id == id then
             if enchanter.effect_to_modify==false and not allow_duplicate_effects then
                 UI.showMessage("This magic effect has already been added")

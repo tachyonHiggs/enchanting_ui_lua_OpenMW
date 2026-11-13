@@ -148,7 +148,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
         
         for index, effect in ipairs(enchanter.effects_with_params) do
             -- Attribute and skill effects allow multiple/duplicates on one enchantment
-            local allow_duplicate_effects = core.magic.effects.records[effect.id].hasAttribute or core.magic.effects.records[effect.id].hasSkill or storage.globalSection("effects_enchanting_ui"):get("allow_duplicate_effects")
+            local allow_duplicate_effects = core.magic.effects.records[effect.id].hasAttribute or core.magic.effects.records[effect.id].hasSkill or storage.globalSection("Settings_effects_enchanting_ui"):get("allow_duplicate_effects")
             if effect.id == enchanter.effect_to_add.id then
                 if enchanter.effect_to_modify==false and not allow_duplicate_effects then
                     UI.showMessage("This magic effect has already been added")
@@ -442,7 +442,7 @@ function customize_effect_ui.show_customize_effect_ui(wnd, effect_id, modify_eff
     )
     local constant_effect_constant_magnitude = false
     if effects.get_hasMag(enchanter.effect_to_add.id) then
-        if storage.globalSection("constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+        if storage.globalSection("Settings_constant_enchanting_ui"):get("constant_effect_constant_magnitude") and enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
             constant_effect_constant_magnitude = true
             table.insert(valid_sliders, magnitude)
         else
