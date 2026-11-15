@@ -451,15 +451,10 @@ enchanter.get_enchant_success = function()
         templates.print(debug, "enchanter", "calculated success is at: " .. success_percent)
         
         if not enchanter.get_success(success_percent) then
-            UI.showMessage("Failed to Create Enchanted Item")
-            ambient.playSound('enchant fail')
             return false
         end
 
     end
-
-    UI.showMessage("Created Enchanted Item")
-    ambient.playSound('enchant success')
     return true
 end
 
@@ -517,14 +512,24 @@ enchanter.enchant_item = function(is_vendor_enchant, skyrim_like_enchanting)
         core.sendGlobalEvent('remove_object', {object = enchanter.soul.object, count = 1, type = "soul"})
     end
 
-    if (enchanter.soul.id == 'misc_soulgem_azura') then
+    if (enchanter.soul.object.recordId == 'misc_soulgem_azura') then
         core.sendGlobalEvent('move_into_player', { id = "misc_soulgem_azura", count = 1 })
     end
 
     if not is_vendor_enchant and not skyrim_like_enchanting then 
         if enchanter.get_enchant_success() == false then
-            enchanter.reset_soul()
-            return reset_soulgem_icon
+            UI.showMessage("Failed to Create Enchanted Item")
+            ambient.playSound('enchant fail')
+
+            enchanter.give_player_xp(enchanter.is_vendor, false) -- if setting, give player xp on enchant fail
+
+            if enchanter.soul.object.count > 1 then -- This object value will update as long as global event has enough time to run, TODO: potential bug if this runs too fast?
+                return reset_nothing
+            else
+                enchanter.reset_soul()
+                return reset_soulgem_icon
+            end
+            
         end
     end
     if is_vendor_enchant then
@@ -535,6 +540,10 @@ enchanter.enchant_item = function(is_vendor_enchant, skyrim_like_enchanting)
         local current_gold = types.Actor.getBarterGold(enchanter.vendor)
         core.sendGlobalEvent('set_actor_gold', {actor = enchanter.vendor, count = current_gold + enchanter.price,  is_player = false})
     end
+    
+    UI.showMessage("Created Enchanted Item")
+    ambient.playSound('enchant success')
+    enchanter.give_player_xp(enchanter.is_vendor, true) -- give player xp on enchant success
 
     enchanter.create_item(modify_effect_potency)
 

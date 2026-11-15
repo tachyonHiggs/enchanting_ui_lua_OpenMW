@@ -163,7 +163,7 @@ function Handler:onOpened(wnd, _, saved)
         local soul_charge = types.Creature.records[soul].soulValue
         local icon = enchanter.used_soul_gem.type.records[enchanter.used_soul_gem.recordId].icon
 
-        souls_ui.on_soul_clicked(enchanter.used_soul_gem.recordId, enchanter.used_soul_gem, soul_charge, icon)
+        souls_ui.on_soul_clicked(enchanter.used_soul_gem.id, enchanter.used_soul_gem, soul_charge, icon)
         -- self:setSoul(enchanter.used_soul_gem)
         self.soulInput.layout.content[1].props.resource = I.UIToolkit.texture(icon)
 
@@ -463,6 +463,7 @@ function Handler:onOpened(wnd, _, saved)
     self.count_value:setValue(0)
     enable_count_elements(false, self)
 
+    -- Cleans up UI elements after attempting to enchant item
     local function enchant_item()
         local icons_to_reset = enchanter.enchant_item(enchanter.is_vendor, enchanter.skyrim_like_enchanting)
 
@@ -475,15 +476,7 @@ function Handler:onOpened(wnd, _, saved)
             self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture("black")
             I.UIToolkit.queueUpdate(self.itemInput)
             name_input:setValue('')
-           
-            -- clear effects and everything
-            enchanter.reset()
-
             reset_type_input(self.type_input)
-            
-            enchanter.give_player_xp(enchanter.is_vendor, true) -- give player xp on enchant success
-        elseif icons_to_reset >= 1 then
-            enchanter.give_player_xp(enchanter.is_vendor, false) -- if setting, give player xp on enchant fail
         end
         
         self:updateUI()
@@ -495,6 +488,7 @@ function Handler:onOpened(wnd, _, saved)
         end
         
     end
+
     local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item, background = 0}
     create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(1,1), position = v2(-100, 1)})
     local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function()  I.UI.removeMode('Enchanting') end, background = 0}
