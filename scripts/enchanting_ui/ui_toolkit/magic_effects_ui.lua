@@ -21,6 +21,7 @@ local ColumnItem = require 'scripts.UIToolkit.components.list_items.column_item'
 ---@field name string
 ---@field school string
 ---@field baseCost number
+---@field harmful string
 
 local rowHeight = 25
 
@@ -56,6 +57,16 @@ local columns = {
         render = ColumnItem.renderText,
         arg = { textAlignH = ui.ALIGNMENT.End },
         align = ui.ALIGNMENT.End,
+    },
+    {
+        id = 'harmful',
+        name = 'Harmful', --TODO: add L10N
+        auto = 4,
+        sort = {},
+        render = ColumnItem.renderText,
+        arg = { textAlignH = ui.ALIGNMENT.End },
+        align = ui.ALIGNMENT.End,
+
     },
 }
 
@@ -106,6 +117,11 @@ local function create_magic_effect_item(id)
     local skill = core.stats.Skill.record(school)
     if skill then school = skill.name end
 
+    local harmful = 'False'
+    if record.harmful then
+        harmful = 'True'
+    end
+
     ---@type EffectListData
     return
     {
@@ -115,6 +131,7 @@ local function create_magic_effect_item(id)
         baseCost = record.baseCost,
         icon = record.icon,
         tooltip = { key = id, type = I.UTKTooltips.TYPE.MagicEffect },
+        harmful = harmful,
     }
 end
 

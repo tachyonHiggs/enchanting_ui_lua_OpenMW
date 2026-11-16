@@ -217,7 +217,8 @@ enchanter.get_enchanted_item_value = function()
     -- (enchanter.item.type)
     if enchanter.item.object ~= nil then
         local record = enchanter.item.object.type.records[enchanter.item.recordId]
-        return enchanter.calculate_enchanted_item_value(record.value, enchanter.enchantment.base_cost)
+        local value = enchanter.calculate_enchanted_item_value(record.value, enchanter.enchantment.base_cost)
+        return math.max(value, 0) -- make sure minimum value is 0, no negatives
     else
         return 0
     end

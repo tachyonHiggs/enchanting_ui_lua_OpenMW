@@ -3,7 +3,7 @@ local storage = require('openmw.storage')
 
 local templates = require("scripts.enchanting_ui.components.templates")
 
-local debug = true
+local debug = false
 
 local effects = {}
 
@@ -44,6 +44,12 @@ effects.get_effect_cost = function (effect, type, index, total_effects)
     end
     
     cost = (((effect.magnitudeMin + effect.magnitudeMax) * duration) + effect.area) * base_cost * core.getGMST('fEffectCostMult') * 0.05
+
+    if storage.globalSection("Settings_enchanting_ui"):get("allow_negative_effects") and core.magic.effects.records[effect.id].harmful then
+        if effect.range == core.magic.RANGE.Self then
+            cost = cost * (-0.5) -- half and negate negative effect cost
+        end
+    end
 
     if effect.range == core.magic.RANGE.Target then
         cost = cost * 1.5

@@ -3,17 +3,12 @@ This Readme is just for development specific notes.
 
 ## Vanilla Features
 - Allow bartering for vendor enchanted items services
-- Add visuals to indicate max count has been reached
-- Hide count input when not needed
 
 ## Expanded Features
-- For skyrim enchanting, disable/remove effects player is not able to cast
-- AND have effects indicate how much they will be reduced by
 - TBD Add option to scale enchantment points based on skill, need to decide on balance for this
 - TBD add scalers for individual enchantment type success
 - TBD At higher enchanting skill levels, add ability to rename enchanted item and dis/re-enchant an item
 - TBD add features to make certain soul types to have special bonuses. IE a fire Atronach soul could improve fire enchantments by 10% or something. Suggested by juh9870 on discord
-- TBD negative effects on self, and/or positive effects on enemies lower cost. Would use MagicEffect.harmful to check if its considered 'negative' or 'positive'. See https://wiki.project-tamriel.com/wiki/Magic#Flags
 
 ## Development
 - Add more descriptions, params, fields etc to functions and files

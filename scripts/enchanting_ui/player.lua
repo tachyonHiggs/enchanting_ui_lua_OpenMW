@@ -2,7 +2,7 @@ local I = require('openmw.interfaces')
 local storage = require('openmw.storage')
 
 local enchanting_ui = require("scripts.enchanting_ui.enchanting_ui")
-local VERSION = 0.69
+local VERSION = 0.75
 
 -- For the menu settings tab
 I.Settings.registerPage ({

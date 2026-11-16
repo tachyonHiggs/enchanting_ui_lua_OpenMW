@@ -83,13 +83,40 @@ end
 
 local function enable_count_elements(enabled, handler)
     if handler.btnMinus then
-        handler.btnMinus:setDisabled(not enabled)
+        handler.btnMinus:setVisible(enabled)
     end
     if handler.btnPlus then
-        handler.btnPlus:setDisabled(not enabled)
+        handler.btnPlus:setVisible(enabled)
     end
     if handler.count_value then
-        handler.count_value:setDisabled(not enabled)
+        handler.count_value:setVisible(enabled)
+    end
+    if handler.count_text then
+        handler.count_text:setVisible(enabled)
+    end
+end
+
+local function check_count_max_or_min(max, handler)
+    print("check_count_max_or_min")
+    print(max)
+    print(enchanter.enchantment.count_to_enchant)
+    if handler.btnPlus then
+        if handler.btnPlus:isVisible() then
+            if enchanter.enchantment.count_to_enchant >= max then
+                handler.btnPlus:setDisabled(true)
+            else
+                handler.btnPlus:setDisabled(false)
+            end
+        end
+    end
+    if handler.btnMinus then
+        if handler.btnMinus:isVisible() then
+            if enchanter.enchantment.count_to_enchant <= 1 then
+                handler.btnMinus:setDisabled(true)
+            else
+                handler.btnMinus:setDisabled(false)
+            end
+        end
     end
 end
 
@@ -423,21 +450,32 @@ function Handler:onOpened(wnd, _, saved)
     }
 
     self.btnMinus = I.UIToolkit.Components.textButton { text = "-", name = 'btn-minus', style = 'thin', padding = v2(4, 2),
-        onClick = function() enchanter.enchantment.count_to_enchant = Util.clamp(enchanter.enchantment.count_to_enchant - 1, 1, enchanter.get_count_max()) update_price_or_chance(self) self.count_value:setValue(enchanter.enchantment.count_to_enchant) end }
+        onClick = function() 
+            local max = enchanter.get_count_max()
+            enchanter.enchantment.count_to_enchant = Util.clamp(enchanter.enchantment.count_to_enchant - 1, 1, max) 
+            update_price_or_chance(self) 
+            self.count_value:setValue(enchanter.enchantment.count_to_enchant) 
+            check_count_max_or_min(max, self)
+        end }
     self.btnPlus = I.UIToolkit.Components.textButton { text = "+", name = 'btn-plus', style = 'thin', padding = v2(4, 2),
-        onClick = function() enchanter.enchantment.count_to_enchant = Util.clamp(enchanter.enchantment.count_to_enchant + 1, 1, enchanter.get_count_max()) update_price_or_chance(self) self.count_value:setValue(enchanter.enchantment.count_to_enchant) end }
+        onClick = function()
+            local max = enchanter.get_count_max()
+            enchanter.enchantment.count_to_enchant = Util.clamp(enchanter.enchantment.count_to_enchant + 1, 1, max) 
+            update_price_or_chance(self) 
+            self.count_value:setValue(enchanter.enchantment.count_to_enchant)
+            check_count_max_or_min(max, self)
+        end }
 
-
-    local count_text = I.UIToolkit.Interactive.makeInteractive({
-        tooltip = {body = 'The total number of items to enchant. This is only used by projectiles (and optionally scrolls/books if enabled). The max value is limited between the item count and the Soul charge over the total effect cost, and effect by the Projectiles Enchant Multiplier'},
-    }, {
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = 'Count: ',
-        },
-    })
+    self.count_text = I.UIToolkit.Components.textButton { 
+        text = "Count: ",
+        tooltip = {body = 'The total number of items to enchant. Only used by projectiles (and optionally scrolls/books if enabled). The max value is limited between the item count and the Soul charge over the total effect cost, and effect by the Projectiles Enchant Multiplier'},
+        name = 'count_text',
+        style = 'thin',
+        canClick = false,
+    }
 
     local count_input = {
+        name = "count_input",
         type = UI.TYPE.Flex,
         props = {
             horizontal = true,
@@ -450,7 +488,7 @@ function Handler:onOpened(wnd, _, saved)
             visible = true,
         },
         content = UI.content {
-            count_text,
+            self.count_text.element,
             {template = T.padding(5)},
             self.btnMinus.element,
             self.count_value.element,
@@ -592,8 +630,12 @@ function Handler:setItem(item)
     local record = item.type.records[item.recordId]
     self.itemInput.layout.content[1].props.resource = I.UIToolkit.texture(record.icon)
 
-    enable_count_elements(true, self)
-     
+    if enchanter.get_count_max() > 1 then
+        enable_count_elements(true, self)
+    else
+        enable_count_elements(false, self)
+    end
+
     self.type_input:setDisabled(false) -- Enable type input
 
     local types_supported = {}
@@ -648,6 +690,7 @@ function Handler:updateUI()
     local max = enchanter.get_count_max()
     enchanter.enchantment.count_to_enchant = math.min(max, enchanter.enchantment.count_to_enchant)
     self.count_value:setValue(enchanter.enchantment.count_to_enchant)
+    check_count_max_or_min(max, self)
 
     -- Now update UI
     -- Update price or Chance
@@ -679,7 +722,7 @@ function Handler:updateUI()
     I.UIToolkit.queueUpdate(self.soul_uses_stat)
 
     enchanter.item.value = enchanter.get_enchanted_item_value()
-    self.enchanted_item_value.layout.props.text = " Value: " .. enchanter.item.value
+    self.enchanted_item_value.layout.props.text = " Value: " .. (string.format("%.0f", enchanter.item.value))
     I.UIToolkit.queueUpdate(self.enchanted_item_value)
 
     if enchanter.skyrim_like_enchanting then

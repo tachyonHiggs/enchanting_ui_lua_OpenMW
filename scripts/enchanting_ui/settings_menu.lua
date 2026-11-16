@@ -30,6 +30,16 @@ I.Settings.registerGroup {
             }
         },
         {
+            key = 'allow_negative_effects',
+            renderer = 'checkbox',
+            name = 'Allow Negative Effects on Self Enchantments',
+            description = "When enabled, 'Harmful' effects will negatively contribute to enchantments, allowing even more powerful enchants with drawbacks! Only works on On-Self effects and contributes negatively half as much, ie -'Effect Cost'/2. Can also decrease the value of the item.",
+            default = false,
+			argument = {
+                disabled = false,
+            }
+        },
+        {
             key = 'enchant_fail_gives_xp',
             renderer = 'checkbox',
             name = 'Enchanting Failure gives XP',
