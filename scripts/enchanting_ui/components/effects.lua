@@ -65,7 +65,7 @@ effects.get_effect_cost = function (effect, type, index, total_effects)
         end
     end
 
-    if not storage.globalSection("Settings_effects_enchanting_ui"):get("remove_compound_effect_cost") and index then
+    if not storage.globalSection("Settings_effects_enchanting_ui"):get("remove_compound_effect_cost") and index and cost > 0 then
         cost = cost * (total_effects - index + 1)
     end
 

@@ -584,7 +584,8 @@ enchanter.calculate_vanilla_success_rate = function()
     local is_effect_constant = enchanter.enchantment.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect and 1 or 0
 
     -- From: "Enchanting success rate" at https://en.uesp.net/wiki/Morrowind:Enchant
-    local rate = (0.75 + (fatigue_percent/2)) * (1 - (enchantment_const_chance_mult * is_effect_constant)) * (enchant_skill + (intelligence/5) + (luck/10) - (enchantment_chance_mult * enchanter.enchantment.base_cost))
+    local base_cost = math.max(0, enchanter.enchantment.base_cost) -- negative costs, have a higher chance of success than positive ones
+    local rate = (0.75 + (fatigue_percent/2)) * (1 - (enchantment_const_chance_mult * is_effect_constant)) * (enchant_skill + (intelligence/5) + (luck/10) - (enchantment_chance_mult * base_cost))
     
     -- If no effects currently, 0% of it succeeding
     if enchanter.enchantment.base_cost == 0 then
@@ -606,7 +607,6 @@ enchanter.get_vanilla_success = function(success_percent)
     local dice_roll = math.random(0, 100)
     templates.print(debug, "enchanter", "random dice roll: " .. dice_roll)
     
-
     if dice_roll > success_percent then
         success = false
     end 

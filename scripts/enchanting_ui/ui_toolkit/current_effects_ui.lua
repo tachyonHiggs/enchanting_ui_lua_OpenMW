@@ -166,6 +166,24 @@ current_effects_ui.regen_effects = function(wnd)
         
     end
 
+    -- Move negative Effects to the bottom of the list
+    local reordered_effects = {}
+    local negative_cost_effects = {}
+
+    for _, effect in ipairs(enchanter.effects_with_params) do
+        if effect.cost < 0 then
+            table.insert(negative_cost_effects, effect)
+        else
+            table.insert(reordered_effects, effect)
+        end
+    end
+
+    -- Append negative effects to the bottom of the list
+    for _, effect in ipairs(negative_cost_effects) do
+        table.insert(reordered_effects, effect)
+    end
+    enchanter.effects_with_params = reordered_effects
+
     -- regen items and indices now
     local new_effect_elements = {}
     for index, effect in ipairs(enchanter.effects_with_params) do

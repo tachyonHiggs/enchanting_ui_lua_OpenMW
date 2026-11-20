@@ -97,9 +97,6 @@ local function enable_count_elements(enabled, handler)
 end
 
 local function check_count_max_or_min(max, handler)
-    print("check_count_max_or_min")
-    print(max)
-    print(enchanter.enchantment.count_to_enchant)
     if handler.btnPlus then
         if handler.btnPlus:isVisible() then
             if enchanter.enchantment.count_to_enchant >= max then
