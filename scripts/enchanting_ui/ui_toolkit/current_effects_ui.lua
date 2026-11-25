@@ -37,7 +37,7 @@ provider:init({
     { id = 'icon',   render = ColumnItem.renderIcon, width = 1.5 * rowHeight},
     { id = 'text',   render = ColumnItem.renderText, width = 375},
     { id = 'cost',   render = ColumnItem.renderText, arg = { textAlignH = ui.ALIGNMENT.End }, align = ui.ALIGNMENT.End, width = 1.5 * rowHeight },
-    { id = 'effect_id',   render = ColumnItem.renderIcon, width = 0}
+    { id = 'effect_id',   render = ColumnItem.renderHidden}
 }, rowHeight)
 
 function current_effects_ui.create_effect_mag_str(min, max)

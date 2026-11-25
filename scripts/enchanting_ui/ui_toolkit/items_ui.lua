@@ -130,6 +130,7 @@ local function create_enchantable_item(item)
         icon = item.type.records[recordId].icon,
         item = item,
         recordId = item.recordId,
+        tooltip = { object = item, observer = player },
     }
 end
 

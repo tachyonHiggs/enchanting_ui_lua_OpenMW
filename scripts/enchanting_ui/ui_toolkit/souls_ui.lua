@@ -102,6 +102,7 @@ local function create_soul_item(item)
         count = count,
         icon = record.icon,
         item = item,
+        tooltip = { object = item, observer = player },
     }
 end
 

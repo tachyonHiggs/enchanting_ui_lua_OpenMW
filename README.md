@@ -15,4 +15,3 @@ This Readme is just for development specific notes.
 - Integrate Arrean's logger code 
 
 ## Known Issues
-- Error message about "failed to open image: Resource:" then lists effect id instead of icon path

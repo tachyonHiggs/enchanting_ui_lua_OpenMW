@@ -97,9 +97,6 @@ local function enable_count_elements(enabled, handler)
 end
 
 local function check_count_max_or_min(max, handler)
-    print("check_count_max_or_min")
-    print(max)
-    print(enchanter.enchantment.count_to_enchant)
     if handler.btnPlus then
         if handler.btnPlus:isVisible() then
             if enchanter.enchantment.count_to_enchant >= max then
@@ -467,10 +464,10 @@ function Handler:onOpened(wnd, _, saved)
         end }
 
     self.count_text = I.UIToolkit.Components.textButton { 
-        text = "Count: ",
+        text = "Count:",
         tooltip = {body = 'The total number of items to enchant. Only used by projectiles (and optionally scrolls/books if enabled). The max value is limited between the item count and the Soul charge over the total effect cost, and effect by the Projectiles Enchant Multiplier'},
         name = 'count_text',
-        style = 'thin',
+        style = 'empty',
         canClick = false,
     }
 
@@ -489,7 +486,6 @@ function Handler:onOpened(wnd, _, saved)
         },
         content = UI.content {
             self.count_text.element,
-            {template = T.padding(5)},
             self.btnMinus.element,
             self.count_value.element,
             self.btnPlus.element,
@@ -528,9 +524,9 @@ function Handler:onOpened(wnd, _, saved)
     end
 
     local create_btn = I.UIToolkit.Components.textButton { text = "Create", onClick = enchant_item, background = 0}
-    create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(1,1), position = v2(-100, 1)})
+    create_btn:updateProps({anchor = v2(1,1), relativePosition = v2(1,1), position = v2(-100, -3)})
     local cancel_btn = I.UIToolkit.Components.textButton { text = "Cancel", onClick = function()  I.UI.removeMode('Enchanting') end, background = 0}
-    cancel_btn:updateProps({anchor = v2(1,1),  relativePosition = v2(1,1), position = v2(-25, 1)})
+    cancel_btn:updateProps({anchor = v2(1,1),  relativePosition = v2(1,1), position = v2(-25, -3)})
     local outputs = {
         name = "outputs",
         type = UI.TYPE.Widget,
